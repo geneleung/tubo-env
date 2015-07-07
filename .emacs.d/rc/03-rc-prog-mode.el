@@ -1784,6 +1784,119 @@ and is reversed for better performence.")
  (sql-set-product 'mysql))
 
 
+
+(defun make-command(arg)
+  (let* ((file (if buffer-file-name (file-name-nondirectory buffer-file-name)))
+         (ext-name (if file (file-name-extension file)))
+         (real_cmd
+          (cond
+           ;; Makefile
+           ((or (file-exists-p "makefile")
+                (file-exists-p "Makefile"))
+            (if arg
+                (format "make -j%d %s" (1+ (string-to-number (yc/get-cpu-number))) arg)
+              (format "make -j%d"
+                      (1+ (string-to-number (yc/get-cpu-number))))))
+           ;; CMake
+           ((file-exists-p "CMakeLists.txt")
+            (format "cmake CMakeLists.txt" ))
+           ;; C
+           ((or (equal ext-name "cc")
+                (equal ext-name "cpp"))
+            (format "%s %s %s %s -std=c++11 -g -o %s"
+                    (yc/get-env "CXX" 'executable-find
+                                "g++" "clang++"  "mingw-g++")
+                    (or (getenv "CPPFLAGS")"-Wall  ")
+                    (get-user-defined-opts)
+                    file
+                    (file-name-sans-extension file)))
+           ;; C++
+           ((or (equal ext-name "c")
+                (equal ext-name "C"))
+            (format "%s -o %s %s %s %s %s %s -g -std=c99"
+                    (yc/get-env "CXX" 'executable-find
+                                "gcc" "clang"  "mingw-g++")
+                    (file-name-sans-extension file)
+                    (or (getenv "GTKFLAGS") "-Wall ")
+                    (or (getenv "CPPFLAGS")"-DDEBUG=9  ")
+                    (or (getenv "CFLAGS") "-Wall ")
+                    (get-user-defined-opts)
+                    file))
+           ;; Tex
+           ((or (equal ext-name "tex")
+                (equal ext-name "TEX"))
+            (format "xelatex %s" file))
+           ((or (equal ext-name "sh")
+                (equal ext-name "SH"))
+            (format "./%s" file))
+           ;; cmake.
+           ((or (equal file "CMakeLists.txt")
+                (equal ext-name ".cmake"))
+            (format "cmake %s" file))
+           ;; swig
+           ((or (equal ext-name "i")
+                (equal ext-name "swig"))
+            (format "%s -c++ -java %s" (executable-find "swig") file))
+           (t compile-command))))
+    (if (and (executable-find "notify-send")
+             (not (string-match ".*notify-send.*" real_cmd)))
+        (message
+         "%s && [ $? -eq 0 ] && notify-send --hint=int:transient:1 \"Compile finished: succeed\" ||
+notify-send --hint=int:transient:1 \"Compile finished: failed\""
+         real_cmd)
+      real_cmd)))
+
+(defun do-compile (arg)
+  "save buffers and start compile"
+  (interactive "P")
+  (let ((source-window (get-buffer-window))
+        (compile-window nil))
+    (save-some-buffers t)
+    (setq compilation-read-command nil)
+    (when (not (get-buffer-window "*compilation*"))
+      (setq compile-window (split-window-vertically))
+      (select-window compile-window)
+      (get-buffer-create "*compilation*")
+      (switch-to-buffer "*compilation*")
+      (select-window source-window))
+    (setq compilation-read-command nil)
+    (make-local-variable 'compile-command)
+    (setenv "LANG" "C")
+    (compile (make-command arg))))
+
+
+(defun open-makefile ()
+  "Open and edit Makefile.description"
+  (interactive)
+  (let ((fname (buffer-file-name)))
+    (find-file (concat (file-name-directory fname) "/Makefile"))))
+
+(global-set-key (kbd "<f6>")  'do-compile)
+
+(global-set-key (kbd "<C-f6>")
+                (lambda (arg)
+                  (interactive "P")
+                  (let ((buffer (get-buffer "*compilation*")))
+                    (if buffer
+                        (with-current-buffer buffer
+                          (recompile arg))
+                      (do-compile arg)))))
+
+(autoload 'helm-make "helm-make" "\
+Call \"make -j ARG target\". Target is selected with completion.
+
+\(fn &optional ARG)" t nil)
+
+(autoload 'helm-make-projectile "helm-make" "\
+Call `helm-make' for `projectile-project-root'.
+ARG specifies the number of cores.
+
+\(fn &optional ARG)" t nil)
+
+(global-set-key (kbd "<M-f6>")  'helm-make)
+(global-set-key (kbd "<C-S-f6>")  'helm-make-projectile)
+
+
 (provide '03-rc-prog-mode)
 
 ;; Local Variables:

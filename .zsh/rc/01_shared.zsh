@@ -9,7 +9,7 @@ export ARCH=`uname -m`"-"`uname -s | tr '[:upper:]' '[:lower:]'`
 export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=lcd'
 export PATH="/opt/bin:$PATH:/sbin:/usr/sbin/"
 
-which eix && export EIX_LIMIT=0
+export EIX_LIMIT=0
 
 if [ -d /opt/usr ]; then
     export PATH="/opt/usr/bin:/opt/usr/sbin:$PATH"

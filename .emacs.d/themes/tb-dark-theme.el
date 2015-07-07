@@ -607,6 +607,8 @@
    `(magit-diff-add ((,class (:inherit diff-added))))
    `(magit-diff-del ((,class (:inherit diff-removed))))
    `(magit-header ((,class (:inherit nil :weight bold))))
+   `(magit-section-heading ((t ( :foreground "#Ff4500" :bold t))))
+
    `(magit-item-highlight ((,class (:inherit highlight :background ,current-line))))
    `(magit-log-author ((,class (:foreground ,aqua))))
    `(magit-log-graph ((,class (:foreground ,comment))))
@@ -617,6 +619,7 @@
    `(magit-log-head-label-remote ((,class (:foreground ,purple :box nil :weight bold))))
    `(magit-log-head-label-tags ((,class (:foreground ,aqua :box nil :weight bold))))
    `(magit-log-sha1 ((,class (:foreground ,yellow))))
+   `(magit-hash ((,class (:foreground ,yellow))))
    `(magit-section-title ((,class (:foreground ,blue :weight bold))))
 
    )

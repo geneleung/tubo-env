@@ -433,8 +433,12 @@ which is options for `diff'."
 (autoload 'magit-svn-rebase "magit-svn" ""  t)
 (add-hook 'magit-mode-hook
           (lambda ()
-            (when (file-exists-p ".git/svn/.metadata")
-              (magit-svn-mode))))
+            (if (and (file-exists-p ".git/svn/.metadata")
+                       (string-match ".*/svn" (with-temp-buffer
+                                                (insert-file-contents ".git/HEAD")
+                                                (buffer-substring-no-properties (point-min) (point-max)))))
+                (magit-svn-mode 1)
+              (magit-svn-mode -1))))
 
 
  ;; **************************** RFCs ******************************
@@ -685,130 +689,7 @@ which is options for `diff'."
                       (interactive) (hl-line-mode))))
       (list 'bookmark-bmenu-mode-hook 'ibuffer-mode-hook
             'grep-setup-hook))
- ;; Helm
-(autoload 'helm-mode "helm-mode" ""  t)
-(custom-set-variables
- '(helm-autoresize-mode t)
- '(helm-M-x-fuzzy-match t))
 
-(yc/eval-after-load
- "helm-grep"
- (setq-default
-  helm-grep-in-recurse t
-  helm-grep-default-recurse-command ;; skip binary files.
-  "grep --color=never -d recurse %e -n%cH -e %p %f"
-  helm-grep-default-command helm-grep-default-recurse-command))
-
-(yc/eval-after-load
- "helm-ring"
- (define-or-set helm-source-kill-ring
-   (helm-build-sync-source "Kill Ring"
-     :init (lambda () (helm-attrset 'last-command last-command))
-     :candidates #'helm-kill-ring-candidates
-     :filtered-candidate-transformer #'helm-kill-ring-transformer
-     :action '(("Yank" . helm-kill-ring-action)
-               ("Delete" . (lambda (candidate)
-                             (cl-loop for cand in (helm-marked-candidates)
-                                      do (setq kill-ring
-                                               (delete cand kill-ring))))))
-     :persistent-action (lambda (_candidate) (ignore))
-     :persistent-help "DoNothing"
-     :keymap helm-kill-ring-map
-     :migemo t
-     :multiline t)
-   "Source for browse and insert contents of kill-ring."))
-
-
-(yc/eval-after-load
- "helm"
- (unless (boundp 'completion-in-region-function)
-   (define-key lisp-interaction-mode-map [remap completion-at-point]
-     'helm-lisp-completion-at-point)
-   (define-key emacs-lisp-mode-map       [remap completion-at-point]
-     'helm-lisp-completion-at-point))
- (add-to-list 'helm-sources-using-default-as-input 'helm-source-man-pages)
-
- (defvar helm-rc-misc-map
-   (let ((map (make-sparse-keymap)))
-     (set-keymap-parent map helm-map)
-     (define-key map (kbd "C-s")           'helm-ff-run-grep)
-     (define-key map (kbd "C-c ?")         'helm-ff-help)
-     (delq nil map))
-   "Keymap for `helm-emacs-rcs'.")
-
- (defun helm-rc-misc-get-files (dir regex &optional with-current-dir)
-   (let ((flist (directory-files dir t regex)))
-     (if with-current-dir
-         (add-to-list 'flist (concat dir "/."))
-       flist)))
-
- ;; redefine some functions with helm.
- (define-or-set helm-source-projects
-   (helm-build-sync-source "Helm-Projects"
-     :init nil
-     :candidates (lambda ()
-                   (helm-rc-misc-get-files "~/.emacs.d/rc" "^99[0-9]?.*?\.el" t))
-     :real-to-display (lambda (x)
-                        (file-name-nondirectory x))
-     :fuzzy-match t
-     :action (lambda (cand)
-               (find-file cand))
-     :keymap helm-rc-misc-map)
-   "")
-
- (defadvice edit-project (around helm/edit-project ())
-   (interactive)
-   (helm :sources '(helm-source-projects)
-         :buffer "*helm helm-xgtags*"
-         :preselect nil))
- (ad-activate 'edit-project)
-
- (define-or-set helm-source-rcs
-   (helm-build-sync-source "Helm-emacs-rcs"
-     :init nil
-     :candidates (lambda ()
-                   (helm-rc-misc-get-files "~/.emacs.d/rc" "^[0-9]+.*?\.el" t))
-     :real-to-display (lambda (x)
-                        (file-name-nondirectory x))
-     :fuzzy-match t
-     :action (lambda (cand)
-               (find-file cand))
-     :keymap helm-rc-misc-map)
-   "")
-
- (defadvice edit-rcs (around helm/edit-rcs ())
-   (interactive)
-   (helm :sources '(helm-source-rcs)
-         :buffer "*helm helm-xgtags*"
-         :preselect nil))
- (ad-activate 'edit-rcs)
-
-
- (define-key helm-map (kbd "<M-return>")  'helm-kill-marked-buffers)
- (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)
- (define-key helm-map (kbd "C-i") 'helm-execute-persistent-action)
- (define-key helm-map (kbd "C-z")  'helm-select-action))
-
-(defmacro helm-load-and-bind (sym file key &optional map)
-  "Wrapper of [load-and-bind].
-It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
-  `(load-and-bind (intern (concat "helm-" (symbol-name ,sym)))
-                  (concat "helm-" ,file) ,key ,map))
-
-(helm-load-and-bind 'M-x "command" (kbd "M-x"))
-(helm-load-and-bind 'bookmarks "bookmark" [remap bookmark-bmenu-list])
-(helm-load-and-bind 'dabbrev "dabbrev" [remap dabbrev-expand])
-(helm-load-and-bind 'eshell-history "eshell" [remap eshell-previous-matching-input])
-(helm-load-and-bind 'find-files "files" "\C-f" ctl-x-map)
-(helm-load-and-bind 'register "ring" [remap insert-register])
-(helm-load-and-bind 'occur "regexp" [remap occur])
-(helm-load-and-bind 'man-woman "man" [(f1)])
-(helm-load-and-bind 'mini "buffers" [remap switch-to-buffer])
-(helm-load-and-bind 'show-kill-ring "ring" [remap yank-pop])
-(helm-load-and-bind 'surfraw "net" (kbd "C-c C-s"))
-(helm-load-and-bind 'find "files" (kbd "C-x M-f"))
-
-(define-key global-map [remap list-buffers] 'ibuffer)
 
 (autoload 'switch-window "switch-window" ""  t)
 (define-key global-map (kbd "C-x o")

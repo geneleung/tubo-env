@@ -9,7 +9,7 @@ Xft.hinting: 1
 Xft.hintstyle: hintfull
 Xft.rgba: rgb
 
-xterm*faceName: Consolas:pixelsize=11
+xterm*faceName: Monaco:pixelsize=11
 xTerm*scrollBar: false
 xTerm*saveLines: 5000
 xterm.termName: xterm-256color
