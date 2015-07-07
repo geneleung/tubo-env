@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# --
+if [ ${1:expression} ]; then
+$0$>
+fi$>

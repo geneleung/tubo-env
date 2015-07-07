@@ -1,0 +1,9 @@
+# -*- mode: snippet -*-
+# name: fibe
+# key: fibe
+# --
+${1:V}<${2:T}>::const_iterator iter = ${3:v}.begin();
+$1<$2>::const_iterator end = $3.end();
+for (; iter != end; ++iter) {
+    $0
+}

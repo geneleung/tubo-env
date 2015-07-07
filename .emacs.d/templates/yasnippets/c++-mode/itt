@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: itt
+# key: itt
+# --
+${1:Container}<${2:Type}>::iterator ${3:it}

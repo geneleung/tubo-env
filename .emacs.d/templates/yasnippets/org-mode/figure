@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: figure
+# key: fig
+# --
+#+CAPTION: ${1:caption}
+#+LABEL: fig:${3:label}
+[[./images/$0]]

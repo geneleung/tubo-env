@@ -1,0 +1,122 @@
+! % xrdb -load ~/.Xresources
+! ! % xrdb -query
+! ! % xrdb -symbol
+! ! % xrdb -merge ~/.Xresources
+!
+Xft.antialias: 1
+! Xft.dpi: 96
+Xft.hinting: 1
+Xft.hintstyle: hintfull
+Xft.rgba: rgb
+
+xterm*faceName: Consolas:pixelsize=11
+xTerm*scrollBar: false
+xTerm*saveLines: 5000
+xterm.termName: xterm-256color
+xterm*scrollBar: false
+xterm*rightScrollBar: true
+xterm*loginshell: true
+xterm*cursorBlink: true
+xterm.borderLess: true
+xterm.cursorBlink: true
+xterm*background:#2e3436
+xter*foreground:white
+
+*xter*color0: #000000
+*xter*color1: #a40000
+*xter*color2: #4e9a06
+*xter*color3: #c4a000
+*xter*color4: #729fcf
+*xter*color5: #75507b
+*xter*color6: #0b939b
+*xter*color7: #d3d7cf
+*xter*color8: #555753
+*xter*color9: #ef2929
+*xter*color10: #8ae234
+*xter*color11: #fce94f
+*xter*color12: #1e90ff ! #204a87
+*xter*color13: #ad7fa8
+*xter*color14: #00f5e9
+*xter*color15: #eeeeec
+
+
+urxvt*preeditType:Root
+URxvt*preeditType:Root
+URxvt*font:  xft:Monaco:size=11:antialias=true,xft:Consolas:size=11:antialias=true
+URxvt*boldFont:   xft:Monaco:size=11:antialias=true,xft:Consolas:size=11:antialias=true
+URxvt*italicFont: xft:Monaco:size=11:antialias=true,xft:Consolas:size=11:antialias=true
+URxvt*bolditalicFont: xft:Monaco:size=11:antialias=true,xft:Consolas:size=11:antialias=true
+
+URxvt.background:#2e3436
+URxvt.foreground:white
+URxvt.color0: #000000
+URxvt.color1: #a40000
+URxvt.color2: #7fff00
+URxvt.color3: #c4a000
+URxvt.color4: #729fcf
+URxvt.color5: #75507b
+URxvt.color6: #0b939b
+URxvt.color7: #d3d7cf
+URxvt.color8: #555753
+URxvt.color9: #ef2929
+URxvt.color10: #8ae234
+URxvt.color11: #fce94f
+URxvt.color12: #1e90ff
+URxvt.color13: #ad7fa8
+URxvt.color14: #00f5e9
+URxvt.color15: #eeeeec
+URxvt.fading: 30
+URxvt.internalBorder: 5
+URxvt.cutchars:    "()*,<>[]{}|'"
+URxvt.scrollBar: False
+URxvt.scrollWithBuffer: false
+URxvt.buffered:  true
+Urxvt.secondaryScroll:  true    # Enable Shift-PageUp/Down in screen
+URxvt.saveLines: 5000
+URxvt.preeditType: OverTheSpot
+URxvt.thickness: 0
+URxvt.termName: rxvt
+URxvt.title: Rxvt-Unicode
+URxvt.tintColor:lightgray
+URxvt.depth: 32
+
+Rxvt.transparent:false
+Rxvt.shading:30
+Rxvt*preeditType:Root
+Rxvt*font:  xft:Monaco:size=11:antialias=true,xft:Consolas:size=11:antialias=true
+Rxvt*boldFont:   xft:Monaco:size=11:antialias=true,xft:Consolas:size=11:antialias=true
+Rxvt*italicFont: xft:Monaco:size=11:antialias=true,xft:Consolas:size=11:antialias=true
+Rxvt*bolditalicFont: xft:Monaco:size=11:antialias=true,xft:Consolas:size=11:antialias=true
+
+Rxvt.background:#2e3436
+Rxvt.foreground:white
+Rxvt.color0: #000000
+Rxvt.color1: #a40000
+Rxvt.color2: #7fff00
+Rxvt.color3: #c4a000
+Rxvt.color4: #729fcf
+Rxvt.color5: #75507b
+Rxvt.color6: #0b939b
+Rxvt.color7: #d3d7cf
+Rxvt.color8: #555753
+Rxvt.color9: #ef2929
+Rxvt.color10: #8ae234
+Rxvt.color11: #fce94f
+Rxvt.color12: #1e90ff
+Rxvt.color13: #ad7fa8
+Rxvt.color14: #00f5e9
+Rxvt.color15: #eeeeec
+Rxvt.fading: 30
+Rxvt.internalBorder: 5
+Rxvt.cutchars:    "()*,<>[]{}|'"
+Rxvt.scrollBar: False
+Rxvt.scrollWithBuffer: false
+Rxvt.buffered:  true
+rxvt.secondaryScroll:  true    # Enable Shift-PageUp/Down in screen
+Rxvt.saveLines: 5000
+Rxvt.preeditType: OverTheSpot
+Rxvt.thickness: 0
+Rxvt.termName: rxvt
+Rxvt.title: Rxvt-Unicode
+Rxvt.tintColor:lightgray
+Rxvt.depth: 32

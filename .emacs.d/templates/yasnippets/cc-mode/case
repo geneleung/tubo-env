@@ -1,0 +1,6 @@
+# -*- mode: snippet -*-
+# --
+case ${1:value}: {$>
+$0$>
+break;$>
+}$>

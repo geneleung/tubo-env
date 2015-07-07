@@ -1,0 +1,4 @@
+# -*- mode: snippet -*-
+# name: install_programs
+# --
+install_programs($0)

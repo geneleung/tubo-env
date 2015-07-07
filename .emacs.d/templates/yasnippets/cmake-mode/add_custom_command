@@ -1,0 +1,4 @@
+# -*- mode: snippet -*-
+# name: add_custom_command
+# --
+add_custom_command($0)

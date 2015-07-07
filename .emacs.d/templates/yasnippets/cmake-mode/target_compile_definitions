@@ -1,0 +1,4 @@
+# -*- mode: snippet -*-
+# name: target_compile_definitions
+# --
+target_compile_definitions($0)

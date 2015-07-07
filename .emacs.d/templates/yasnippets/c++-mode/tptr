@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: Typedef shared_ptr.
+# key: tptr
+# --
+typedef shared_ptr<${1:RealName}> $1Ptr;

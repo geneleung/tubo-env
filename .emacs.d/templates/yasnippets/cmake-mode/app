@@ -1,0 +1,63 @@
+# -*- mode: snippet -*-
+# name: app
+# --
+project (${1:name})
+cmake_minimum_required(VERSION 2.8)
+
+# uninstall target
+configure_file(
+    "\${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"
+    "\${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake"
+    IMMEDIATE @ONLY)
+
+configure_file(
+    "\${CMAKE_CURRENT_SOURCE_DIR}/cmake_distclean.cmake.in"
+    "\${CMAKE_CURRENT_BINARY_DIR}/cmake_distclean.cmake"
+    IMMEDIATE @ONLY)
+
+add_custom_target(uninstall
+    COMMAND \${CMAKE_COMMAND} -P \${CMAKE_CURRENT_BINARY_DIR}/cmake_uninstall.cmake)
+
+add_custom_target(distclean
+    COMMAND \${CMAKE_COMMAND} -P \${CMAKE_CURRENT_BINARY_DIR}/cmake_distclean.cmake)
+
+add_subdirectory(src)
+
+`(progn
+   (with-temp-file "cmake_uninstall.cmake.in"
+   (erase-buffer)
+   (insert "#!/bin/bash
+if (NOT EXISTS \"@PROJECT_BINARY_DIR@/install_manifest.txt\")
+    message(FATAL_ERROR \"Cannot find install manifest: \\\"@PROJECT_BINARY_DIR@/install_manifest.txt\\\"\")
+endif(NOT EXISTS \"@PROJECT_BINARY_DIR@/install_manifest.txt\")
+
+file(READ \"@PROJECT_BINARY_DIR@/install_manifest.txt\" files)
+string(REGEX REPLACE \"\n\" \";\" files \"${files}\")
+list(REVERSE files)
+foreach (file ${files})
+    message(STATUS \"Uninstalling \\\"$ENV{DESTDIR}${file}\\\"\")
+    if (EXISTS \"$ENV{DESTDIR}${file}\")
+        execute_process(
+            COMMAND @CMAKE_COMMAND@ -E remove \"$ENV{DESTDIR}${file}\"
+            OUTPUT_VARIABLE rm_out
+            RESULT_VARIABLE rm_retval
+        )
+        if(NOT ${rm_retval} EQUAL 0)
+            message(FATAL_ERROR \"Problem when removing \\\"$ENV{DESTDIR}${file}\\\"\")
+        endif (NOT ${rm_retval} EQUAL 0)
+    else (EXISTS \"$ENV{DESTDIR}${file}\")
+        message(STATUS \"File \\\"$ENV{DESTDIR}${file}\\\" does not exist.\")
+    endif (EXISTS \"$ENV{DESTDIR}${file}\")
+endforeach(file)"))
+
+   (with-temp-file "cmake_distclean.cmake.in"
+   (erase-buffer)
+   (insert "#!/bin/bash
+execute_process(
+    COMMAND find . -name CMakeFiles -prune -print -exec rm -rf {} \\;
+    COMMAND find . -name Makefile -prune -print -exec rm -rf {} \\;
+    COMMAND rm -rf CMakeCache.txt
+    COMMAND rm -rf cmake_uninstall.cmake
+    COMMAND rm -rf cmake_distclean.cmake
+)
+")))`

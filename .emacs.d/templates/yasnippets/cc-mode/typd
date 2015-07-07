@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# key: typd
+# name: typedef
+# --
+typedef ${1:type} ${2:alias};

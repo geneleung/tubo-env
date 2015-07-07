@@ -1,0 +1,6 @@
+#name: dolist
+#key: dolist
+# --
+(dolist (${1:var} ${2:lst})
+    $0
+)

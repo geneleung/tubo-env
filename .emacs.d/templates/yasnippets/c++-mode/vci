@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: vector iterator
+# key: vci
+# --
+vector<${1:T}>::iterator ${2:iter} $0

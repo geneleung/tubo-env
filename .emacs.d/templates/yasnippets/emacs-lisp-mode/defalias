@@ -1,0 +1,5 @@
+#contributor
+#name: defalias
+#key: defalias
+# --
+(defalias '${1:SYMBOL} '${2:DEFINIATION}$0)

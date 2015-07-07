@@ -1,0 +1,3 @@
+# -*- mode: snippet -*-
+# --
+shared_ptr<${1:T}> ${2:variable}

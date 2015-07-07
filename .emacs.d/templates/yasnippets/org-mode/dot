@@ -1,0 +1,21 @@
+# -*- mode: snippet -*-
+# name: dot
+# key: dot
+# --
+#+BEGIN_SRC dot :file ${1:..}${1:$(if (string-match "^\.\." yas-text)
+                                      "/assets/img"
+                                    (if (string-match "^i" yas-text)
+                                        "mages" ""
+                                        ))}/${2:name}.png :cmdline -Kdot -Tpng
+digraph Name {
+    node [fontsize=12 fontname=Courier style=filled shape=record];
+    edge[color="#666666" style=dashed arrowhead=open tailclip=true];
+    // rankdir=LR;
+
+    //XXX: Place to put subgraphs
+    $0
+}
+#+END_SRC
+
+#+CAPTION: ${3:caption}
+#+RESULTS:

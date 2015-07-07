@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: citt
+# key: citt
+# --
+${1:Container}<${2:Type}>::const_iterator ${3:it}

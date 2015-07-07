@@ -1,0 +1,3 @@
+# -*- mode: snippet -*-
+# --
+static_cast<${1:T}>(${2:variable})

@@ -1,0 +1,4 @@
+# -*- mode: snippet -*-
+# name: endwhile
+# --
+endwhile($0)

@@ -1,0 +1,4 @@
+# -*- mode: snippet -*-
+# name: install_targets
+# --
+install_targets($0)

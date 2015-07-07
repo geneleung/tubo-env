@@ -1,0 +1,7 @@
+# -*- mode: snippet -*-
+# name: define-keys
+# key: define-keys
+# key: dfk
+# key: dfkeys
+# --
+(yc/set-keys $0 ${1:nil})

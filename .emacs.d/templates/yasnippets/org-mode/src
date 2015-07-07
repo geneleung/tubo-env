@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# --
+#+BEGIN_SRC ${1:c++} -r ${2:-n}
+$0
+#+END_SRC

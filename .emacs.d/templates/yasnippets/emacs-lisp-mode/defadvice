@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: defadvice
+# key: dfa
+# --
+(defadvice ${1:func} (${2:class} ${3:name} ${4:(args)})
+  $0)
+
+ (ad-activate '$1)

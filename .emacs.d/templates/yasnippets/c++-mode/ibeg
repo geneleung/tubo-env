@@ -1,0 +1,5 @@
+# -*- mode: snippet -*-
+# name: ibeg
+# key: ibeg
+# --
+${1:V}<${2:T}>::iterator iter = ${3:v}.begin();

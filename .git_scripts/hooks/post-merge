@@ -1,0 +1,9 @@
+#!/bin/sh
+#
+# Hook script to prepare a packed repository for use over dumb transports.
+#
+# To enable this hook, copy or link it to ~/.git/hooks
+
+printf "\n\nCleaning local compiled init files for Emacs ...\n\n"
+rm -rf ~/.emacs.d/rc/*.elc
+printf "\nDone ...\n"

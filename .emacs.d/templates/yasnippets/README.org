@@ -1,0 +1,27 @@
+#+TITLE: README
+#+AUTHOR: Yang, Ying-chao
+#+EMAIL:  yangyingchao[at]gmail[dot]com
+#+KEYWORDS: (nil)
+#+CATEGORY: (nil)
+#+DESCRIPTION: (nil)
+#+OPTIONS:  ^:nil toc:2 H:3 \n:nil ::t |:t ^:{} -:t f:t *:t tex:t d:(HIDE) tags:not-in-toc
+#+STARTUP:    align nodlcheck oddeven lognotestate
+#+SEQ_TODO:   TODO(t) INPROGRESS(i) WAITING(w@) | DONE(d) CANCELED(c@)
+#+TAGS:       Write(w) Update(u) Fix(f) Check(c) noexport(n)
+#+LANGUAGE:   en
+#+EXCLUDE_TAGS: noexport
+
+This is snipptes collected for yasnipptes.
+
+To use it, clone templates into a folder, for example
+=~/.emacs.d/templates/yasnippets=, and add following lines into init file:
+
+#+BEGIN_SRC emacs-lisp -r -n
+(custom-set-variables
+   '(yas-snippet-dirs '("~/.emacs.d/templates/yasnippets")))
+#+END_SRC
+
+Two branches are maintained for different styles:
+
+- master: k&r style.
+- all-man: all-man style.
