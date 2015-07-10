@@ -95,6 +95,15 @@ THEN-FORM and ELSE-FORMS are then excuted just like in `if'."
                         (message "Configuration for %s finished in %.2f seconds" ,name
                                  (float-time (time-since ts ))))))))
 
+(defmacro yc/autoload (func &rest args)
+  "Wrapper to autoload FUNC.
+ARGS provide extra information: first element in ARGS specifies whether this is an
+  interactive funtion, second element in ARGS specifies filename where to load this FUNC."
+  `(let ((interact ,(if args (car args) t))
+         (file ,(if (cadr args) (cadr args)  `(symbol-name ,func))))
+     (autoload ,func file ""  interact)))
+
+
 (defmacro yc/add-keyword (sym type)
   `(font-lock-add-keywords
     nil (list

@@ -394,25 +394,47 @@ which is options for `diff'."
 
 ;; ************************** SVN Settings *****************************
 
-;; (when (try-require 'psvn)
-;; (add-to-list 'auto-mode-alist '("svn-commit.*" . log-edit-mode))
-;;   ;; C-xvv Bind to vc-next-action.
-;;   (global-set-key "\C-xvV" 'svn-status-commit)
-;;   (global-set-key "\C-xvl" 'svn-status-show-svn-log)
-;;   (global-set-key "\C-xvu" 'svn-status-update-cmd)
-;;   (global-set-key "\C-xvs" 'svn-status-curdir)
-;;   (global-set-key "\C-xvS" 'svn-status)
-;;   (define-key svn-status-mode-map (kbd "d") 'svn-status-rm)
+(autoload 'svn-checkout "psvn" "\
+Run svn checkout REPOS-URL PATH.
 
-;;   (defun svn-status-curdir()
-;;     (interactive)
-;;     (svn-status (file-name-directory (buffer-file-name))))
-;;   )
+\(fn REPOS-URL PATH)" t nil)
+(defalias 'svn-examine 'svn-status)
+
+(autoload 'svn-status "psvn" "\
+Examine the status of Subversion working copy in directory DIR.
+If ARG is -, allow editing of the parameters. One could add -N to
+run svn status non recursively to make it faster.
+For every other non nil ARG pass the -u argument to `svn status', which
+asks svn to connect to the repository and check to see if there are updates
+there.
+
+If there is no .svn directory, examine if there is CVS and run
+`cvs-examine'. Otherwise ask if to run `dired'.
+
+\(fn DIR &optional ARG)" t nil)
+
+(add-to-list 'auto-mode-alist '("svn-commit.*" . log-edit-mode))
+(global-set-key "\C-xvs" 'svn-status)
+(yc/eval-after-load
+ "psvn"
+ ;; C-xvv Bind to vc-next-action.
+ (global-set-key "\C-xvv" 'svn-status-commit)
+ (global-set-key "\C-xvl" 'svn-status-show-svn-log)
+ (global-set-key "\C-xvu" 'svn-status-update-cmd)
+ (define-key svn-status-mode-map (kbd "d") 'svn-status-rm)
+ )
+
+
+
+(defun svn-status-curdir()
+  (interactive)
+  (svn-status (file-name-directory (buffer-file-name))))
 
  ;; Cool magit tool for git.
 (autoload 'magit-status "magit" "magit"  t)
 (autoload 'magit-blame-mode "magit-blame" "blame"  t)
 (define-or-set magit-last-seen-setup-instructions "1.4.0")
+(yc/autoload 'git-commit-training-wheels-mode)
 
 (yc/eval-after-load
  "git-commit-mode"
@@ -422,12 +444,21 @@ which is options for `diff'."
   'ido-kill-buffer  'git-commit-abort git-commit-mode-map))
 
 (global-set-key "\C-xgs" 'magit-status)
+
 (yc/eval-after-load
  "magit"
  (add-hook 'git-commit-mode-hook
            (lambda ()
+             ;; (git-commit-training-wheels-mode 1)
              (turn-on-flyspell))) )
 
+(custom-set-variables
+ '(magit-revert-buffers t)
+ )
+
+(autoload 'magit-svn-mode "magit-svn" ""  t)
+(autoload 'magit-svn-fetch "magit-svn" ""  t)
+(autoload 'magit-svn-rebase "magit-svn" ""  t)
 (add-hook 'magit-mode-hook
           (lambda ()
             (when (try-require 'magit-svn-mode)
@@ -437,7 +468,6 @@ which is options for `diff'."
                                                 (buffer-substring-no-properties (point-min) (point-max)))))
                   (magit-svn-mode 1)
                 (magit-svn-mode -1)))))
-
 
  ;; **************************** RFCs ******************************
 

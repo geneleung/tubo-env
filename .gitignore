@@ -267,3 +267,5 @@ tmp/
 /RTXC File List/
 /.emacs.d/projectile-bookmarks.eld
 /.emacs.d/rc/10-priv.el
+/.rbtools-cookies
+/.clion10/
