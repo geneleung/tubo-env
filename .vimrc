@@ -391,6 +391,7 @@ imap <silent> <leader>ws <Esc>:call DeleteTrailingWS()<cr>:w<cr>
 "Fast reloading and editing of .vimrc
 map <silent> <leader>sr :source ~/.vimrc<cr>
 map <silent> <leader>ee :e ~/.vimrc<cr>
+map <silent> <leader>sudo :w !sudo tee %<cr>
 
 " Fast grep
 nmap <silent> <leader>lv :lv /<c-r>=expand("<cword>")<cr>/ %<cr>:lw<cr>

@@ -428,17 +428,15 @@ which is options for `diff'."
            (lambda ()
              (turn-on-flyspell))) )
 
-(autoload 'magit-svn-mode "magit-svn" ""  t)
-(autoload 'magit-svn-remote-update "magit-svn" ""  t)
-(autoload 'magit-svn-rebase "magit-svn" ""  t)
 (add-hook 'magit-mode-hook
           (lambda ()
-            (if (and (file-exists-p ".git/svn/.metadata")
+            (when (try-require 'magit-svn-mode)
+              (if (and (file-exists-p ".git/svn/.metadata")
                        (string-match ".*/svn" (with-temp-buffer
                                                 (insert-file-contents ".git/HEAD")
                                                 (buffer-substring-no-properties (point-min) (point-max)))))
-                (magit-svn-mode 1)
-              (magit-svn-mode -1))))
+                  (magit-svn-mode 1)
+                (magit-svn-mode -1)))))
 
 
  ;; **************************** RFCs ******************************

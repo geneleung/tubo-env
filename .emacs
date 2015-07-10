@@ -50,7 +50,7 @@ If not, instead of an error, just add the package to a list of missing packages.
 (package-initialize)
 
 (defvar yc/packages
-  (list 'helm 'auto-complete 'flycheck)
+  (list 'helm 'auto-complete 'flycheck 'yasnippet 'session 'undo-tree 'autopair)
   "List of needed packages.")
 
 (defun yc/install-missing-packages ()
