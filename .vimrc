@@ -490,35 +490,3 @@ abbr Yang YangYingchao,
 abbr yangying yangyingchao@gmail.com
 
 """""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"*******************************************
-" Part Seven: Appendix.
-"*******************************************
-"""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""""
-"   1. mktags.
-"#!/bin/bash
-"#ctags -R .
-"rm -rf cscope*
-"
-"#`/home/yyc/tools/bin/cscope-indexer . -r`
-"LIST_ONLY=
-"DIR='.'
-"LIST_FILE='cscope.files'
-"DATABASE_FILE='cscope.out'
-"RECURSE=
-"VERBOSE=
-"
-"find $DIR \( -type f -o -type l \)  | \
-"egrep -i '\.([chlyp](xx|pp|y)*|cc|hh)$' | \
-"sed -e '/\/CVS\//d' -e '/\/RCS\//d'  -e '/\/\.svn\//d' -e 's/^\.\///' | \
-"sort > $LIST_FILE
-"
-"echo "Creating list of files to index ... done"
-"
-"echo "Indexing files ..."
-"
-"#cscope -b -i $LIST_FILE -f $DATABASE_FILE
-"cscope -bkq -i $LIST_FILE -f $DATABASE_FILE
-"
-"echo "Indexing files ... done"
-"exit 0
-"yangyingchao@gmail.com 

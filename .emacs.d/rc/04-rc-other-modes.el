@@ -516,10 +516,9 @@ li {font-size: 15px}
 
 
 (autoload 'logviewer-mode "logviewer"   "Major mode for editing Logviewer files"  t)
-(mapc (lambda (arg)
-        (yc/add-to-mode-alist arg 'logviewer-mode))
-      '("\\messages\\'" "\\(LOG\\|Log\\|log\\)\\.txt"))
-
+(yc/set-mode 'logviewer-mode (rx (or (: bow "messages" eow)
+                                          (: "." (or "log" "LOG" "Log"))
+                                          (: (or "log" "LOG" "Log") ".txt"))))
 
 
 (autoload 'qml-mode "qml-mode")

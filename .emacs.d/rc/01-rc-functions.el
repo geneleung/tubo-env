@@ -109,6 +109,10 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
     nil (list
          (list ,sym 1 ,type t ))))
 
+(defmacro yc/set-mode (mode expr)
+  "description"
+  `(add-to-list 'auto-mode-alist
+                (cons ,expr ,mode)))
  ;; Functions
 (defun yc/toggle-debug ()
   "Toggle debug mode."
@@ -177,7 +181,7 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
     (indent-for-tab-command)))
 
 
- ;; *********** Fuctions for edit special rc-files quickly ************
+;; *********** Fuctions for edit special rc-files quickly ************
 
 (defun edit-emacs ()
   (interactive)
@@ -212,37 +216,8 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
   (interactive)
   (find-file "~/.emacs.d/templates/"))
 
- ;; ****************************** Copy Functions **************************
 
-(defun copy-line (&optional arg)
-  "Save current line into Kill-Ring without mark the line"
-  (interactive "P")
-  (let ((beg (line-beginning-position))
-        (end (line-end-position arg)))
-    (copy-region-as-kill beg end))
-  )
-
-(global-set-key (kbd "<M-S-SPC>") 'copy-line)
-
-(defun copy-word (&optional arg)
-  "Copy words at point"
-  (interactive "P")
-  (let ((beg (progn (if (looking-back "[a-zA-Z0-9]" 1) (backward-word 1))
-                    (point)))
-        (end (progn (forward-word arg) (point))))
-    (copy-region-as-kill beg end))
-  )
-
-
-(defun copy-paragraph (&optional arg)
-  "Copy paragraphes at point"
-  (interactive "P")
-  (let ((beg (progn (backward-paragraph 1) (point)))
-        (end (progn (forward-paragraph arg) (point))))
-    (copy-region-as-kill beg end))
-  )
-
- ;; ******************** Others ***************************************
+;; ******************** Others ***************************************
 
 (defun load-this-file ()
   (interactive)
@@ -270,7 +245,6 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
         (define-key map key def)))))
 
 (defalias 'yc/set-keys 'lazy-set-key)
-
 
 (defun lazy-unset-key (key-list &optional keymap)
   "This function is to little type when unset key binding.
@@ -698,172 +672,13 @@ inserts comment at the end of the line."
   (let ((newname (concat (buffer-name) "-" (format-time-string current-time-format (current-time)))))
          (rename-buffer newname)))
 
-
-
-
-(defun yc/add-to-mode-alist (reg-exp mode)
-  "Add regexp to mode"
-  (add-to-list 'auto-mode-alist
-               (cons reg-exp mode))
-  )
-
-
-
-(defun get-word (msg)
-  "Return a whole word."
-  (let ((r-match-word (rx bow (group (+ ascii)) eow))
-        (word nil))
-    (if (string-match r-match-word msg)
-        (progn
-          (setq word (match-string 1 msg))))
-    word))
-
 (defalias 'string-split 'split-string)
-
-(defun yc/sort-string-array (start end)
-  "Sort selected region as array of chars, use \",\" as seperator."
-  (interactive "rp")
-  (let* ((content (buffer-substring-no-properties start end))
-         (content-list (sort (string-split content ",") 'string<))
-         (total (length content-list))
-         (counter 0))
-    (delete-region start end)
-    (insert "[")
-    (while (< counter (1- total))
-      (insert (nth counter content-list) ", ")
-      (setq counter (1+ counter)))
-    (insert (format "%s]" (nth counter content-list)))
-    )
-  )
-
-
-(defun yc/get-filename-extension (filename)
-  "Parse to get extension of file name"
-  (let* ((tmp-list (append filename nil))
-         (ext-list nil))
-    (while (member ?. tmp-list)
-      (setq ext-list (member ?. tmp-list))
-      (setq tmp-list (member ?. (rest tmp-list))))
-    (concat ext-list)))
 
 (defun yc/strip-ws-in-string (src)
   "description"
   (let ((str-array (split-string src split-string-default-separators)))
     (mapconcat 'identity str-array "_")))
 
-
-
-(defconst r-match-arglist-end
-  (rx (* blank) ")")
-  "Regular expression to match the end of arglist"
-  )
-
-(defconst r-match-empty
-  (rx bol (* blank) ")" (* blank) eol)
-  "Regular expresstion to match an empty string."
-  )
-
-(defconst r-match-arg
-  (rx (* blank) (+ (or alnum "_" "*" "/" "@")))
-  "Regular expression to match plain args"
-  )
-
-(defcustom yc/wired-intent nil
-  "Wired indent or not"
-  :group 'user)
-
-(defun yc/get-indent-offset (syntax)
-  "Wrapper to get correct indent offset. Here `correct' means an indent comfort to some wired
-  coding standard."
-  (let ((found nil)
-        (c-syntactic-context
-         (or syntax
-             (and (boundp 'c-syntactic-context)
-                  c-syntactic-context))))
-    (save-excursion
-      (if (and yc/wired-intent
-               (or (looking-at r-match-arglist-end)
-                   (looking-back r-match-empty)
-                   ))
-          (while (not found)
-            (forward-line -1)
-            (end-of-line)
-            (beginning-of-line)
-            (if (looking-at r-match-arg)
-                (setq found t))))
-      (c-save-buffer-state (indent)
-        (unless c-syntactic-context
-          (setq c-syntactic-context (c-guess-basic-syntax)))
-        (c-get-syntactic-indentation  c-syntactic-context)))))
-
-(defun yc/c-indent-line (&optional syntax quiet ignore-point-pos)
-  "Wrapper of c-indent-line to suppoer a wired indent style"
-  (let ((line-cont-backslash (save-excursion
-                               (end-of-line)
-                               (eq (char-before) ?\\)))
-        (c-fix-backslashes c-fix-backslashes)
-        bs-col
-        shift-amt)
-    (when (and (not ignore-point-pos)
-               (save-excursion
-                 (beginning-of-line)
-                 (looking-at (if line-cont-backslash
-                                 ;; Don't use "\\s " - ^L doesn't count as WS
-                                 ;; here
-                                 "\\([ \t]*\\)\\\\$"
-                               "\\([ \t]*\\)$")))
-               (<= (point) (match-end 1)))
-      ;; Delete all whitespace after point if there's only whitespace
-      ;; on the line, so that any code that does back-to-indentation
-      ;; or similar gets the current column in this case.  If this
-      ;; removes a line continuation backslash it'll be restored
-      ;; at the end.
-      (unless c-auto-align-backslashes
-        ;; Should try to keep the backslash alignment
-        ;; in this case.
-        (save-excursion
-          (goto-char (match-end 0))
-          (setq bs-col (1- (current-column)))))
-      (delete-region (point) (match-end 0))
-      (setq c-fix-backslashes t))
-    (if c-syntactic-indentation
-        (progn
-          (setq c-parsing-error
-                (or (let ((c-parsing-error nil)
-                          (c-syntactic-context
-                           (or syntax
-                               (and (boundp 'c-syntactic-context)
-                                    c-syntactic-context))))
-                      (c-save-buffer-state (indent)
-                        (setq indent (yc/get-indent-offset syntax))
-                        (and (not (c-echo-parsing-error quiet))
-                             c-echo-syntactic-information-p
-                             (message "Syntax error"))
-                        (setq shift-amt (- indent (current-indentation))))
-                      (c-shift-line-indentation shift-amt)
-                      (run-hooks 'c-special-indent-hook)
-                      c-parsing-error)
-                    c-parsing-error)))
-      (let ((indent 0))
-        (save-excursion
-          (while (and (= (forward-line -1) 0)
-                      (if (looking-at "\\s *\\\\?$")
-                          t
-                        (setq indent (current-indentation))
-                        nil))))
-        (setq shift-amt (- indent (current-indentation)))
-        (c-shift-line-indentation shift-amt)))
-    (when (and c-fix-backslashes line-cont-backslash)
-      (if bs-col
-          (save-excursion
-            (indent-to bs-col)
-            (insert ?\\))
-        (when c-auto-align-backslashes
-          ;; Realign the line continuation backslash.
-          (c-backslash-region (point) (point) nil t))))
-    shift-amt))
-
-
 (defun yc/update-info ()
   "Update info"
   (interactive)
@@ -1092,9 +907,6 @@ inserts comment at the end of the line."
   )
 
 (add-hook 'before-save-hook 'change-file-permissions-to-writable)
-
-
-
 
 (defun yc/compile-rc-files ()
   "Compile all init files."

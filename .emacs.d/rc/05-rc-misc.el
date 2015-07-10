@@ -456,16 +456,14 @@ If there is no .svn directory, examine if there is CVS and run
  '(magit-revert-buffers t)
  )
 
-(autoload 'magit-svn-mode "magit-svn" ""  t)
-(autoload 'magit-svn-fetch "magit-svn" ""  t)
-(autoload 'magit-svn-rebase "magit-svn" ""  t)
 (add-hook 'magit-mode-hook
           (lambda ()
-            (when (try-require 'magit-svn-mode)
+            (when (load "magit-svn-mode" t)
               (if (and (file-exists-p ".git/svn/.metadata")
-                       (string-match ".*/svn" (with-temp-buffer
-                                                (insert-file-contents ".git/HEAD")
-                                                (buffer-substring-no-properties (point-min) (point-max)))))
+                       (string-match ".*/svn"
+                                     (with-temp-buffer
+                                       (insert-file-contents ".git/HEAD")
+                                       (buffer-substring-no-properties (point-min) (point-max)))))
                   (magit-svn-mode 1)
                 (magit-svn-mode -1)))))
 
@@ -761,6 +759,17 @@ If there is no .svn directory, examine if there is CVS and run
  "cc-mode"
  (define-key c-mode-map "\C-ct" 'yc/cflow-function))
 
+ ;; vimrc-mode
+
+(yc/autoload 'vimrc-mode)
+(yc/set-mode 'vimrc-mode (rx (or ".vim"
+                                (: "." (? "_") (? "g")  "vimrc")
+                                ".exrc")))
+(add-to-list 'auto-mode-alist
+             (cons (rx (or ".vim"
+                           (: "." (? "_") (? "g")  "vimrc")
+                           ".exrc"))
+                   'vimrc-mode))
 (provide '05-rc-misc)
 
 ;; Local Variables:
