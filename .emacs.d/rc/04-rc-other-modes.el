@@ -220,6 +220,7 @@
              (cons "\\.\\(org\\|org_archive\\|/TODO\\)$"  'utf-8))
 
 (yc/eval-after-load "org"
+  (push (purecopy (append '(org) (version-to-list org-version))) package--builtin-versions)
   (setq org-export-time-stamp-file nil
         org-confirm-babel-evaluate nil
         org-startup-indented t
