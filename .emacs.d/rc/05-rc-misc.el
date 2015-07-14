@@ -438,7 +438,6 @@ If there is no .svn directory, examine if there is CVS and run
 (autoload 'magit-status "magit" "magit"  t)
 (autoload 'magit-blame-mode "magit-blame" "blame"  t)
 (define-or-set magit-last-seen-setup-instructions "1.4.0")
-(yc/autoload 'git-commit-training-wheels-mode)
 
 (yc/eval-after-load
  "git-commit-mode"
@@ -453,7 +452,6 @@ If there is no .svn directory, examine if there is CVS and run
  "magit"
  (add-hook 'git-commit-mode-hook
            (lambda ()
-             ;; (git-commit-training-wheels-mode 1)
              (turn-on-flyspell))) )
 
 (custom-set-variables
