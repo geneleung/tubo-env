@@ -584,7 +584,7 @@
    '(mode-line-modified-face ((t (:inherit 'mode-line-buffer-id :foreground "#c82829"))))
    '(mode-line-80col-face ((t (:inherit 'mode-line-face :foreground "black" :background "#eab700"))))
 
-   `(hl-line  ((t (:background ,current-line))))
+   `(hl-line  ((t (:background ,current-line :foreground ,yellow))))
 
    ;; Helm
    `(helm-header ((,class (:foreground ,foreground :background ,background))))
@@ -622,6 +622,7 @@
    `(magit-hash ((,class (:foreground ,yellow))))
    `(magit-blame-heading ((,class (:foreground "#a9a9a9"))))
    `(magit-section-title ((,class (:foreground ,blue :weight bold))))
+   `(magit-section-highlight  ((t (:background ,current-line))))
 
    )
   )
