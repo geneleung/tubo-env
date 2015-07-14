@@ -620,6 +620,7 @@
    `(magit-log-head-label-tags ((,class (:foreground ,aqua :box nil :weight bold))))
    `(magit-log-sha1 ((,class (:foreground ,yellow))))
    `(magit-hash ((,class (:foreground ,yellow))))
+   `(magit-blame-heading ((,class (:foreground "#a9a9a9"))))
    `(magit-section-title ((,class (:foreground ,blue :weight bold))))
 
    )

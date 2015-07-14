@@ -1,0 +1,8 @@
+# -*- mode: snippet -*-
+# name: dotimes
+# key: dotimes
+# key: dt
+# --
+for (int i = 0; i < ${1:N}; i++) {
+    $0
+}

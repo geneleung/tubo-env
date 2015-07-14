@@ -63,7 +63,8 @@ detailed descriptions."
   (interactive "rp")
   (clang-format-region start end (symbol-name emr-clang-format-style)))
 
-(emr-declare-command 'emr-c-tidy-includes
+(defalias 'emr-cc-tidy-includes 'emr-c-tidy-includes)
+(emr-declare-command 'emr-cc-tidy-includes
   :title "tidy"
   :description "includes"
   :modes 'c++-mode

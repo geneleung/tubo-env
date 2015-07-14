@@ -1494,39 +1494,39 @@ and is reversed for better performence.")
   (custom-set-variables
    '(gdb-many-windows t))
 
-(defadvice gdb-setup-windows (around yc/gdb-setup-windows ())
-  (gdb-get-buffer-create 'gdb-locals-buffer)
-  (gdb-get-buffer-create 'gdb-stack-buffer)
-  (gdb-get-buffer-create 'gdb-breakpoints-buffer)
-  (set-window-dedicated-p (selected-window) nil)
-  (switch-to-buffer gud-comint-buffer) ;;0
-  (delete-other-windows)
-  (let* ((win-src (selected-window))
-         (win-gud (split-window-right))
-         (win-stack (split-window win-src ( / ( * (window-height win-src) 3) 4)))
-         (win-bk (split-window win-gud ( / ( * (window-height win-gud) 3) 4)))
-         (win-local (split-window win-gud ( / (window-height  win-gud) 3))))
+;; (defadvice gdb-setup-windows (around yc/gdb-setup-windows ())
+;;   (gdb-get-buffer-create 'gdb-locals-buffer)
+;;   (gdb-get-buffer-create 'gdb-stack-buffer)
+;;   (gdb-get-buffer-create 'gdb-breakpoints-buffer)
+;;   (set-window-dedicated-p (selected-window) nil)
+;;   (switch-to-buffer gud-comint-buffer) ;;0
+;;   (delete-other-windows)
+;;   (let* ((win-src (selected-window))
+;;          (win-gud (split-window-right))
+;;          (win-stack (split-window win-src ( / ( * (window-height win-src) 3) 4)))
+;;          (win-bk (split-window win-gud ( / ( * (window-height win-gud) 3) 4)))
+;;          (win-local (split-window win-gud ( / (window-height  win-gud) 3))))
 
-    (gdb-set-window-buffer (gdb-locals-buffer-name) nil win-local)
-    (set-window-buffer
-     win-src
-     (if gud-last-last-frame
-         (gud-find-file (car gud-last-last-frame))
-       (if gdb-main-file
-           (gud-find-file gdb-main-file)
-         ;; Put buffer list in window if we
-         ;; can't find a source file.
-         (list-buffers-noselect))))
+;;     (gdb-set-window-buffer (gdb-locals-buffer-name) nil win-local)
+;;     (set-window-buffer
+;;      win-src
+;;      (if gud-last-last-frame
+;;          (gud-find-file (car gud-last-last-frame))
+;;        (if gdb-main-file
+;;            (gud-find-file gdb-main-file)
+;;          ;; Put buffer list in window if we
+;;          ;; can't find a source file.
+;;          (list-buffers-noselect))))
 
-    (setq gdb-source-window win-src)
+;;     (setq gdb-source-window win-src)
 
-    (gdb-set-window-buffer (gdb-stack-buffer-name) nil win-stack)
+;;     (gdb-set-window-buffer (gdb-stack-buffer-name) nil win-stack)
 
-    (gdb-set-window-buffer (if gdb-show-threads-by-default
-                               (gdb-threads-buffer-name)
-                             (gdb-breakpoints-buffer-name))
-                           nil win-bk)
-    (select-window win-gud)))
+;;     (gdb-set-window-buffer (if gdb-show-threads-by-default
+;;                                (gdb-threads-buffer-name)
+;;                              (gdb-breakpoints-buffer-name))
+;;                            nil win-bk)
+;;     (select-window win-gud)))
 
 ;; (ad-activate 'gdb-setup-windows)
 )
