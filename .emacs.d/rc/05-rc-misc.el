@@ -8,8 +8,8 @@
 (icomplete-mode t)
 
 
-(yc/autoload 'helm-projectile-find-file-dwim "helm-projectile")
-(define-key (current-global-map) (kbd "C-x M-f") 'helm-projectile-find-file-dwim)
+(yc/autoload 'helm-projectile-find-file "helm-projectile")
+(define-key (current-global-map) (kbd "C-x M-f") 'helm-projectile-find-file)
 
 
 ;;;; ido -- disabled for helm
