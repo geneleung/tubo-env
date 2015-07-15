@@ -584,7 +584,7 @@
    '(mode-line-modified-face ((t (:inherit 'mode-line-buffer-id :foreground "#c82829"))))
    '(mode-line-80col-face ((t (:inherit 'mode-line-face :foreground "black" :background "#eab700"))))
 
-   `(hl-line  ((t (:background ,current-line :foreground ,yellow))))
+   `(hl-line  ((t (:background ,current-line))))
 
    ;; Helm
    `(helm-header ((,class (:foreground ,foreground :background ,background))))

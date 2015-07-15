@@ -1368,7 +1368,7 @@ and is reversed for better performence.")
   (rx bow (group (or "add-to-list" "try-require" "add-hook" "autoload"
                      "yc/eval-after-load" "try-require-autoloads"
                      "fboundp" "boundp" "featurep" "define-or-set"
-                     "csq" "cdsq" "yc/autoload" "yc/set-auto-mode")) eow)
+                     "csq" "cdsq" "yc/autoload" "yc/set-auto-mode" "defun*" "defmacro*")) eow)
   "My Lisp keywords")
 
 (define-skeleton skeleton-require
