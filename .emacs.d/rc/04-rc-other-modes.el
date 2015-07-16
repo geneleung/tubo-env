@@ -227,7 +227,7 @@
         org-directory (convert-standard-filename "~/Work/Orgs")
         org-default-notes-file (convert-standard-filename "~/Work/Orgs/notes.org"))
   (custom-set-variables
-   '(org-ditaa-jar-path "~/.emacs.d/site-lisp/org_contrib/scripts/ditaa.jar")
+   '(org-ditaa-jar-path "~/.emacs.d/site-lisp/org_contrib/ditaa.jar")
    '(org-blank-before-new-entry (quote ((heading . auto) (plain-list-item))))
    '(org-enforce-todo-checkbox-dependencies t)
    '(org-hide-leading-stars t)

@@ -1609,13 +1609,15 @@ and is reversed for better performence.")
 ;; (setq lua-default-application "/usr/bin/lua")
 
 (autoload 'cmake-mode "cmake-mode" ""  t)
-(add-to-list 'auto-mode-alist
-             (cons (rx (or "CMakeList.txt" "CMakeLists.txt" ".cmake")) 'cmake-mode))
+(autoload 'cmake-font-lock-activate "cmake-font-lock" nil t)
+(yc/set-mode 'cmake-mode (rx (or "CMakeList.txt" "CMakeLists.txt" ".cmake")))
+
 (yc/eval-after-load
  "cmake-mode"
  (add-hook 'cmake-mode-hook
            (lambda ()
              (yc/common-program-hook)
+             (cmake-font-lock-activate)
              (let ((map (make-sparse-keymap)))
                (define-key map "\C-ch" 'cmake-help)
                (define-key map "\C-cl" 'cmake-help-list-commands)
@@ -1692,28 +1694,29 @@ and is reversed for better performence.")
 ;;              (cons (rx "." (or "glsl" "vert" "frag" ".geom")) 'glsl-mode))
 
  ;; Javascript mode
-(autoload 'js3-mode "js3" nil t)
-(add-to-list 'auto-mode-alist
-             (cons (rx (or (: bow "manifest")
-                           ".json"
-                           ".js"
-                           ) eol)
-                   'js3-mode))
+(yc/autoload 'js2-mode)
+(yc/autoload 'js2-imenu-extras-mode)
+
+
+(yc/set-mode 'js2-mode (rx (or (: bow "manifest")
+                               ".json"
+                               ".js"
+                               ) eol))
 (yc/eval-after-load
- "js3-mode"
- (setq js3-mode-must-byte-compile nil
-       js3-lazy-commas t
-       js3-lazy-operators t
-       js3-lazy-dots t
-       js3-expr-indent-offset 4
-       js3-paren-indent-offset 4
-       js3-square-indent-offset 4
-       )
- (define-key js3-mode-map "\C-c\C-x" 'executable-interpret)
- (add-hook 'js3-mode-hook
+ "js2-mode"
+ ;; (setq js2-mode-must-byte-compile nil
+ ;;       js2-lazy-commas t
+ ;;       js2-lazy-operators t
+ ;;       js2-lazy-dots t
+ ;;       js2-expr-indent-offset 4
+ ;;       js2-paren-indent-offset 4
+ ;;       js2-square-indent-offset 4
+ ;;       )
+ (define-key js2-mode-map "\C-c\C-x" 'executable-interpret)
+ (add-hook 'js2-mode-hook
            (lambda ()
              (yc/common-program-hook)
-             ;; (js2-imenu-extras-mode)
+             (js2-imenu-extras-mode)
              )))
 
 (custom-set-variables
