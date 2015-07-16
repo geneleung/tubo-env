@@ -156,6 +156,18 @@
 
 ;; ******************** Yasnippet ****************************
 (autoload 'yas-global-mode "yasnippet" "yas-global-mode" t)
+
+(defmacro yas-with-comment (str)
+  "description"
+  `(let (surrounded)
+     (save-excursion
+       (beginning-of-line)
+       (if (looking-at (rx ,comment-start))
+           (setq surrounded t)))
+     (if surrounded
+         ,str
+       (format "%s %s%s" comment-start ,str comment-end))))
+
 (yc/eval-after-load "yasnippet"
   (custom-set-variables
    '(yas-verbosity 2)
