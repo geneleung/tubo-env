@@ -384,14 +384,14 @@ unwanted space when exporting org-mode to html."
 
 
  ;; *************************** Wiki Mode ******************************
-(autoload 'wikipedia-mode "wikipedia-mode"nil t)
-(add-to-list 'auto-mode-alist
-             '("\\.wiki\\'" . wikipedia-mode))
-(add-to-list 'auto-mode-alist
-             '("en\\.wikipedia\\.org" . wikipedia-mode))
-(add-to-list 'auto-mode-alist
-             '("127\\.0\\.0\\.1" . wikipedia-mode))
-(add-hook 'wikipedia-mode-hook 'turn-on-flyspell)
+;; (autoload 'mediawiki-draft "mediawiki"nil t)
+;; (add-to-list 'auto-mode-alist
+;;              '("\\.wiki\\'" . wikipedia-mode))
+;; (add-to-list 'auto-mode-alist
+;;              '("en\\.wikipedia\\.org" . wikipedia-mode))
+;; (add-to-list 'auto-mode-alist
+;;              '("127\\.0\\.0\\.1" . wikipedia-mode))
+;; (add-hook 'wikipedia-mode-hook 'turn-on-flyspell)
 
  ;; *************************** nxml mode for XML *******************
 
