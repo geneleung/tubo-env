@@ -826,7 +826,7 @@ a list with those."
            :header-name (lambda (name)
                           (concat name "(C-c ? Help)"))
            :candidates-process 'helm-xgtags--collect-candidates
-           ;; :filter-one-by-one 'helm-xgtags--filter-one-by-one
+           :filter-one-by-one 'helm-xgtags--filter-one-by-one
            :nohighlight t
            :candidate-number-limit 9999
            :help-message 'helm-xgtags--help-message
@@ -1297,8 +1297,10 @@ If ESCAPE is t, try to escape special characters."
 
 ;; TODO: start filtering when pressed space...
 (defun helm-xgtags--collect-candidates ()
-  (setq helm-xgtags--complete-pfx (or (split-string helm-pattern)
-                                      (cons helm-pattern nil )))
+  (let* ((array (split-string helm-pattern)))
+    (setq helm-xgtags--complete-pfx
+          (cons (or (car array) "") (helm-xgtags--build-regex (cdr array)))))
+
 
   (let* ((cmd (concat helm-xgtags--complete-cmd " " (car helm-xgtags--complete-pfx))))
     ;; Start grep process.
@@ -1329,9 +1331,22 @@ If ESCAPE is t, try to escape special characters."
              (helm-log "Error: Find %s"
                        (replace-regexp-in-string "\n" "" event))))))))
 
+(defun helm-xgtags--build-regex (patterns)
+  "Build a regex for PATTERNS."
+  (let ((p patterns) res )
+    (while p
+      (setq  res (cons (format ".*%s" (pop p)) res)))
+    (if res     (mapconcat 'identity (reverse res) ""))))
+
+;;TODO: fix performane issue:
+;;      this function was called for every arg, thus consums much time if there are
+;;      lots of candidates...
 (defun helm-xgtags--filter-one-by-one (arg)
-  arg
-  )
+  "Filter candidates (ARG) one by one."
+  (let ((pattern (cdr helm-xgtags--complete-pfx)) )
+    (if (not pattern) arg
+      (if (string-match pattern arg)
+          arg nil))))
 
 (defun helm-xgtags--help-message ()
   "description"
