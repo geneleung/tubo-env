@@ -5,9 +5,10 @@
 ;; Author: Yang Yingchao <yangyingchao@gmail.com>
 ;; Maintainer: Yang Yingchao <yangyingchao@gmail.com>
 ;; URL: https://github.com/yangyingchao/helm-xgtags
-;; Version: 1.0
+;; Version: 1.1
 ;; Created: 2015-05-20
-;; Date: 2015-05-20
+;; Date: 2015-07-19
+;; Package-Requires: ((helm "1.5.6") (cl-lib "0.5"))
 ;;
 ;; This program is free software; you can redistribute it and/or modify it under
 ;; the terms of the GNU General Public License as published by the Free Software
@@ -813,7 +814,7 @@ a list with those."
       (all-completions string candidates predicate))))
 
 (defun helm-xgtags--format-complete-cmd (type)
-  "Format compete command."
+  "Format complete command for TYPE."
   (let* ((options (reverse (helm-xgtags--construct-options type t))))
     (setq helm-xgtags--complete-cmd (mapconcat 'identity options " "))))
 
@@ -1245,9 +1246,6 @@ If ESCAPE is t, try to escape special characters."
     (define-key map (kbd "C-c C-o")  'helm-grep-run-other-frame-action)
     (define-key map (kbd "C-w")      'helm-yank-text-at-point)
     (define-key map (kbd "C-x C-s")  'helm-grep-run-save-buffer)
-    (when helm-grep-use-ioccur-style-keys
-      (define-key map (kbd "<right>")  'helm-execute-persistent-action)
-      (define-key map (kbd "<left>")  'helm-grep-run-default-action))
     (delq nil map))
   "Keymap used in Grep sources.")
 
@@ -1295,10 +1293,14 @@ If ESCAPE is t, try to escape special characters."
   :group 'helm-xgtags--faces)
 
 (defvar helm-xgtags--complete-cmd nil "Nil.")
+(defvar helm-xgtags--complete-pfx nil "Nil.")
 
 ;; TODO: start filtering when pressed space...
 (defun helm-xgtags--collect-candidates ()
-  (let* ((cmd (concat helm-xgtags--complete-cmd " " helm-pattern)))
+  (setq helm-xgtags--complete-pfx (or (split-string helm-pattern)
+                                      (cons helm-pattern nil )))
+
+  (let* ((cmd (concat helm-xgtags--complete-cmd " " (car helm-xgtags--complete-pfx))))
     ;; Start grep process.
     (helm-log "Starting global process in directory `%s'" default-directory)
     (helm-log "Command line used was:\n\n%s"
@@ -1310,35 +1312,22 @@ If ESCAPE is t, try to escape special characters."
       (set-process-sentinel
        (get-buffer-process helm-buffer)
        #'(lambda (process event)
-           (let ((noresult (= (process-exit-status process) 1)))
-             (unless noresult
-               (helm-process-deferred-sentinel-hook
-                process event helm-ff-default-directory))
-             (cond (noresult
-                    (with-current-buffer helm-buffer
-                      (insert (concat "* Exit with code 1, no result found,"
-                                      " Command line was:\n\n "
-                                      (propertize helm-xgtags--last-cmd-line
-                                                  'face 'helm-xgtags--cmd-line)))
-                      (setq mode-line-format
-                            '(" " mode-line-buffer-identification " "
-                              (:eval (format "L%s" (helm-candidate-number-at-point))) " "
-                              (:eval (propertize
-                                      "[global process finished - (no results)] "
-                                      'face 'helm-xgtags--finish))))))
-                   ((string= event "finished\n")
-                    (with-helm-window
-                      (setq mode-line-format
-                            '(" " mode-line-buffer-identification " "
-                              (:eval (format "L%s" (helm-candidate-number-at-point))) " "
-                              (:eval (propertize
-                                      "[global process finished - (no results)] "
-                                      'face 'helm-xgtags--finish))))
-                      (force-mode-line-update)))
-                   ;; Catch error output in log.
-                   (t (helm-log
-                       "Error: global %s"
-                       (replace-regexp-in-string "\n" "" event))))))))))
+           (helm-process-deferred-sentinel-hook
+            process event (helm-default-directory))
+           (if (string= event "finished\n")
+               (with-helm-window
+                 (setq mode-line-format
+                       '(" " mode-line-buffer-identification " "
+                         (:eval (format "L%s" (helm-candidate-number-at-point))) " "
+                         (:eval (propertize
+                                 (format "[Global process finished - (%s results)]"
+                                         (max (1- (count-lines
+                                                   (point-min) (point-max)))
+                                              0))
+                                 'face 'helm-locate-finish))))
+                 (force-mode-line-update))
+             (helm-log "Error: Find %s"
+                       (replace-regexp-in-string "\n" "" event))))))))
 
 (defun helm-xgtags--filter-one-by-one (arg)
   arg
