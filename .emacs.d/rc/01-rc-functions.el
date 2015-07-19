@@ -951,9 +951,7 @@ for FILE, but proper EOL-conversion and character interpretation is done!"
 (defun concat-string-array (array &optional sep)
   "Concat string array"
   (when (listp array)
-    (mapconcat (lambda (x) (identity x)) array sep)))
-
-
+    (mapconcat 'identity array sep)))
 
 (defun yc/disable-add-new-line ()
   "Don't add new line at end of file."

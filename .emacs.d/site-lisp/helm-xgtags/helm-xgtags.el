@@ -591,15 +591,6 @@ with the previous query results."
     (symbol     . "Find Symbol: ")
     ))
 
-(defconst helm-xgtags--comp-func-alist
-  '(
-    (definition . helm-xgtags--completing-tags)
-    (path       . helm-xgtags--completing-files)
-    (pattern    . helm-xgtags--completing-pattern)
-    (reference  . helm-xgtags--completing-grtags)
-    (symbol     . helm-xgtags--completing-gsyms)
-    ))
-
 (defconst helm-xgtags--search-option-alist
   '(
     (definition . "-d")
@@ -794,18 +785,13 @@ a list with those."
 (defun helm-xgtags--construct-options (type completion)
   (let ((find-file-p (eq type 'path))
         (gtagslibpath (getenv "GTAGSLIBPATH"))
-        options)
+        (options '("global")))
     (unless find-file-p
       (push "--result=grep" options))
     (when completion
       (push "-c" options))
     (if (assoc-default type helm-xgtags--search-option-alist)
         (push (assoc-default type helm-xgtags--search-option-alist) options))
-    ;; (when (or (eq gtags-path-style 'absolute)
-    ;;           (gtags--use-abs-path-p gtagslibpath))
-    ;;   (push "-a" options))
-    ;; (when gtags-ignore-case
-    ;;   (push "-i" options))
     (push "-i" options)
     (when (and current-prefix-arg (not find-file-p))
       (push "-l" options))
@@ -826,55 +812,40 @@ a list with those."
         (try-completion string candidates predicate)
       (all-completions string candidates predicate))))
 
-(defun helm-xgtags--completing-tags (string predicate code)
-  (helm-xgtags--complete 'definition string predicate code))
-(defun helm-xgtags--completing-pattern (string predicate code)
-  (helm-xgtags--complete 'pattern string predicate code))
-(defun helm-xgtags--completing-grtags (string predicate code)
-  (helm-xgtags--complete 'reference string predicate code))
-(defun helm-xgtags--completing-gsyms (string predicate code)
-  (helm-xgtags--complete 'symbol string predicate code))
-(defun helm-xgtags--completing-files (string predicate code)
-  (helm-xgtags--complete 'path string predicate code))
-
 (defun helm-xgtags--format-complete-cmd (type)
   "Format compete command."
-  (let* ((options (helm-xgtags--construct-options type t))
-         (args (reverse (cons string options)))
-         candidates)
-    (setq helm-xgtags--complete-cmd (concat global args))))
+  (let* ((options (reverse (helm-xgtags--construct-options type t))))
+    (setq helm-xgtags--complete-cmd (mapconcat 'identity options " "))))
 
+;; TODO: add more actions, keymaps.
 (defun helm-xgtags--read-tagname (type &optional tagname)
   (let ((prompt (assoc-default type helm-xgtags--prompt-alist))
-        (comp-func (assoc-default type helm-xgtags--comp-func-alist)))
+        (helm-xgtags--complete-source
+         (helm-build-async-source "xgtags"
+           :header-name (lambda (name)
+                          (concat name "(C-c ? Help)"))
+           :candidates-process 'helm-xgtags--collect-candidates
+           ;; :filter-one-by-one 'helm-xgtags--filter-one-by-one
+           :nohighlight t
+           :candidate-number-limit 9999
+           :help-message 'helm-xgtags--help-message
+           :history 'helm-xgtags--completing-history
+           :action (lambda (cand)
+                     cand)
+           :requires-pattern 2)))
     (when (and (not tagname) tagname)
       (setq tagname tagname))
     (when tagname
       (setq prompt (format "%s(default \"%s\") " prompt tagname)))
-    (let ((helm-xgtags--complete-source
-          (helm-build-async-source "xgtags"
-             :header-name (lambda (name)
-                            (concat name "(C-c ? Help)"))
-             :candidates-process 'helm-xgtags--collect-candidates
-             ;; :filter-one-by-one 'helm-xgtags--filter-one-by-one
-             :nohighlight t
-             :candidate-number-limit 9999
-             :help-message 'helm-xgtags--help-message
-             :history 'helm-xgtags--completing-history
-             :action (lambda (cand)
-                       cand)
-             :requires-pattern 2)))
-      (helm-xgtags--format-complete-cmd)
-
-      (helm
-       :sources 'helm-xgtags--complete-source
-       :buffer (format "*helm %s*" "xxx" )
-       :default nil
-       :input nil
-       :keymap helm-xgtags--map
-       :history 'helm-xgtags--history
-       :truncate-lines t)
-      )))
+    (helm-xgtags--format-complete-cmd type)
+    (helm
+     :sources 'helm-xgtags--complete-source
+     :buffer prompt
+     :default nil
+     :input nil
+     :keymap helm-xgtags--map
+     :history 'helm-xgtags--history
+     :truncate-lines t)))
 
 
 (defun* helm-xgtags--find-with (&key
@@ -1255,6 +1226,7 @@ If ESCAPE is t, try to escape special characters."
         :action (lambda (cand)
                   (helm-xgtags--select-and-follow-tag cand))))
 
+;; TODO: add more actions, keymaps.
 (defun helm-xgtags--activate (&optional fn)
   "Active helm."
   (interactive)
@@ -1324,17 +1296,16 @@ If ESCAPE is t, try to escape special characters."
 
 (defvar helm-xgtags--complete-cmd nil "Nil.")
 
-
-(defun helm-xgtags--collect-candidates ();(type string predicate code)
-  (let* (
-         non-essential)
+;; TODO: start filtering when pressed space...
+(defun helm-xgtags--collect-candidates ()
+  (let* ((cmd (concat helm-xgtags--complete-cmd " " helm-pattern)))
     ;; Start grep process.
     (helm-log "Starting global process in directory `%s'" default-directory)
-    ;; (helm-log "Command line used was:\n\n%s"
-    ;;           (concat ">>> " (propertize cmd-line 'face 'helm-xgtags--cmd-line) "\n\n"))
-    (prog1            ; This function should return the process first.
+    (helm-log "Command line used was:\n\n%s"
+              (concat ">>> " (propertize cmd 'face 'helm-xgtags--cmd-line) "\n\n"))
+    (prog1
         (start-file-process-shell-command
-         "global" helm-buffer (concat helm-xgtags--complete-cmd " " helm-pattern))
+         "global" helm-buffer cmd)
       ;; Init sentinel.
       (set-process-sentinel
        (get-buffer-process helm-buffer)
