@@ -837,6 +837,12 @@ a list with those."
 (defun helm-xgtags--completing-files (string predicate code)
   (helm-xgtags--complete 'path string predicate code))
 
+(defun helm-xgtags--format-complete-cmd (type)
+  "Format compete command."
+  (let* ((options (helm-xgtags--construct-options type t))
+         (args (reverse (cons string options)))
+         candidates)
+    (setq helm-xgtags--complete-cmd (concat global args))))
 
 (defun helm-xgtags--read-tagname (type &optional tagname)
   (let ((prompt (assoc-default type helm-xgtags--prompt-alist))
@@ -845,15 +851,29 @@ a list with those."
       (setq tagname tagname))
     (when tagname
       (setq prompt (format "%s(default \"%s\") " prompt tagname)))
-    (let ((completion-ignore-case helm-xgtags-ignore-case)
-          (completing-read-function 'completing-read-default))
-      ;; (helm-comp-read prompt comp-func;;  nil nil nil
-      ;;                 :default tagname
-      ;;  ;; 'helm-xgtags--completing-history tagname
-      ;;  )
-      (completing-read prompt
-       comp-func nil nil nil
-       'helm-xgtags--completing-history tagname)
+    (let ((helm-xgtags--complete-source
+          (helm-build-async-source "xgtags"
+             :header-name (lambda (name)
+                            (concat name "(C-c ? Help)"))
+             :candidates-process 'helm-xgtags--collect-candidates
+             ;; :filter-one-by-one 'helm-xgtags--filter-one-by-one
+             :nohighlight t
+             :candidate-number-limit 9999
+             :help-message 'helm-xgtags--help-message
+             :history 'helm-xgtags--completing-history
+             :action (lambda (cand)
+                       cand)
+             :requires-pattern 2)))
+      (helm-xgtags--format-complete-cmd)
+
+      (helm
+       :sources 'helm-xgtags--complete-source
+       :buffer (format "*helm %s*" "xxx" )
+       :default nil
+       :input nil
+       :keymap helm-xgtags--map
+       :history 'helm-xgtags--history
+       :truncate-lines t)
       )))
 
 
@@ -1244,6 +1264,120 @@ If ESCAPE is t, try to escape special characters."
         :preselect (if fn fn
                      (helm-xgtags--candidate-transformer helm-xgtags--selected-tag t))))
 
+(defvar helm-xgtags--map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map helm-map)
+    (define-key map (kbd "M-<down>") 'helm-goto-next-file)
+    (define-key map (kbd "M-<up>")   'helm-goto-precedent-file)
+    (define-key map (kbd "C-c o")    'helm-grep-run-other-window-action)
+    (define-key map (kbd "C-c C-o")  'helm-grep-run-other-frame-action)
+    (define-key map (kbd "C-w")      'helm-yank-text-at-point)
+    (define-key map (kbd "C-x C-s")  'helm-grep-run-save-buffer)
+    (when helm-grep-use-ioccur-style-keys
+      (define-key map (kbd "<right>")  'helm-execute-persistent-action)
+      (define-key map (kbd "<left>")  'helm-grep-run-default-action))
+    (delq nil map))
+  "Keymap used in Grep sources.")
+
+(defvar helm-xgtags--last-cmd-line nil "Nil.")
+
+;;; Faces
+;;
+;;
+(defgroup helm-xgtags--faces nil
+  "Customize the appearance of helm-grep."
+  :prefix "helm-"
+  :group 'helm-grep
+  :group 'helm-faces)
+
+(defface helm-xgtags--match
+  '((((background light)) :foreground "#b00000")
+    (((background dark))  :foreground "gold1"))
+  "Face used to highlight grep matches."
+  :group 'helm-xgtags--faces)
+
+(defface helm-xgtags--file
+  '((t (:foreground "BlueViolet"
+                    :underline t)))
+  "Face used to highlight grep results filenames."
+  :group 'helm-xgtags--faces)
+
+(defface helm-xgtags--lineno
+  '((t (:foreground "Darkorange1")))
+  "Face used to highlight grep number lines."
+  :group 'helm-xgtags--faces)
+
+(defface helm-xgtags--running
+  '((t (:foreground "Red")))
+  "Face used in mode line when grep is running."
+  :group 'helm-xgtags--faces)
+
+(defface helm-xgtags--finish
+  '((t (:foreground "Green")))
+  "Face used in mode line when grep is finish."
+  :group 'helm-xgtags--faces)
+
+(defface helm-xgtags--cmd-line
+  '((t (:inherit diff-added)))
+  "Face used to highlight grep command line when no results."
+  :group 'helm-xgtags--faces)
+
+(defvar helm-xgtags--complete-cmd nil "Nil.")
+
+
+(defun helm-xgtags--collect-candidates ();(type string predicate code)
+  (let* (
+         non-essential)
+    ;; Start grep process.
+    (helm-log "Starting global process in directory `%s'" default-directory)
+    ;; (helm-log "Command line used was:\n\n%s"
+    ;;           (concat ">>> " (propertize cmd-line 'face 'helm-xgtags--cmd-line) "\n\n"))
+    (prog1            ; This function should return the process first.
+        (start-file-process-shell-command
+         "global" helm-buffer (concat helm-xgtags--complete-cmd " " helm-pattern))
+      ;; Init sentinel.
+      (set-process-sentinel
+       (get-buffer-process helm-buffer)
+       #'(lambda (process event)
+           (let ((noresult (= (process-exit-status process) 1)))
+             (unless noresult
+               (helm-process-deferred-sentinel-hook
+                process event helm-ff-default-directory))
+             (cond (noresult
+                    (with-current-buffer helm-buffer
+                      (insert (concat "* Exit with code 1, no result found,"
+                                      " Command line was:\n\n "
+                                      (propertize helm-xgtags--last-cmd-line
+                                                  'face 'helm-xgtags--cmd-line)))
+                      (setq mode-line-format
+                            '(" " mode-line-buffer-identification " "
+                              (:eval (format "L%s" (helm-candidate-number-at-point))) " "
+                              (:eval (propertize
+                                      "[global process finished - (no results)] "
+                                      'face 'helm-xgtags--finish))))))
+                   ((string= event "finished\n")
+                    (with-helm-window
+                      (setq mode-line-format
+                            '(" " mode-line-buffer-identification " "
+                              (:eval (format "L%s" (helm-candidate-number-at-point))) " "
+                              (:eval (propertize
+                                      "[global process finished - (no results)] "
+                                      'face 'helm-xgtags--finish))))
+                      (force-mode-line-update)))
+                   ;; Catch error output in log.
+                   (t (helm-log
+                       "Error: global %s"
+                       (replace-regexp-in-string "\n" "" event))))))))))
+
+(defun helm-xgtags--filter-one-by-one (arg)
+  arg
+  )
+
+(defun helm-xgtags--help-message ()
+  "description"
+  (interactive)
+
+  )
 
 
 (provide 'helm-xgtags)

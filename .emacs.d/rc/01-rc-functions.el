@@ -121,11 +121,9 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
 (defun yc/toggle-debug ()
   "Toggle debug mode."
   (interactive)
-  (if YC-DEBUG
-      (setq YC-DEBUG nil
-            debug-on-error nil)
-    (setq YC-DEBUG t
-          debug-on-error t)))
+  (setq YC-DEBUG (not YC-DEBUG))
+  (setq debug-on-error YC-DEBUG
+        helm-debug YC-DEBUG))
 
 (defun yc/debug-log (msg)
   "Out put debug message based on YC-DEBUG"

@@ -2,4 +2,4 @@
 # name: defvar
 # key: dfv
 # --
-(defvar ${1:var_name} ${nil} "${nil}")
+(defvar ${1:var_name} ${nil} "${Nil.}")
