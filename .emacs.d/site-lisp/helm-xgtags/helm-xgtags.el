@@ -138,6 +138,11 @@
   "Face used to highlight the rest of line in the *xgtags* buffer."
   :group 'helm-xgtags)
 
+(defface helm-xgtags--cmd-line
+  '((t (:inherit diff-added)))
+  "Face used to highlight grep command line when no results."
+  :group 'helm-xgtags)
+
 
 ;;; customization
 
@@ -1237,6 +1242,38 @@ If ESCAPE is t, try to escape special characters."
         :preselect (if fn fn
                      (helm-xgtags--candidate-transformer helm-xgtags--selected-tag t))))
 
+(defun helm-xgtags--run-save-buffer ()
+  "Run grep save results action from `helm-do-grep-1'."
+  (interactive)
+  (with-helm-alive-p
+    (helm-quit-and-execute-action 'helm-xgtgs--save-results)))
+
+(defun helm-xgtags--save-results (_candidate)
+  "Save helm moccur results in a `helm-xgtags-select-mode' buffer."
+  (let ((buf "*hmxgtags*")
+        new-buf)
+    (when (get-buffer buf)
+      (setq new-buf (helm-read-string "BufferName: " buf))
+      (cl-loop for b in (helm-buffer-list)
+               when (and (string= new-buf b)
+                         (not (y-or-n-p
+                               (format "Buffer `%s' already exists overwrite? "
+                                       new-buf))))
+               do (setq new-buf (helm-read-string "OccurBufferName: " "*hmoccur ")))
+      (setq buf new-buf))
+    (with-current-buffer (get-buffer-create buf)
+      (setq buffer-read-only t)
+      (let ((inhibit-read-only t))
+        (erase-buffer)
+        (insert "-*- mode: helm-xgtags-select -*-\n\n"
+                (format "Results for `%s':\n\n" helm-input))
+        (save-excursion
+          (insert (with-current-buffer helm-buffer
+                    (goto-char (point-min)) (forward-line 1)
+                    (buffer-substring (point) (point-max))))))
+      (helm-xgtags--mode) (pop-to-buffer buf))
+    (message "Results saved in `%s' buffer" buf)))
+
 (defvar helm-xgtags--map
   (let ((map (make-sparse-keymap)))
     (set-keymap-parent map helm-map)
@@ -1245,52 +1282,9 @@ If ESCAPE is t, try to escape special characters."
     (define-key map (kbd "C-c o")    'helm-grep-run-other-window-action)
     (define-key map (kbd "C-c C-o")  'helm-grep-run-other-frame-action)
     (define-key map (kbd "C-w")      'helm-yank-text-at-point)
-    (define-key map (kbd "C-x C-s")  'helm-grep-run-save-buffer)
+    (define-key map (kbd "C-x C-s")  'helm-xgtags--run-save-buffer)
     (delq nil map))
   "Keymap used in Grep sources.")
-
-(defvar helm-xgtags--last-cmd-line nil "Nil.")
-
-;;; Faces
-;;
-;;
-(defgroup helm-xgtags--faces nil
-  "Customize the appearance of helm-grep."
-  :prefix "helm-"
-  :group 'helm-grep
-  :group 'helm-faces)
-
-(defface helm-xgtags--match
-  '((((background light)) :foreground "#b00000")
-    (((background dark))  :foreground "gold1"))
-  "Face used to highlight grep matches."
-  :group 'helm-xgtags--faces)
-
-(defface helm-xgtags--file
-  '((t (:foreground "BlueViolet"
-                    :underline t)))
-  "Face used to highlight grep results filenames."
-  :group 'helm-xgtags--faces)
-
-(defface helm-xgtags--lineno
-  '((t (:foreground "Darkorange1")))
-  "Face used to highlight grep number lines."
-  :group 'helm-xgtags--faces)
-
-(defface helm-xgtags--running
-  '((t (:foreground "Red")))
-  "Face used in mode line when grep is running."
-  :group 'helm-xgtags--faces)
-
-(defface helm-xgtags--finish
-  '((t (:foreground "Green")))
-  "Face used in mode line when grep is finish."
-  :group 'helm-xgtags--faces)
-
-(defface helm-xgtags--cmd-line
-  '((t (:inherit diff-added)))
-  "Face used to highlight grep command line when no results."
-  :group 'helm-xgtags--faces)
 
 (defvar helm-xgtags--complete-cmd nil "Nil.")
 (defvar helm-xgtags--complete-pfx nil "Nil.")
@@ -1351,7 +1345,7 @@ If ESCAPE is t, try to escape special characters."
 (defun helm-xgtags--help-message ()
   "description"
   (interactive)
-
+  "AAAAAAAAAAAAa"
   )
 
 
