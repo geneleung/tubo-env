@@ -248,53 +248,42 @@
      (delq nil map))
    "Keymap for `helm-emacs-rcs'.")
 
- (defun helm-rc-misc-get-files (dir regex &optional with-current-dir)
-   (let ((flist (directory-files dir t regex)))
-     (if with-current-dir
-         (add-to-list 'flist (concat dir "/."))
-       flist)))
+ (defun helm-rc-list-directory (dir &optional pattern)
+   "description"
+   (let ((s    (helm-build-sync-source "Helm-files"
+                 :init nil
+                 :candidates (lambda ()
+                               (directory-files  dir t (or pattern ".*")))
+                 :real-to-display (lambda (x)
+                                    (file-name-nondirectory x))
+                 :fuzzy-match t
+                 :action (lambda (cand)
+                           (if (file-directory-p cand)
+                               (helm-list-directory cand)
+                             (find-file cand)))
+                 :persistent-action 'helm-find-files-persistent-action
+                 :keymap helm-rc-misc-map)) )
+
+     (helm :sources '(s)
+           :buffer "*helm*"
+           :preselect nil)))
 
  ;; redefine some functions with helm.
- (define-or-set helm-source-projects
-   (helm-build-sync-source "Helm-Projects"
-     :init nil
-     :candidates (lambda ()
-                   (helm-rc-misc-get-files "~/.emacs.d/rc" "^99[0-9]?.*?\.el" t))
-     :real-to-display (lambda (x)
-                        (file-name-nondirectory x))
-     :fuzzy-match t
-     :action (lambda (cand)
-               (find-file cand))
-     :keymap helm-rc-misc-map)
-   "")
 
  (defadvice edit-project (around helm/edit-project ())
    (interactive)
-   (helm :sources '(helm-source-projects)
-         :buffer "*helm helm-xgtags*"
-         :preselect nil))
+   (helm-rc-list-directory "~/.emacs.d/rc" "^99[0-9]?.*?\.el"))
  (ad-activate 'edit-project)
-
- (define-or-set helm-source-rcs
-   (helm-build-sync-source "Helm-emacs-rcs"
-     :init nil
-     :candidates (lambda ()
-                   (helm-rc-misc-get-files "~/.emacs.d/rc" "^[0-9]+.*?\.el" t))
-     :real-to-display (lambda (x)
-                        (file-name-nondirectory x))
-     :fuzzy-match t
-     :action (lambda (cand)
-               (find-file cand))
-     :keymap helm-rc-misc-map)
-   "")
 
  (defadvice edit-rcs (around helm/edit-rcs ())
    (interactive)
-   (helm :sources '(helm-source-rcs)
-         :buffer "*helm helm-xgtags*"
-         :preselect nil))
+   (helm-rc-list-directory "~/.emacs.d/rc" "^[0-9]+.*?\.el"))
  (ad-activate 'edit-rcs)
 
+ (defadvice edit-template (around helm/edit-template ())
+   (interactive)
+   (helm-rc-list-directory "~/.emacs.d/templates" (rx (or alnum "_"))))
+ (ad-activate 'edit-template)
 
  (define-key helm-map (kbd "<M-return>")  'helm-kill-marked-buffers)
  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)

@@ -798,7 +798,8 @@ a list with those."
       (push "-c" options))
     (if (assoc-default type helm-xgtags--search-option-alist)
         (push (assoc-default type helm-xgtags--search-option-alist) options))
-    (push "-i" options)
+    (if helm-xgtags-ignore-case
+        (push "-i" options))
     (when (and current-prefix-arg (not find-file-p))
       (push "-l" options))
     (when gtagslibpath
