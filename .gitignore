@@ -270,3 +270,5 @@ tmp/
 /.rbtools-cookies
 /.clion10/
 /Google 云端硬盘/
+/.cgdb/
+/.tgdb/

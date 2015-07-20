@@ -1061,7 +1061,6 @@ for FILE, but proper EOL-conversion and character interpretation is done!"
                        fn)
       (error "Can't find proper app to open file %s." fn))))
 
-
 (defun yc/command-output-to-string (&rest args)
   "Execute a p4 command and return result as string.
 args should be a list, but to make caller's life easier, it can accept one atom instead of a
@@ -1121,6 +1120,21 @@ args should be a list, but to make caller's life easier, it can accept one atom 
         (print v)
         (if (and k v)
             (setenv k v))))))
+
+(defcustom yc/wp-path "~/Documents/Email/WeeklyReports/"
+  "Path to store weekly reports."
+  :type 'string
+  :group 'user
+  )
+
+
+(defun yc/new-wp ()
+  "Create new weekly-report."
+  (interactive)
+  (find-file (expand-file-name
+              (format "%swp_%s.org"
+                      yc/wp-path
+                      (format-time-string  "%Y-%m-%d" (current-time))))))
 
  ;; Advice
 ;; Handle file-error and suggest to install missing packages...
