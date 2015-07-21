@@ -248,6 +248,12 @@
      (delq nil map))
    "Keymap for `helm-emacs-rcs'.")
 
+ (defun helm-rc-action (cand)
+   "description"
+   (if (file-directory-p cand)
+       (helm-rc-list-directory cand)
+     (find-file cand)))
+
  (defun helm-rc-list-directory (dir &optional pattern)
    "description"
    (let ((s    (helm-build-sync-source "Helm-files"
@@ -257,11 +263,13 @@
                  :real-to-display (lambda (x)
                                     (file-name-nondirectory x))
                  :fuzzy-match t
-                 :action (lambda (cand)
-                           (if (file-directory-p cand)
-                               (helm-list-directory cand)
-                             (find-file cand)))
-                 :persistent-action 'helm-find-files-persistent-action
+                 :persistent-action 'helm-rc-action
+                 :action (helm-make-actions
+                          "Open File" 'helm-rc-action
+                          "Create New" (lambda (x)
+                                         (let ((name (completing-read "File Name:" nil)))
+                                           (find-file name))))
+
                  :keymap helm-rc-misc-map)) )
 
      (helm :sources '(s)

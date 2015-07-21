@@ -138,7 +138,7 @@
   "Face used to highlight the rest of line in the *xgtags* buffer."
   :group 'helm-xgtags)
 
-(defface helm-xgtags--cmd-line
+(defface helm-xgtags--cmd-line-face
   '((t (:inherit diff-added)))
   "Face used to highlight grep command line when no results."
   :group 'helm-xgtags)
@@ -200,11 +200,6 @@ update.
 Always update if value of this variable is nil."
   :type '(choice (integer :tag "Update interval seconds")
                  (boolean :tag "Update every time" nil))
-  :group 'helm-xgtags)
-
-(defcustom helm-xgtags--debug nil
-  "Switch of debug/non-debug."
-  :type 'boolean
   :group 'helm-xgtags)
 
 
@@ -492,6 +487,7 @@ find one."
   (find-file (helm-xgtags--tag-abs-file tag))
   (setq buffer-read-only (or buffer-read-only helm-xgtags-read-only))
   (helm-xgtags-mode 1)
+  (goto-char (point-min))
   (forward-line (helm-xgtags--tag-line tag))
   (let ((match (helm-xgtags--tag-query tag))
         (found nil)
@@ -686,8 +682,11 @@ If it was kill recreate and fill it with the previous query results."
                           (if (eq helm-xgtags-path-style 'absolute)
                               "--absolute")
                           tagname)))
-               (if helm-xgtags--debug
-                   (message "Calling global %s" args))
+               (helm-log "Starting global process in directory `%s'" default-directory)
+               (helm-log (concat "Command line used was:\n\n"
+                                 ">>> "
+                                 (concat "global" (mapconcat 'identity args " "))
+                                 "\n\n"))
                (if (zerop (apply #'call-process "global" nil t nil
                                  args))
                    (setq tags (append tags (helm-xgtags--collect-tags-in-buffer)))
@@ -704,8 +703,12 @@ If it was kill recreate and fill it with the previous query results."
 (defun helm-xgtags--collect-tags-in-buffer ()
   "This function searches the current buffer for tag items and returns
 a list with those."
-  (when helm-xgtags--debug
-    (message "global output: %s" (buffer-string)))
+
+  (helm-log "In directory `%s'" default-directory)
+  (helm-log (concat "global output was:\n\n"
+                    ">>> "
+                    (buffer-string)
+                    "\n\n"))
   (save-excursion
     (goto-char (point-min))
     (let ((tags nil))
@@ -1012,30 +1015,18 @@ Turning on helm-xgtags-select mode calls the value of the variable
       (file-truename buffile))))
 
 
-(defun helm-xgtags--root-dir ()
-  "Return root directory of xgtags."
-  (let* ((cmd-output
-          (ansi-color-apply (with-output-to-string
-                              (with-current-buffer standard-output
-                                (apply #'process-file
-                                       "global"
-                                       nil (list t t) nil
-                                       '("-p")))))))
-    (if (string-match "GTAGS not found" cmd-output)
-        nil
-      (replace-regexp-in-string "\n" "" cmd-output))))
 
 ;; Database related functions...
 (defun helm-xgtags-update-single(filename)
   "Update Gtags database for changes in a single file"
   (interactive)
   (start-process "update-gtags" "update-gtags" "bash" "-c"
-                 (concat "cd " (helm-xgtags--root-dir) " ; gtags --single-update "
+                 (concat "cd " (helm-xgtags--tag-directory) " ; gtags --single-update "
                          filename )))
 
 (defun helm-xgtags-update-current-file()
   (interactive)
-  (let ((filename (replace-regexp-in-string (helm-xgtags--root-dir) "."
+  (let ((filename (replace-regexp-in-string (helm-xgtags--tag-directory) "."
                                             (buffer-file-name (current-buffer)))) )
     (helm-xgtags-update-single filename)
     (message "Gtags updated for %s" filename)))
@@ -1043,7 +1034,7 @@ Turning on helm-xgtags-select mode calls the value of the variable
 (defun helm-xgtags-update-hook()
   "Update GTAGS file incrementally upon saving a file"
   (when helm-xgtags-mode
-    (when (helm-xgtags--root-dir)
+    (when (helm-xgtags--tag-directory)
       (helm-xgtags-update-current-file))))
 
 (defun helm-xgtags--read-tag-directory ()
@@ -1306,7 +1297,7 @@ If ESCAPE is t, try to escape special characters."
     ;; Start grep process.
     (helm-log "Starting global process in directory `%s'" default-directory)
     (helm-log "Command line used was:\n\n%s"
-              (concat ">>> " (propertize cmd 'face 'helm-xgtags--cmd-line) "\n\n"))
+              (concat ">>> " (propertize cmd 'face 'helm-xgtags--cmd-line-face) "\n\n"))
     (prog1
         (start-file-process-shell-command
          "global" helm-buffer cmd)
