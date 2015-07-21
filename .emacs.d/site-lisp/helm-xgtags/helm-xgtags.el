@@ -851,7 +851,6 @@ a list with those."
   (let* ((options (reverse (helm-xgtags--construct-options type t))))
     (setq helm-xgtags--complete-cmd (mapconcat 'identity options " "))))
 
-;; TODO: add more actions, keymaps.
 (defun helm-xgtags--read-tagname (type &optional tagname)
   (let ((prompt (assoc-default type helm-xgtags--prompt-alist))
         (helm-xgtags--complete-source
@@ -1233,26 +1232,32 @@ If ESCAPE is t, try to escape special characters."
         (rx-to-string str)
         str)))
 
-(defvar helm-source-xgtags-parse-tags nil "A.")
+(defun helm-xgtags--persistent-action (cand)
+  "description"
+  (interactive)
+  (helm-xgtags--select-and-follow-tag cand))
 
-(setq helm-source-xgtags-parse-tags
-      (helm-build-sync-source "Helm-Xgtags"
-        :init nil
-        :candidates 'helm-xgtags--tags
-        :real-to-display 'helm-xgtags--candidate-transformer
-        :fuzzy-match nil
-        :action (lambda (cand)
-                  (helm-xgtags--select-and-follow-tag cand))))
-
-;; TODO: add more actions, keymaps.
 (defun helm-xgtags--activate (&optional fn)
   "Active helm and select proper candidate if FN is provided."
   (interactive)
-  ;; (helm-attrset 'name (concat "GNU Global at " "TODO: "))
-  (helm :sources '(helm-source-xgtags-parse-tags)
-        :buffer "*helm helm-xgtags*"
-        :preselect (if fn fn
-                     (helm-xgtags--candidate-transformer helm-xgtags--selected-tag t))))
+  (let ((h-source
+         (helm-build-sync-source "Helm-Xgtags"
+           :init nil
+           :candidates 'helm-xgtags--tags
+           :real-to-display 'helm-xgtags--candidate-transformer
+           :fuzzy-match nil
+           ;; :persistent-action 'helm-xgtags--persistent-action
+           :action 'helm-xgtags--persistent-action;; (helm-make-actions
+                    ;; "Goto File" 'helm-xgtags--persistent-action
+                    ;; "Create New" (lambda (x)
+                    ;;                (let ((name (completing-read "File Name:" nil)))
+                    ;;                  (find-file name))))
+           )))
+    (helm :sources 'h-source
+          :buffer "*helm helm-xgtags*"
+          :keymap helm-xgtags--map
+          :preselect (if fn fn
+                       (helm-xgtags--candidate-transformer helm-xgtags--selected-tag t)))))
 
 (defun helm-xgtags--run-save-buffer ()
   "Run grep save results action from `helm-do-grep-1'."
@@ -1286,7 +1291,6 @@ If ESCAPE is t, try to escape special characters."
       (helm-xgtags-mode) (pop-to-buffer buf))
     (message "Results saved in `%s' buffer" buf)))
 
-;; TODO: start filtering when pressed space...
 (defun helm-xgtags--collect-candidates ()
   (let* ((array (split-string helm-pattern)))
     (setq helm-xgtags--complete-pfx
