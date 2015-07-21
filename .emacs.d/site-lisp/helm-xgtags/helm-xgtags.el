@@ -245,8 +245,35 @@ Always update if value of this variable is nil."
     keymap)
   "Keymap used in helm-xgtags select mode.")
 
-(defvar helm-xgtags--last-update-time 0 "Last update time.")
+(defvar helm-xgtags-mode-map
+  (let ((keymap (make-sparse-keymap))
+        (sub-keymap (make-sparse-keymap)))
+    (define-key keymap "\C-cs" sub-keymap)
+    (define-key sub-keymap "c" 'helm-xgtags-find-reference)
+    (define-key sub-keymap "s" 'helm-xgtags-find-symbol)
+    (define-key sub-keymap "g" 'helm-xgtags-find-pattern)
+    (define-key sub-keymap "h" 'helm-xgtags--activate)
+    (define-key sub-keymap "n" 'helm-xgtags-select-next-tag)
+    (define-key sub-keymap "p" 'helm-xgtags-select-prev-tag)
+    (define-key sub-keymap "u" 'helm-xgtags-pop-stack)
+    (define-key sub-keymap "f" 'helm-xgtags-find-file)
+    (define-key sub-keymap "x" 'helm-xgtags-switch-to-buffer)
+    (define-key sub-keymap "r" 'helm-xgtags-query-replace-regexp)
+    keymap)
+  "Keymap used in helm-xgtags minor mode.")
 
+(defvar helm-xgtags--map
+  (let ((map (make-sparse-keymap)))
+    (set-keymap-parent map helm-map)
+    (define-key map (kbd "M-<down>") 'helm-goto-next-file)
+    (define-key map (kbd "M-<up>")   'helm-goto-precedent-file)
+    (define-key map (kbd "C-x C-s")  'helm-xgtags--run-save-buffer)
+    (delq nil map))
+  "Keymap used in Grep sources.")
+
+(defvar helm-xgtags--complete-cmd nil "Nil.")
+(defvar helm-xgtags--complete-pfx nil "Nil.")
+(defvar helm-xgtags--last-update-time 0 "Last update time.")
 (defvar helm-xgtags--tags nil
   "List of current tags.")
 (defvar helm-xgtags--selected-tag nil
@@ -465,7 +492,7 @@ find one."
   (find-file (helm-xgtags--tag-abs-file tag))
   (setq buffer-read-only (or buffer-read-only helm-xgtags-read-only))
   (helm-xgtags-mode 1)
-  (goto-line (helm-xgtags--tag-line tag))
+  (forward-line (helm-xgtags--tag-line tag))
   (let ((match (helm-xgtags--tag-query tag))
         (found nil)
         (lines 0))
@@ -532,15 +559,16 @@ funcalls FUNC with the match as argument."
 ;;; handling the selection buffer
 
 (defun helm-xgtags--get-buffer ()
-  "Return the selection buffer. If it was kill recreate and fill it
-with the previous query results."
+  "Return the selection buffer.
+If it was kill recreate and fill it with the previous query results."
   (let ((buffer (get-buffer helm-xgtags-select-buffer-name)))
     (unless buffer
       (setq buffer (get-buffer-create helm-xgtags-select-buffer-name))
       ;; using with-xgtags-buffer here is not possible because it uses
       ;; helm-xgtags--get-buffer itself
-      (save-excursion
-        (set-buffer buffer)
+      (with-current-buffer buffer
+      ;; (save-excursion
+      ;;   (set-buffer buffer)
         (when helm-xgtags--stack
           (helm-xgtags--insert-tags helm-xgtags--tags))
         (helm-xgtags-select-mode)))
@@ -622,7 +650,6 @@ with the previous query results."
 
 ;;; GLOBAL process handling
 
-
 (defun helm-xgtags--tag-directory ()
   (with-temp-buffer
     (if (getenv "GTAGSROOT")
@@ -632,10 +659,7 @@ with the previous query results."
       (goto-char (point-min))
       (when (looking-at "^\\([^\r\n]+\\)")
         (let ((tag-path (match-string-no-properties 1)))
-          (file-name-as-directory
-           (if (eq system-type 'cygwin)
-               (cygwin-convert-file-name-from-windows tag-path)
-             tag-path)))))))
+          (file-name-as-directory tag-path))))))
 
 (defun helm-xgtags--base-directory ()
   (let ((dir (cl-case helm-xgtags-path-style
@@ -897,23 +921,6 @@ a list with those."
   (interactive "P")
   (helm-xgtags--switch-buffer t jump-to-start-p))
 
-(defvar helm-xgtags-mode-map
-  (let ((keymap (make-sparse-keymap))
-        (sub-keymap (make-sparse-keymap)))
-    (define-key keymap "\C-cs" sub-keymap)
-    (define-key sub-keymap "c" 'helm-xgtags-find-reference)
-    (define-key sub-keymap "s" 'helm-xgtags-find-symbol)
-    (define-key sub-keymap "g" 'helm-xgtags-find-pattern)
-    (define-key sub-keymap "h" 'helm-xgtags--activate)
-    (define-key sub-keymap "n" 'helm-xgtags-select-next-tag)
-    (define-key sub-keymap "p" 'helm-xgtags-select-prev-tag)
-    (define-key sub-keymap "u" 'helm-xgtags-pop-stack)
-    (define-key sub-keymap "f" 'helm-xgtags-find-file)
-    (define-key sub-keymap "x" 'helm-xgtags-switch-to-buffer)
-    (define-key sub-keymap "r" 'helm-xgtags-query-replace-regexp)
-    keymap)
-  "Keymap used in helm-xgtags minor mode.")
-
 
 ;;; definition and support for the minor mode
 
@@ -1005,26 +1012,39 @@ Turning on helm-xgtags-select mode calls the value of the variable
       (file-truename buffile))))
 
 
+(defun helm-xgtags--root-dir ()
+  "Return root directory of xgtags."
+  (let* ((cmd-output
+          (ansi-color-apply (with-output-to-string
+                              (with-current-buffer standard-output
+                                (apply #'process-file
+                                       "global"
+                                       nil (list t t) nil
+                                       '("-p")))))))
+    (if (string-match "GTAGS not found" cmd-output)
+        nil
+      (replace-regexp-in-string "\n" "" cmd-output))))
+
 ;; Database related functions...
 (defun helm-xgtags-update-single(filename)
   "Update Gtags database for changes in a single file"
   (interactive)
   (start-process "update-gtags" "update-gtags" "bash" "-c"
-                 (concat "cd " (gtags-root-dir) " ; gtags --single-update "
+                 (concat "cd " (helm-xgtags--root-dir) " ; gtags --single-update "
                          filename )))
 
 (defun helm-xgtags-update-current-file()
   (interactive)
-  (let ((filename (replace-regexp-in-string (gtags-root-dir) "."
+  (let ((filename (replace-regexp-in-string (helm-xgtags--root-dir) "."
                                             (buffer-file-name (current-buffer)))) )
-    (gtags-update-single filename)
+    (helm-xgtags-update-single filename)
     (message "Gtags updated for %s" filename)))
 
 (defun helm-xgtags-update-hook()
   "Update GTAGS file incrementally upon saving a file"
   (when helm-xgtags-mode
-    (when (gtags-root-dir)
-      (gtags-update-current-file))))
+    (when (helm-xgtags--root-dir)
+      (helm-xgtags-update-current-file))))
 
 (defun helm-xgtags--read-tag-directory ()
   (let ((dir (read-directory-name "Directory tag generated: " nil nil t)))
@@ -1235,7 +1255,7 @@ If ESCAPE is t, try to escape special characters."
 
 ;; TODO: add more actions, keymaps.
 (defun helm-xgtags--activate (&optional fn)
-  "Active helm."
+  "Active helm and select proper candidate if FN is provided."
   (interactive)
   ;; (helm-attrset 'name (concat "GNU Global at " "TODO: "))
   (helm :sources '(helm-source-xgtags-parse-tags)
@@ -1247,7 +1267,7 @@ If ESCAPE is t, try to escape special characters."
   "Run grep save results action from `helm-do-grep-1'."
   (interactive)
   (with-helm-alive-p
-    (helm-quit-and-execute-action 'helm-xgtgs--save-results)))
+    (helm-quit-and-execute-action 'helm-xgtags--save-results)))
 
 (defun helm-xgtags--save-results (_candidate)
   "Save helm moccur results in a `helm-xgtags-select-mode' buffer."
@@ -1272,23 +1292,8 @@ If ESCAPE is t, try to escape special characters."
           (insert (with-current-buffer helm-buffer
                     (goto-char (point-min)) (forward-line 1)
                     (buffer-substring (point) (point-max))))))
-      (helm-xgtags--mode) (pop-to-buffer buf))
+      (helm-xgtags-mode) (pop-to-buffer buf))
     (message "Results saved in `%s' buffer" buf)))
-
-(defvar helm-xgtags--map
-  (let ((map (make-sparse-keymap)))
-    (set-keymap-parent map helm-map)
-    (define-key map (kbd "M-<down>") 'helm-goto-next-file)
-    (define-key map (kbd "M-<up>")   'helm-goto-precedent-file)
-    (define-key map (kbd "C-c o")    'helm-grep-run-other-window-action)
-    (define-key map (kbd "C-c C-o")  'helm-grep-run-other-frame-action)
-    (define-key map (kbd "C-w")      'helm-yank-text-at-point)
-    (define-key map (kbd "C-x C-s")  'helm-xgtags--run-save-buffer)
-    (delq nil map))
-  "Keymap used in Grep sources.")
-
-(defvar helm-xgtags--complete-cmd nil "Nil.")
-(defvar helm-xgtags--complete-pfx nil "Nil.")
 
 ;; TODO: start filtering when pressed space...
 (defun helm-xgtags--collect-candidates ()
@@ -1344,10 +1349,7 @@ If ESCAPE is t, try to escape special characters."
           arg nil))))
 
 (defun helm-xgtags--help-message ()
-  "description"
-  (interactive)
-  "AAAAAAAAAAAAa"
-  )
+  "description")
 
 
 (provide 'helm-xgtags)
