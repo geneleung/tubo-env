@@ -112,6 +112,7 @@
 
  (defun auto-replace-date-time ()
    (save-excursion
+     (goto-char (point-min))
      (while (search-forward "(>>DATE<<)" nil t)
        (save-restriction
          (narrow-to-region (match-beginning 0) (match-end 0))
@@ -164,9 +165,14 @@
        (beginning-of-line)
        (if (looking-at (rx ,comment-start))
            (setq surrounded t)))
-     (if surrounded
-         ,str
-       (format "%s %s%s" comment-start ,str comment-end))))
+     (with-temp-buffer
+       (if surrounded
+           (insert ,str)
+         (insert (format "%s%s%s" ,comment-start ,str ,comment-end)))
+
+       (auto-update-defaults)
+       (buffer-substring-no-properties (point-min) (point-max)))
+))
 
 (yc/eval-after-load "yasnippet"
   (custom-set-variables

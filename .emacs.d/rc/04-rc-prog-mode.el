@@ -1857,7 +1857,7 @@ notify-send --hint=int:transient:1 \"Compile finished: failed\""
       real_cmd)))
 
 (defun do-compile (arg)
-  "save buffers and start compile"
+  "Save buffers and start compile with ARG."
   (interactive "P")
   (let ((source-window (get-buffer-window))
         (compile-window nil))
@@ -1875,14 +1875,7 @@ notify-send --hint=int:transient:1 \"Compile finished: failed\""
     (compile (make-command arg))))
 
 
-(defun open-makefile ()
-  "Open and edit Makefile.description"
-  (interactive)
-  (let ((fname (buffer-file-name)))
-    (find-file (concat (file-name-directory fname) "/Makefile"))))
-
 (global-set-key (kbd "<f6>")  'do-compile)
-
 (global-set-key (kbd "<C-f6>")
                 (lambda (arg)
                   (interactive "P")
@@ -1891,6 +1884,22 @@ notify-send --hint=int:transient:1 \"Compile finished: failed\""
                         (with-current-buffer buffer
                           (recompile arg))
                       (do-compile arg)))))
+
+(yc/eval-after-load
+ "compile"
+ (yc/set-keys
+  (list
+   (cons (kbd "<S-f9>")
+         (lambda ()
+           (interactive)
+           (let ((cur (point)))
+             (goto-char (point-min))
+             (unless (search-forward-regexp (rx (* space) "error:" (* space)) nil t)
+               (goto-char cur)))))
+   (cons "<f9>" 'next-error))
+  compilation-mode-map))
+
+
 
 (autoload 'helm-make "helm-make" "\
 Call \"make -j ARG target\". Target is selected with completion.

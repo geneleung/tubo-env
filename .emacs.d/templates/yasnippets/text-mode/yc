@@ -2,4 +2,4 @@
 # name: yc
 # key: yc
 # --
-`(yas-with-comment "yyc, @DATE, ")
+`(yas-with-comment "yyc, (>>DATE<<), ")`

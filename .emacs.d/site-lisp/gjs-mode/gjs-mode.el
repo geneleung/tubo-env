@@ -24,10 +24,10 @@
 ;; configurations.
 ;;
 
-(require 'js3-mode)
+(require 'js2-mode)
 
 ;;;###autoload
-(define-derived-mode gjs-mode js3-mode "Gnome Javascript-IDE"
+(define-derived-mode gjs-mode js2-mode "Gnome Javascript-IDE"
   (message "OK")
   )
 
