@@ -239,74 +239,81 @@
 ;; (global-set-key (kbd "<C-tab>") 'yas/expand)
 
 
-;; *********************** Autocomplete ***********************
-(require 'auto-complete-config)
+;; ;; *********************** Autocomplete ***********************
+;; (require 'auto-complete-config)
 
-;; Overwrite original ac-handle-pos-command
-(defun ac-handle-post-command ()
-  (condition-case var
-    (when (and ac-triggered
-               (or ac-auto-start
-                   ac-completing)
-               (not isearch-mode)
-               (looking-back (rx alnum)))
-      (setq ac-last-point (point))
-      (ac-start :requires (unless ac-completing ac-auto-start))
-      (unless ac-disable-inline
-        (ac-inline-update)))
-    (error (ac-error var))))
+;; ;; Overwrite original ac-handle-pos-command
+;; (defun ac-handle-post-command ()
+;;   (condition-case var
+;;     (when (and ac-triggered
+;;                (or ac-auto-start
+;;                    ac-completing)
+;;                (not isearch-mode)
+;;                (looking-back (rx alnum)))
+;;       (setq ac-last-point (point))
+;;       (ac-start :requires (unless ac-completing ac-auto-start))
+;;       (unless ac-disable-inline
+;;         (ac-inline-update)))
+;;     (error (ac-error var))))
 
-(defun yc/ac-cc-mode-hook ()
-  "cc mode hook"
-  ;; (add-to-list 'ac-sources 'ac-source-semantic)
-  )
+;; (defun yc/ac-cc-mode-hook ()
+;;   "cc mode hook"
+;;   ;; (add-to-list 'ac-sources 'ac-source-semantic)
+;;   )
 
-(add-hook 'emacs-lisp-mode-hook
-          (lambda ()
-            (add-to-list 'ac-sources 'ac-source-symbols)
-            (ac-emacs-lisp-mode-setup)))
+;; (add-hook 'emacs-lisp-mode-hook
+;;           (lambda ()
+;;             (add-to-list 'ac-sources 'ac-source-symbols)
+;;             (ac-emacs-lisp-mode-setup)))
 
-(add-hook 'ruby-mode-hook 'ac-ruby-mode-setup)
-(add-hook 'css-mode-hook 'ac-css-mode-setup)
-(add-hook 'auto-complete-mode-hook 'ac-common-setup)
-(add-hook 'c-mode-common-hook
-          (lambda ()
-            (setq ac-sources '(ac-source-yasnippet
-                               ;; ac-source-semantic-raw
-                               ac-source-semantic
-                               ac-source-gtags
-                               ac-source-abbrev
-                               ac-source-dictionary
-                               ac-source-words-in-same-mode-buffers))))
-(ac-flyspell-workaround)
+;; (add-hook 'ruby-mode-hook 'ac-ruby-mode-setup)
+;; (add-hook 'css-mode-hook 'ac-css-mode-setup)
+;; (add-hook 'auto-complete-mode-hook 'ac-common-setup)
+;; (add-hook 'c-mode-common-hook
+;;           (lambda ()
+;;             (setq ac-sources '(ac-source-yasnippet
+;;                                ;; ac-source-semantic-raw
+;;                                ac-source-semantic
+;;                                ac-source-gtags
+;;                                ac-source-abbrev
+;;                                ac-source-dictionary
+;;                                ac-source-words-in-same-mode-buffers))))
+;; (ac-flyspell-workaround)
 
-(custom-set-variables
- '(ac-auto-start 3)
- '(ac-dwim t)
- '(ac-auto-show-menu 1.5)
- '(ac-quick-help-delay 0.5)
- '(ac-ignore-case nil))
+;; (custom-set-variables
+;;  '(ac-auto-start 3)
+;;  '(ac-dwim t)
+;;  '(ac-auto-show-menu 1.5)
+;;  '(ac-quick-help-delay 0.5)
+;;  '(ac-ignore-case nil))
 
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/templates/ac-dict")
-(ac-config-default)
-(global-auto-complete-mode t)
-(mapc
- (lambda(mode)
-   (add-to-list 'ac-modes mode))
- '(asm-mode conf-mode html-mode
-            emms-tag-editor-mode haskell-mode latex-mode lisp-mode
-            literate-haskell-mode org-mode text-mode eshell-mode
-            graphviz-dot-mode powershell-mode nxml-mode
-            sawfish-mode flyspell-mode objc-mode antlr-mode protobuf-mode cmake-mode tcl-mode))
+;; (add-to-list 'ac-dictionary-directories "~/.emacs.d/templates/ac-dict")
+;; (ac-config-default)
+;; (global-auto-complete-mode t)
+;; (mapc
+;;  (lambda(mode)
+;;    (add-to-list 'ac-modes mode))
+;;  '(asm-mode conf-mode html-mode
+;;             emms-tag-editor-mode haskell-mode latex-mode lisp-mode
+;;             literate-haskell-mode org-mode text-mode eshell-mode
+;;             graphviz-dot-mode powershell-mode nxml-mode
+;;             sawfish-mode flyspell-mode objc-mode antlr-mode protobuf-mode cmake-mode tcl-mode))
 
-;; Autofill Keybinding.
-(define-key ac-complete-mode-map (kbd "<C-tab>") 'ac-expand)
-(define-key ac-complete-mode-map "\M-\r" 'ac-complete)
-(define-key ac-complete-mode-map [(tab)] 'ac-complete)
-(define-key ac-complete-mode-map "\M-n" 'ac-next)
-(define-key ac-complete-mode-map "\M-p" 'ac-previous)
-(define-key global-map "\C-\\" 'auto-complete)
-(global-set-key (kbd "<S-iso-lefttab>") 'ac-complete-semantic-raw)
+;; ;; Autofill Keybinding.
+;; (define-key ac-complete-mode-map (kbd "<C-tab>") 'ac-expand)
+;; (define-key ac-complete-mode-map "\M-\r" 'ac-complete)
+;; (define-key ac-complete-mode-map [(tab)] 'ac-complete)
+;; (define-key ac-complete-mode-map "\M-n" 'ac-next)
+;; (define-key ac-complete-mode-map "\M-p" 'ac-previous)
+;; (define-key global-map "\C-\\" 'auto-complete)
+;; (global-set-key (kbd "<S-iso-lefttab>") 'ac-complete-semantic-raw)
+
+(require 'company)
+(global-company-mode)
+(yc/eval-after-load
+ "company"
+ (define-key company-active-map [tab] 'company-complete)
+ (define-key company-active-map (kbd "TAB") 'company-complete))
 
 (provide '06-rc-complete)
 
