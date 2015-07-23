@@ -1,9 +1,10 @@
-;;; emacs-rc-prog-mode.el -- settings.
+;;; 04-rc-prog-mode.el -- Brief introduction here.
+
+;; Author: YangYingchao <yangyingchao@gmail.com>
+
 ;;; Commentary:
+
 ;;; Code:
-
-
-;; Common settings.
 
 (autoload 'which-function-mode "which-func" "" t)
 (autoload 'autopair-mode "autopair" ""  t)
@@ -200,6 +201,8 @@
   "Tag stack, when jumping to new tag, current tag will be stored here,
 and when jumping back, it will be removed.")
 
+(defvar yc/tag-stack nil "nil")
+
 (defun yc/store-mru-tag (pt)
   "Store tag info into mru-tag-stack"
   (interactive "d")
@@ -277,7 +280,7 @@ and is reversed for better performence.")
   (setq yc/system-include-dirs
         (reverse (append (semantic-gcc-get-include-paths "c++") '("./"))))
   (check-symbol-and-set semantic-c-dependency-system-include-path
-                 yc/system-include-dirs)
+                        yc/system-include-dirs)
   (check-symbol-and-set semantic-dependency-system-include-path
                         yc/system-include-dirs)
   ;; (check-symbol-and-set semantic-default-objc-path yc/system-include-dirs)
@@ -306,14 +309,14 @@ and is reversed for better performence.")
   (let ((files nil))
     (when (file-exists-p dir)
 
-        (setq files (directory-files dir t "^.+\\.h[hp]*$" t))
-    (defvar-mode-local c++-mode semanticdb-implied-include-tags
-      (mapcar (lambda (header)
-                (semantic-tag-new-include
-                 header
-                 nil
-                 :filename header))
-              files)))))
+      (setq files (directory-files dir t "^.+\\.h[hp]*$" t))
+      (defvar-mode-local c++-mode semanticdb-implied-include-tags
+        (mapcar (lambda (header)
+                  (semantic-tag-new-include
+                   header
+                   nil
+                   :filename header))
+                files)))))
 
 (defun yc/add-semantic-symbol (symbol)
   "Add symbol to semantic-lex-c-preprocessor-symbol-map"
@@ -570,8 +573,6 @@ and is reversed for better performence.")
 (autoload 'helm-xgtags-find-definition "helm-xgtags" ""  t)
 (autoload 'helm-xgtags-update-tags "helm-xgtags" ""  t)
 
-(defvar yc/tag-stack nil "nil")
-
 (defun yc/guess-available-tag-system (pt)
   "Check available tagging system at point PT."
   (let* (ctxt tag)
@@ -790,8 +791,8 @@ and is reversed for better performence.")
  (mapc
   (lambda (table)
     (define-abbrev-table table '(
-                                ("imp" "" skeleton-python-import 1)
-                                )))
+                                 ("imp" "" skeleton-python-import 1)
+                                 )))
   '(python-mode-abbrev-table)))
 
 (autoload 'pydoc "pydoc" ""  t)
@@ -809,205 +810,205 @@ and is reversed for better performence.")
              (cons (rx "." (or "mm" "m") eow) 'objc-mode))
 
 (yc/eval-after-load
-    "cc-mode"
-    (require 'semantic/bovine/c)
-    (require 'semantic/bovine/gcc)
-    (when (not (member system-type '(gnu gnu/linux darwin cygwin)))
-      (if (executable-find "gcc")
-          (semantic-gcc-setup)
-        (message "GCC is not installed, semantic analysis will be restriced.")))
-    (yc/add-common-includes)
+ "cc-mode"
+ (require 'semantic/bovine/c)
+ (require 'semantic/bovine/gcc)
+ (when (not (member system-type '(gnu gnu/linux darwin cygwin)))
+   (if (executable-find "gcc")
+       (semantic-gcc-setup)
+     (message "GCC is not installed, semantic analysis will be restriced.")))
+ (yc/add-common-includes)
 
-    ;; Customized doc-font
-    (define-or-set tbdoc-font-lock-doc-comments
-      (let ((symbol "[a-zA-Z0-9_]+")
-            (header "^ \\* "))
-        `((,(concat header "\\("     symbol "\\):[ \t]*$")
-           1 ,c-doc-markup-face-name prepend nil)
-          (,(concat                  symbol     "()")
-           0 ,c-doc-markup-face-name prepend nil)
-          (,(concat header "\\(" "@" symbol "\\):")
-           1 ,c-doc-markup-face-name prepend nil)
-          (,(concat "[#%@]" symbol)
-           0 ,c-doc-markup-face-name prepend nil)
-          (,(concat "\\\\" symbol)
-           0 ,c-doc-markup-face-name prepend nil)
-          )))
+ ;; Customized doc-font
+ (define-or-set tbdoc-font-lock-doc-comments
+   (let ((symbol "[a-zA-Z0-9_]+")
+         (header "^ \\* "))
+     `((,(concat header "\\("     symbol "\\):[ \t]*$")
+        1 ,c-doc-markup-face-name prepend nil)
+       (,(concat                  symbol     "()")
+        0 ,c-doc-markup-face-name prepend nil)
+       (,(concat header "\\(" "@" symbol "\\):")
+        1 ,c-doc-markup-face-name prepend nil)
+       (,(concat "[#%@]" symbol)
+        0 ,c-doc-markup-face-name prepend nil)
+       (,(concat "\\\\" symbol)
+        0 ,c-doc-markup-face-name prepend nil)
+       )))
 
-    (define-or-set tbdoc-font-lock-doc-protection
-      `(("< \\(public\\|private\\|protected\\) >"
-         1 ,c-doc-markup-face-name prepend nil)))
+ (define-or-set tbdoc-font-lock-doc-protection
+   `(("< \\(public\\|private\\|protected\\) >"
+      1 ,c-doc-markup-face-name prepend nil)))
 
-    (define-or-set tbdoc-font-lock-keywords
-      `((,(lambda (limit)
-            (c-font-lock-doc-comments "/\\*\\*.*$" limit
-              tbdoc-font-lock-doc-comments)
-            (c-font-lock-doc-comments "/\\*!.*" limit
-              tbdoc-font-lock-doc-comments)
-            (c-font-lock-doc-comments "/\\*!-+" limit
-              tbdoc-font-lock-doc-comments)
-            (c-font-lock-doc-comments "/\\*!< " limit
-              tbdoc-font-lock-doc-comments)
-            (c-font-lock-doc-comments "/\\*< " limit
-              tbdoc-font-lock-doc-protection)
-            (c-font-lock-doc-comments "///.*$" limit
-              tbdoc-font-lock-doc-comments)))))
+ (define-or-set tbdoc-font-lock-keywords
+   `((,(lambda (limit)
+         (c-font-lock-doc-comments "/\\*\\*.*$" limit
+           tbdoc-font-lock-doc-comments)
+         (c-font-lock-doc-comments "/\\*!.*" limit
+           tbdoc-font-lock-doc-comments)
+         (c-font-lock-doc-comments "/\\*!-+" limit
+           tbdoc-font-lock-doc-comments)
+         (c-font-lock-doc-comments "/\\*!< " limit
+           tbdoc-font-lock-doc-comments)
+         (c-font-lock-doc-comments "/\\*< " limit
+           tbdoc-font-lock-doc-protection)
+         (c-font-lock-doc-comments "///.*$" limit
+           tbdoc-font-lock-doc-comments)))))
 
-    ;; (defmacro yc/add-doc-comment-style (lst)
-    ;;   `(mapcar (lambda (x)
-    ;;              `(cons ,x ,'tbdoc))
-    ;;            ,lst))
+ ;; (defmacro yc/add-doc-comment-style (lst)
+ ;;   `(mapcar (lambda (x)
+ ;;              `(cons ,x ,'tbdoc))
+ ;;            ,lst))
 
-    ;; This is a sample, real c-doc-comment-style will be set in "10-emacs-custome.el"
+ ;; This is a sample, real c-doc-comment-style will be set in "10-emacs-custome.el"
 
-    ;; Add kernel style
-    (c-add-style "kernel-coding"
-                 '( "linux"
-                    (c-basic-offset . 8)
-                    (indent-tabs-mode . t)
-                    (tab-width . 8)
-                    (c-comment-only-line-offset . 0)
-                    (c-hanging-braces-alist
-                     (brace-list-open)
-                     (brace-entry-open)
-                     (substatement-open after)
-                     (block-close . c-snug-do-while)
-                     (arglist-cont-nonempty))
-                    (c-cleanup-list brace-else-brace)
-                    (c-offsets-alist
-                     (statement-block-intro . +)
-                     (knr-argdecl-intro . 0)
-                     (substatement-open . 0)
-                     (substatement-label . 0)
-                     (label . 0)
-                     (statement-cont . +))))
+ ;; Add kernel style
+ (c-add-style "kernel-coding"
+              '( "linux"
+                 (c-basic-offset . 8)
+                 (indent-tabs-mode . t)
+                 (tab-width . 8)
+                 (c-comment-only-line-offset . 0)
+                 (c-hanging-braces-alist
+                  (brace-list-open)
+                  (brace-entry-open)
+                  (substatement-open after)
+                  (block-close . c-snug-do-while)
+                  (arglist-cont-nonempty))
+                 (c-cleanup-list brace-else-brace)
+                 (c-offsets-alist
+                  (statement-block-intro . +)
+                  (knr-argdecl-intro . 0)
+                  (substatement-open . 0)
+                  (substatement-label . 0)
+                  (label . 0)
+                  (statement-cont . +))))
 
-    (define-or-set tb-c-style
-      `((c-recognize-knr-p . nil)
-        (c-basic-offset . 4)
-        (indent-tabs-mode . nil)
-        (c-comment-only-line-offset . 0)
-        (c-hanging-braces-alist . ((defun-open after)
-                                   (defun-close before after)
-                                   (class-open after)
-                                   (class-close before after)
-                                   (namespace-open after)
-                                   (inline-open after)
-                                   (inline-close before after)
-                                   (block-open after)
-                                   (block-close . c-snug-do-while)
-                                   (extern-lang-open after)
-                                   (extern-lang-close after)
-                                   (statement-case-open after)
-                                   (substatement-open after)))
-        (c-hanging-colons-alist . ((case-label)
-                                   (label after)
-                                   (access-label after)
-                                   (member-init-intro before)
-                                   (inher-intro)))
-        (c-hanging-semi&comma-criteria
-         . (c-semi&comma-no-newlines-for-oneline-inliners
-            c-semi&comma-inside-parenlist
-            c-semi&comma-no-newlines-before-nonblanks))
-        (c-indent-comments-syntactically-p . nil)
-        (comment-column . 40)
-        (c-cleanup-list . (brace-else-brace
-                           brace-elseif-brace
-                           brace-catch-brace
-                           empty-defun-braces
-                           defun-close-semi
-                           list-close-comma
-                           scope-operator))
-        (c-offsets-alist . ((func-decl-cont . ++)
-                            (member-init-intro . +)
-                            (member-init-cont  . c-lineup-multi-inher)
-                            (inher-intro . ++)
-                            (comment-intro . 0)
-                            (arglist-close . c-lineup-arglist)
-                            (topmost-intro . 0)
-                            (block-open . 0)
-                            (inline-open . 0)
-                            (substatement-open . 0)
-                            (statement-cont
-                             . c-lineup-assignments)
-                            (label . /)
-                            (case-label . +)
-                            (statement-case-open . 0)
-                            (statement-case-intro . +) ; case w/o {
-                            (access-label . -)
-                            (inextern-lang . 0)
-                            (innamespace . 0)))
-        (c-doc-comment-style . ((c-mode . tbdoc)
-                                (c++-mode . tbdoc)
+ (define-or-set tb-c-style
+   `((c-recognize-knr-p . nil)
+     (c-basic-offset . 4)
+     (indent-tabs-mode . nil)
+     (c-comment-only-line-offset . 0)
+     (c-hanging-braces-alist . ((defun-open after)
+                                (defun-close before after)
+                                (class-open after)
+                                (class-close before after)
+                                (namespace-open after)
+                                (inline-open after)
+                                (inline-close before after)
+                                (block-open after)
+                                (block-close . c-snug-do-while)
+                                (extern-lang-open after)
+                                (extern-lang-close after)
+                                (statement-case-open after)
+                                (substatement-open after)))
+     (c-hanging-colons-alist . ((case-label)
+                                (label after)
+                                (access-label after)
+                                (member-init-intro before)
+                                (inher-intro)))
+     (c-hanging-semi&comma-criteria
+      . (c-semi&comma-no-newlines-for-oneline-inliners
+         c-semi&comma-inside-parenlist
+         c-semi&comma-no-newlines-before-nonblanks))
+     (c-indent-comments-syntactically-p . nil)
+     (comment-column . 40)
+     (c-cleanup-list . (brace-else-brace
+                        brace-elseif-brace
+                        brace-catch-brace
+                        empty-defun-braces
+                        defun-close-semi
+                        list-close-comma
+                        scope-operator))
+     (c-offsets-alist . ((func-decl-cont . ++)
+                         (member-init-intro . +)
+                         (member-init-cont  . c-lineup-multi-inher)
+                         (inher-intro . ++)
+                         (comment-intro . 0)
+                         (arglist-close . c-lineup-arglist)
+                         (topmost-intro . 0)
+                         (block-open . 0)
+                         (inline-open . 0)
+                         (substatement-open . 0)
+                         (statement-cont
+                          . c-lineup-assignments)
+                         (label . /)
+                         (case-label . +)
+                         (statement-case-open . 0)
+                         (statement-case-intro . +) ; case w/o {
+                         (access-label . -)
+                         (inextern-lang . 0)
+                         (innamespace . 0)))
+     (c-doc-comment-style . ((c-mode . tbdoc)
+                             (c++-mode . tbdoc)
+                             (objc-mode . tbdoc)
+                             (java-mode . tbdoc)
+                             (awk-mode . autodoc)
+                             (other . tbdoc))))
+   "Based on Google C/C++ Programming Style")
+
+ (c-add-style "Tubo" tb-c-style)
+
+ (defvar yc/c-file-mode-mapping
+   (list (cons (rx (or "linux-" "kernel" "driver" "samba")) "kernel-coding")
+         (cons (rx (or "mysql" "curl" "emacs" "gnome")) "gnu"))
+   "List of possible coding styles")
+
+ (defun yc/guess-c-stype (filename)
+   "Guess c-style based on input filename"
+   (let ((style "Tubo"))
+     (when filename
+       (dolist (pred yc/c-file-mode-mapping)
+         (if (string-match (car pred) filename)
+             (setq style (cdr pred)))))
+     style))
+
+ (custom-set-variables
+  '(c-doc-comment-style (quote ((c-mode . tbdoc) (c++-mode . tbdoc)
                                 (objc-mode . tbdoc)
-                                (java-mode . tbdoc)
-                                (awk-mode . autodoc)
-                                (other . tbdoc))))
-      "Based on Google C/C++ Programming Style")
+                                (java-mode . javadoc) (pike-mode . autodoc)))))
 
-    (c-add-style "Tubo" tb-c-style)
+ (autoload 'global-cwarn-mode "cwarn")
+ (autoload 'ctypes-auto-parse-mode "ctypes" ""  t)
+ (autoload 'uml/struct-to-UML "semantic-uml" ""  t)
+ (autoload 'uml/struct-to-UML-full "semantic-uml" ""  t)
+ (add-hook 'c-mode-common-hook
+           (lambda ()
+             (let ((style (yc/guess-c-stype (buffer-file-name))) )
+               (c-set-style style)
+               (when (string= style "kernel-coding")
+                 (add-to-list
+                  'hide-ifdef-define-alist
+                  '(kernel __KERNEL__ CONFIG_SMP CONFIG_PCI CONFIG_MMU))
+                 (hide-ifdef-use-define-alist 'kernel)))
+             (local-set-key "\C-csd" 'uml/struct-to-UML)
+             (local-set-key "\C-csD" 'uml/struct-to-UML-full)
+             (local-set-key "\C-c\C-h" 'eassist-switch-h-cpp)
+             (local-set-key "\M-:" 'yc/enable-disable-c-block)
+             ;; (setq semantic-dependency-include-path 'yc/system-include-dirs)
+             (add-hook 'before-save-hook 'hide-ifdefs nil t)
+             (global-cwarn-mode 1)
+             (ctypes-auto-parse-mode 1)
+             (c-setup-doc-comment-style)
+             (ede-turn-on-hook)
+             (when ede-object
+               (yc/add-to-ifdef-env (ede-preprocessor-map ede-object)))
 
-    (defvar yc/c-file-mode-mapping
-      (list (cons (rx (or "linux-" "kernel" "driver" "samba")) "kernel-coding")
-            (cons (rx (or "mysql" "curl" "emacs" "gnome")) "gnu"))
-      "List of possible coding styles")
-
-    (defun yc/guess-c-stype (filename)
-      "Guess c-style based on input filename"
-      (let ((style "Tubo"))
-        (when filename
-          (dolist (pred yc/c-file-mode-mapping)
-            (if (string-match (car pred) filename)
-                (setq style (cdr pred)))))
-        style))
-
-    (custom-set-variables
-     '(c-doc-comment-style (quote ((c-mode . tbdoc) (c++-mode . tbdoc)
-                                   (objc-mode . tbdoc)
-                                   (java-mode . javadoc) (pike-mode . autodoc)))))
-
-    (autoload 'global-cwarn-mode "cwarn")
-    (autoload 'ctypes-auto-parse-mode "ctypes" ""  t)
-    (autoload 'uml/struct-to-UML "semantic-uml" ""  t)
-    (autoload 'uml/struct-to-UML-full "semantic-uml" ""  t)
-    (add-hook 'c-mode-common-hook
-              (lambda ()
-                (let ((style (yc/guess-c-stype (buffer-file-name))) )
-                  (c-set-style style)
-                  (when (string= style "kernel-coding")
-                    (add-to-list
-                     'hide-ifdef-define-alist
-                     '(kernel __KERNEL__ CONFIG_SMP CONFIG_PCI CONFIG_MMU))
-                    (hide-ifdef-use-define-alist 'kernel)))
-                (local-set-key "\C-csd" 'uml/struct-to-UML)
-                (local-set-key "\C-csD" 'uml/struct-to-UML-full)
-                (local-set-key "\C-c\C-h" 'eassist-switch-h-cpp)
-                (local-set-key "\M-:" 'yc/enable-disable-c-block)
-                ;; (setq semantic-dependency-include-path 'yc/system-include-dirs)
-                (add-hook 'before-save-hook 'hide-ifdefs nil t)
-                (global-cwarn-mode 1)
-                (ctypes-auto-parse-mode 1)
-                (c-setup-doc-comment-style)
-                (ede-turn-on-hook)
-                (when ede-object
-                  (yc/add-to-ifdef-env (ede-preprocessor-map ede-object)))
-
-                (condition-case msg
-                    (hide-ifdef-mode 1)
-                  (error nil)))))
+             (condition-case msg
+                 (hide-ifdef-mode 1)
+               (error nil)))))
 
 (defun yc/list-include-dirs ()
   "List all include directories"
   (interactive)
   (let* ((bf
           (get-buffer-create (format "**Include path for %s"
-                      (if (buffer-file-name)
-                          (file-name-nondirectory (buffer-file-name)) "None"))))
+                                     (if (buffer-file-name)
+                                         (file-name-nondirectory (buffer-file-name)) "None"))))
          (obj ede-object))
     (with-current-buffer bf
       (erase-buffer)
       (print (ede-system-include-path obj) (current-buffer)))
-  (display-buffer bf)))
+    (display-buffer bf)))
 
 (defun yc/get-all-includes ()
   "Return all include directories"
@@ -1021,15 +1022,15 @@ and is reversed for better performence.")
 (mapc
  (lambda (table)
    (define-abbrev-table table '(
-                               ("inc" "" skeleton-include 1)
-                               )))
+                                ("inc" "" skeleton-include 1)
+                                )))
  '(c-mode-abbrev-table c++-mode-abbrev-table objc-mode-abbrev-table))
 
 (mapc
  (lambda (table)
    (define-abbrev-table table '(
-                               ("imp" "" skeleton-import 1)
-                               )))
+                                ("imp" "" skeleton-import 1)
+                                )))
  '(objc-mode-abbrev-table))
 
 (defvar inc-minibuffer-compl-list nil "nil")
@@ -1175,8 +1176,8 @@ and is reversed for better performence.")
 
 (autoload 'expand-member-functions "member-function" ""  t)
 (yc/eval-after-load "member-function"
-  (setq mf--source-file-extension "cpp"
-        mf--insert-commentary t))
+                    (setq mf--source-file-extension "cpp"
+                          mf--insert-commentary t))
 (add-hook 'c++-mode-hook
           (lambda ()
             (local-set-key
@@ -1336,8 +1337,8 @@ and is reversed for better performence.")
   (local-set-key "\C-cdp" (lambda (pt) "Look up symbol through Devhelp"
                             (interactive "P")
                             (let ((sym nil))
-                            (when (and sym (executable-find "devhelp"))
-                              (shell-command (format "devhelp -s \"%s\"" sym))))))
+                              (when (and sym (executable-find "devhelp"))
+                                (shell-command (format "devhelp -s \"%s\"" sym))))))
   (local-set-key (kbd "<M-return>") 'semantic-ia-complete-symbol)
 
   ;;;; Keybindings for srecode
@@ -1365,11 +1366,11 @@ and is reversed for better performence.")
  ;; Lisp mode.
 
 (cdsq yc/lisp-keywords
-  (rx bow (group (or "add-to-list" "try-require" "add-hook" "autoload"
-                     "yc/eval-after-load" "try-require-autoloads"
-                     "fboundp" "boundp" "featurep" "define-or-set"
-                     "csq" "cdsq" "yc/autoload" "yc/set-auto-mode" "defun*" "defmacro*")) eow)
-  "My Lisp keywords")
+      (rx bow (group (or "add-to-list" "try-require" "add-hook" "autoload"
+                         "yc/eval-after-load" "try-require-autoloads"
+                         "fboundp" "boundp" "featurep" "define-or-set"
+                         "csq" "cdsq" "yc/autoload" "yc/set-auto-mode" "defun*" "defmacro*")) eow)
+      "My Lisp keywords")
 
 (define-skeleton skeleton-require
   "generate req<>" ""
@@ -1383,7 +1384,7 @@ and is reversed for better performence.")
        (when (file-exists-p dir)
          (mapcar 'file-name-sans-extension
                  (directory-files dir nil (rx (+? (or alnum "_" "+" "-")) (? (or ".el" ".gz")))))
-))
+         ))
      load-path)))
   ")")
 
@@ -1442,8 +1443,8 @@ and is reversed for better performence.")
             "declare" "dirs" "disown" "enable" "fc" "fg" "help" "history" "jobs" "kill"
             "let" "local" "popd" "printf" "pushd" "shopt" "source" "suspend" "typeset"
             "unalias" "command" "hash" "test" "type" "eval" "export" "getopts" "newgrp" "pwd"
-          "read" "readonly" "times" "ulimit" "alias" "bg" "false" "fc" "fg" "jobs" "kill" "let" "print"
-             "time" "typeset" "unalias" "whence")
+            "read" "readonly" "times" "ulimit" "alias" "bg" "false" "fc" "fg" "jobs" "kill" "let" "print"
+            "time" "typeset" "unalias" "whence")
 
       (zsh sh-append bash "autoload" "bindkey" "builtin" "chdir" "compctl" "declare" "dirs"
            "disable" "disown" "echotc" "enable" "functions" "getln" "hash" "history"
@@ -1494,42 +1495,42 @@ and is reversed for better performence.")
   (custom-set-variables
    '(gdb-many-windows t))
 
-(defadvice gdb-setup-windows (around yc/gdb-setup-windows ())
-  (gdb-get-buffer-create 'gdb-locals-buffer)
-  (gdb-get-buffer-create 'gdb-stack-buffer)
-  (gdb-get-buffer-create 'gdb-breakpoints-buffer)
-  (set-window-dedicated-p (selected-window) nil)
-  (switch-to-buffer gud-comint-buffer) ;;0
-  (delete-other-windows)
-  (let* ((win-src (selected-window))
-         (win-gud (split-window-right))
-         (win-stack (split-window win-src ( / ( * (window-height win-src) 3) 4)))
-         (win-bk (split-window win-gud ( / ( * (window-height win-gud) 3) 4)))
-         (win-local (split-window win-gud ( / (window-height  win-gud) 3))))
+  (defadvice gdb-setup-windows (around yc/gdb-setup-windows ())
+    (gdb-get-buffer-create 'gdb-locals-buffer)
+    (gdb-get-buffer-create 'gdb-stack-buffer)
+    (gdb-get-buffer-create 'gdb-breakpoints-buffer)
+    (set-window-dedicated-p (selected-window) nil)
+    (switch-to-buffer gud-comint-buffer) ;;0
+    (delete-other-windows)
+    (let* ((win-src (selected-window))
+           (win-gud (split-window-right))
+           (win-stack (split-window win-src ( / ( * (window-height win-src) 3) 4)))
+           (win-bk (split-window win-gud ( / ( * (window-height win-gud) 3) 4)))
+           (win-local (split-window win-gud ( / (window-height  win-gud) 3))))
 
-    (gdb-set-window-buffer (gdb-locals-buffer-name) nil win-local)
-    (set-window-buffer
-     win-src
-     (if gud-last-last-frame
-         (gud-find-file (car gud-last-last-frame))
-       (if gdb-main-file
-           (gud-find-file gdb-main-file)
-         ;; Put buffer list in window if we
-         ;; can't find a source file.
-         (list-buffers-noselect))))
+      (gdb-set-window-buffer (gdb-locals-buffer-name) nil win-local)
+      (set-window-buffer
+       win-src
+       (if gud-last-last-frame
+           (gud-find-file (car gud-last-last-frame))
+         (if gdb-main-file
+             (gud-find-file gdb-main-file)
+           ;; Put buffer list in window if we
+           ;; can't find a source file.
+           (list-buffers-noselect))))
 
-    (setq gdb-source-window win-src)
+      (setq gdb-source-window win-src)
 
-    (gdb-set-window-buffer (gdb-stack-buffer-name) nil win-stack)
+      (gdb-set-window-buffer (gdb-stack-buffer-name) nil win-stack)
 
-    (gdb-set-window-buffer (if gdb-show-threads-by-default
-                               (gdb-threads-buffer-name)
-                             (gdb-breakpoints-buffer-name))
-                           nil win-bk)
-    (select-window win-gud)))
+      (gdb-set-window-buffer (if gdb-show-threads-by-default
+                                 (gdb-threads-buffer-name)
+                               (gdb-breakpoints-buffer-name))
+                             nil win-bk)
+      (select-window win-gud)))
 
-(ad-activate 'gdb-setup-windows)
-)
+  (ad-activate 'gdb-setup-windows)
+  )
 
 
 
@@ -1539,63 +1540,63 @@ and is reversed for better performence.")
                                 powershell-mode))
 
 (yc/eval-after-load "powershell-mode"
-  (defun yc/pws-find-tag (function)
-    "find defination of function under current poin"
-    (interactive
-     (let* ((fn (thing-at-point 'symbol))
-            (val nil))
-       (message fn)
-       (setq val (completing-read (if fn
-                                      (format "search for (default %s): " fn)
-                                    "search for: ")
-                                  obarray 'fboundp t nil nil
-                                  ))
-       (list (if (equal val "")
-                 fn (intern val)))))
+                    (defun yc/pws-find-tag (function)
+                      "find defination of function under current poin"
+                      (interactive
+                       (let* ((fn (thing-at-point 'symbol))
+                              (val nil))
+                         (message fn)
+                         (setq val (completing-read (if fn
+                                                        (format "search for (default %s): " fn)
+                                                      "search for: ")
+                                                    obarray 'fboundp t nil nil
+                                                    ))
+                         (list (if (equal val "")
+                                   fn (intern val)))))
 
-    (let ((cmd nil))
-      (if (null function)
-          (message "you didn't specify a function")
-        (progn
-          (setq cmd (concat "egrep -i \"^function +" function "\" . -ri"))
-          (eshell-command cmd)
-          (pop-to-buffer (get-buffer "*grep*"))
-          (setq buffer-read-only nil)
-          (goto-char (point-min))
-          (kill-line 3)
-          (insert (concat "*********************** find tag for:"
-                          function "********************\n\n"))
-          (setq buffer-read-only t)
-          (goto-char (point-min))))))
+                      (let ((cmd nil))
+                        (if (null function)
+                            (message "you didn't specify a function")
+                          (progn
+                            (setq cmd (concat "egrep -i \"^function +" function "\" . -ri"))
+                            (eshell-command cmd)
+                            (pop-to-buffer (get-buffer "*grep*"))
+                            (setq buffer-read-only nil)
+                            (goto-char (point-min))
+                            (kill-line 3)
+                            (insert (concat "*********************** find tag for:"
+                                            function "********************\n\n"))
+                            (setq buffer-read-only t)
+                            (goto-char (point-min))))))
 
-  (defun yc/pws-get-help (function)
-    "display the documentation of function (a symbol)."
-    (interactive
-     (let ((fn (thing-at-point 'symbol))
-           val)
-       (message fn)
-       (setq val (completing-read (if fn
-                                      (format "help for (default %s): " fn)
-                                    "help for: ")
-                                  obarray 'fboundp t nil nil
-                                  ))
-       (list (if (equal val "")
-                 fn (intern val)))))
+                    (defun yc/pws-get-help (function)
+                      "display the documentation of function (a symbol)."
+                      (interactive
+                       (let ((fn (thing-at-point 'symbol))
+                             val)
+                         (message fn)
+                         (setq val (completing-read (if fn
+                                                        (format "help for (default %s): " fn)
+                                                      "help for: ")
+                                                    obarray 'fboundp t nil nil
+                                                    ))
+                         (list (if (equal val "")
+                                   fn (intern val)))))
 
-    (if (null function)
-        (message "you didn't specify a function")
-      (progn
-        (start-process "powershell-help" nil "devhelp" "-s" function))))
+                      (if (null function)
+                          (message "you didn't specify a function")
+                        (progn
+                          (start-process "powershell-help" nil "devhelp" "-s" function))))
 
 
 
-  (add-hook 'powershell-mode-hook
-            (lambda()
-              (progn
-                (yc/common-program-hook)
-                (local-set-key [(f1)] 'yc/pws-get-help)
-                (local-set-key [(meta .)] 'yc/pws-find-tag)
-                ))))
+                    (add-hook 'powershell-mode-hook
+                              (lambda()
+                                (progn
+                                  (yc/common-program-hook)
+                                  (local-set-key [(f1)] 'yc/pws-get-help)
+                                  (local-set-key [(meta .)] 'yc/pws-find-tag)
+                                  ))))
 
  ;; windows batch-mode for bat files.
 (autoload 'batch-mode "batch-mode" ""  t)
@@ -1607,6 +1608,12 @@ and is reversed for better performence.")
 ;; (try-require 'lua-mode)
 ;; (autoload 'lua-mode "lua-mode")
 ;; (setq lua-default-application "/usr/bin/lua")
+(autoload 'makefile-mode "make-mode" nil t)
+
+(add-to-list 'auto-mode-alist
+             (cons (rx (or (: (or "Makefile" "makefile") "." (+ alnum))
+                           (: (+ alnum) ".mk"))) 'makefile-mode))
+
 
 (autoload 'cmake-mode "cmake-mode" ""  t)
 (autoload 'cmake-font-lock-activate "cmake-font-lock" nil t)
@@ -1900,11 +1907,12 @@ ARG specifies the number of cores.
 (global-set-key (kbd "<C-S-f6>")  'helm-make-projectile)
 
 
-(provide '03-rc-prog-mode)
+
+(provide '04-rc-prog-mode)
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:
 
-;;; emacs-rc-prog-mode.el ends here
+;;; 04-rc-prog-mode.el ends here

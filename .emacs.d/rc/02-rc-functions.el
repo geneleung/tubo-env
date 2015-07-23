@@ -1,5 +1,9 @@
-;;; emacs-rc-functions.el --- functions.
+;;; 02-rc-functions.el -- Brief introduction here.
+
+;; Author: YangYingchao <yangyingchao@gmail.com>
+
 ;;; Commentary:
+
 ;;; Code:
 
 (defvar YC-DEBUG nil "flag to debug or not")
@@ -21,17 +25,17 @@
        (setq ,sym ,val)
      (defvar ,sym ,val ,doc)))
 
-(defmacro cdsq (sym val &optional doc)
-  "Define or set/customize value of SYM to VAL."
-  `(if (boundp ',sym)
-       (csq ,sym ,val)
-     (defvar ,sym ,val ,doc)))
-
 (defmacro csq (sym val)
   "Define or set/customize value of SYM to VAL."
   `(funcall (or (get ',sym 'custom-set)
                 'set-default)
             ',sym ,val))
+
+(defmacro cdsq (sym val &optional doc)
+  "Define or set/customize value of SYM to VAL."
+  `(if (boundp ',sym)
+       (csq ,sym ,val)
+     (defvar ,sym ,val ,doc)))
 
 (defmacro check-symbol (sym)
   "Return value or nil"
@@ -44,7 +48,6 @@ THEN-FORM and ELSE-FORMS are then excuted just like in `if'."
   (declare (indent 2) (debug t))
   `(let ((it ,test-form))
      (if it ,then-form ,@else-forms)))
-
 
 (defmacro PDEBUG (&rest msgs)
   "Output msgs with file and line..."
@@ -118,6 +121,10 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
   `(add-to-list 'auto-mode-alist
                 (cons ,expr ,mode)))
  ;; Functions
+
+;;; Start debug on error.
+(cdsq debug-on-error nil)
+
 (defun yc/toggle-debug ()
   "Toggle debug mode."
   (interactive)
@@ -311,7 +318,7 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
   (if user-defined-opts
       user-defined-opts
     ""
-      )
+    )
   )
 
 (defun yc/get-cpu-number ( )
@@ -324,9 +331,9 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
         (if (string-match reg-match-cpu msg)
             (setq cpu-number (match-string 0 msg))))
       (setq cpu-number
-       (yc/parse-cat-output
+            (yc/parse-cat-output
              (shell-command-to-string (format "cat %s | grep processor|wc -l" cpuinfo-file)))))
-  cpu-number))
+    cpu-number))
 
 (defun yc/get-env (env &optional func &rest backups)
   (let ((ret (getenv env)))
@@ -603,8 +610,8 @@ Uses `current-date-time-format' for the formatting the date/time."
   (interactive "r")
   (let ((lines '()))
     (uniq beg end
-         (lambda (line) (assoc line lines))
-         (lambda (line) (add-to-list 'lines (cons line t))))))
+          (lambda (line) (assoc line lines))
+          (lambda (line) (add-to-list 'lines (cons line t))))))
 
 (defun uniq (beg end test-line add-line)
   (save-restriction
@@ -612,11 +619,11 @@ Uses `current-date-time-format' for the formatting the date/time."
       (narrow-to-region beg end)
       (goto-char (point-min))
       (while (not (eobp))
-    (if (funcall test-line (thing-at-point 'line))
-        (kill-line 1)
-      (progn
-        (funcall add-line (thing-at-point 'line))
-        (forward-line))))
+        (if (funcall test-line (thing-at-point 'line))
+            (kill-line 1)
+          (progn
+            (funcall add-line (thing-at-point 'line))
+            (forward-line))))
       (widen))))
 
 (dolist (command '(yank yank-pop))
@@ -672,7 +679,7 @@ inserts comment at the end of the line."
   "Rename current buffer to the basename"
   (interactive)
   (let ((newname (concat (buffer-name) "-" (format-time-string current-time-format (current-time)))))
-         (rename-buffer newname)))
+    (rename-buffer newname)))
 
 (defalias 'string-split 'split-string)
 
@@ -706,21 +713,16 @@ inserts comment at the end of the line."
 (yc/setup-exec-path)
 
 
-(defvar self-use t "")
-
 (defvar yc/color-them 'dark
   "dark or light")
 
 (defun yc/setup-color-theme ()
   (when window-system
-
     (csq custom-theme-directory "~/.emacs.d/themes")
     (csq custom-safe-themes t)
-
     (if (eq yc/color-them 'dark)
         (load-theme 'tb-dark)
-      (load-theme 'tb-light)))
-  )
+      (load-theme 'tb-light))))
 
 (defun yc/toggle-color-theme ()
   "Toggle color theme"
@@ -789,57 +791,47 @@ inserts comment at the end of the line."
 
 (defun yc/setup-font ()
   (when window-system
-    (if self-use
-        (cond ((string= system-type "darwin")
-               (set-face-attribute
-                'default nil :font "Monaco 13")
-               (dolist (charset '(kana han symbol cjk-misc bopomofo))
-                 (set-fontset-font (frame-parameter nil 'font)
-                                   charset
-                                   (font-spec :family "Hiragino Sans GB"
-                                              :size 16)))
-               )
-              ((string= system-type "gnu/linux")
-               (set-face-attribute
-                'default nil :font "Monaco 11")
-               (dolist (charset '(kana han symbol cjk-misc bopomofo))
-                 (set-fontset-font (frame-parameter nil 'font)
-                                   charset
-                                   (font-spec :family "WenQuanYi Micro Hei"
-                                              :size 18)))
-               )
-              ((string= system-type "windows-nt")
-               (set-face-attribute
-                'default nil :font "Consolas 11")
-               (set-frame-font
-                "-outline-Consolas-normal-normal-normal-mono-15-*-*-*-c-*-iso8859-1")
-               (dolist (charset '(kana han symbol cjk-misc bopomofo))
-                 (set-fontset-font (frame-parameter nil 'font)
-                                   charset
-                                   (font-spec :family "Microsoft YaHei"
-                                              :size 18)))
-               )
-              (t
-               (message "Font not set up, choose it yourself.")
-               ;; (set-face-attribute
-               ;;  'default nil :font "Monaco 10")
-               ;; (set-frame-font
-               ;;  "-outline-Monaco-normal-normal-normal-mono-15-*-*-*-c-*-iso8859-1")
-               ;; (dolist (charset '(kana han symbol cjk-misc bopomofo))
-               ;;   (set-fontset-font (frame-parameter nil 'font)
-               ;;                     charset
-               ;;                     (font-spec :family "WenQuanYi Micro Hei"
-               ;;                                :size 16)))
-               )
-              )
-      (progn
-        (set-frame-font
-         "-unknown-Monaco-normal-normal-normal-*-20-*-*-*-m-0-iso10646-1")
-        (dolist (charset '(kana han symbol cjk-misc bopomofo))
-          (set-fontset-font (frame-parameter nil 'font)
-                            charset
-                            (font-spec :family "WenQuanYi Micro Hei"
-                                       :size 26)))))))
+    (cond ((string= system-type "darwin")
+           (set-face-attribute
+            'default nil :font "Monaco 13")
+           (dolist (charset '(kana han symbol cjk-misc bopomofo))
+             (set-fontset-font (frame-parameter nil 'font)
+                               charset
+                               (font-spec :family "Hiragino Sans GB"
+                                          :size 16)))
+           )
+          ((string= system-type "gnu/linux")
+           (set-face-attribute
+            'default nil :font "Monaco 11")
+           (dolist (charset '(kana han symbol cjk-misc bopomofo))
+             (set-fontset-font (frame-parameter nil 'font)
+                               charset
+                               (font-spec :family "WenQuanYi Micro Hei"
+                                          :size 18)))
+           )
+          ((string= system-type "windows-nt")
+           (set-face-attribute
+            'default nil :font "Consolas 11")
+           (set-frame-font
+            "-outline-Consolas-normal-normal-normal-mono-15-*-*-*-c-*-iso8859-1")
+           (dolist (charset '(kana han symbol cjk-misc bopomofo))
+             (set-fontset-font (frame-parameter nil 'font)
+                               charset
+                               (font-spec :family "Microsoft YaHei"
+                                          :size 18)))
+           )
+          (t
+           (message "Font not set up, choose it yourself.")
+           ;; (set-face-attribute
+           ;;  'default nil :font "Monaco 10")
+           ;; (set-frame-font
+           ;;  "-outline-Monaco-normal-normal-normal-mono-15-*-*-*-c-*-iso8859-1")
+           ;; (dolist (charset '(kana han symbol cjk-misc bopomofo))
+           ;;   (set-fontset-font (frame-parameter nil 'font)
+           ;;                     charset
+           ;;                     (font-spec :family "WenQuanYi Micro Hei"
+           ;;                                :size 16)))
+           ))))
 
 (defun yc/setup-display ()
   "Setup display, including: font, colortheme, and fill-column."
@@ -849,15 +841,7 @@ inserts comment at the end of the line."
     (yc/setup-font)
     (yc/setup-column)))
 
-(defun yc/toggle-presentation ( )
-  "Change fonts and colors to make it suitable to displaying files when in presentations."
-  (interactive)
-  (setq self-use (not self-use))
-  (yc/setup-font)
-  (yc/setup-color-theme)
-  )
-
-(global-set-key (kbd "<M-f5>") 'yc/toggle-presentation)
+(yc/setup-display)
 
 
 (defcustom trailing-whitespace-autoremove nil
@@ -866,14 +850,14 @@ inserts comment at the end of the line."
   )
 
 (defun yc/toggle-autoremove-spaces ()
-   "Toggle auto remove tailing whitespace."
-   (interactive)
-   (make-local-variable 'trailing-whitespace-autoremove)
-   (setq trailing-whitespace-autoremove
-         (not trailing-whitespace-autoremove))
-   (if trailing-whitespace-autoremove
-       (add-hook 'before-save-hook 'delete-trailing-whitespace t t)
-     (remove-hook 'before-save-hook 'delete-trailing-whitespace)))
+  "Toggle auto remove tailing whitespace."
+  (interactive)
+  (make-local-variable 'trailing-whitespace-autoremove)
+  (setq trailing-whitespace-autoremove
+        (not trailing-whitespace-autoremove))
+  (if trailing-whitespace-autoremove
+      (add-hook 'before-save-hook 'delete-trailing-whitespace t t)
+    (remove-hook 'before-save-hook 'delete-trailing-whitespace)))
 (global-set-key (kbd "<C-S-f12>") 'yc/toggle-autoremove-spaces)
 
 
@@ -918,7 +902,7 @@ inserts comment at the end of the line."
     (when init-dir
       (dolist (file-name (directory-files init-dir t ".*el"))
         (if file-name
-          (byte-compile-file file-name))))))
+            (byte-compile-file file-name))))))
 
 
 (defun yc/read-file-content-as-string (file)
@@ -1057,8 +1041,8 @@ for FILE, but proper EOL-conversion and character interpretation is done!"
         ;;                (if YC-DEBUG YC-DEBUG-BUF nil)
         ;;                app fn)
         (call-process app nil nil
-                       (if YC-DEBUG YC-DEBUG-BUF nil)
-                       fn)
+                      (if YC-DEBUG YC-DEBUG-BUF nil)
+                      fn)
       (error "Can't find proper app to open file %s." fn))))
 
 (defun yc/command-output-to-string (&rest args)
@@ -1068,13 +1052,13 @@ args should be a list, but to make caller's life easier, it can accept one atom 
   (let* ((cmd (car args))
          (args (cdr args))
          (cmd-output (with-output-to-string
-                      (with-current-buffer standard-output
-                        (apply #'process-file
-                               cmd
-                               nil (list t t) nil
-                               (if (listp (car args))
-                                   (car args)
-                                 args))))))
+                       (with-current-buffer standard-output
+                         (apply #'process-file
+                                cmd
+                                nil (list t t) nil
+                                (if (listp (car args))
+                                    (car args)
+                                  args))))))
     (ansi-color-apply cmd-output)))
 
 (defun yc/replace-string (content from to)
@@ -1174,11 +1158,11 @@ args should be a list, but to make caller's life easier, it can accept one atom 
                        (set-auto-mode))))))))))
 
 (ad-activate 'command-execute)
-(provide '01-rc-functions)
 
+(provide '02-rc-functions)
 ;; Local Variables:
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:
 
-;;; emacs-rc-functions.el ends here
+;;; 02-rc-functions.el ends here

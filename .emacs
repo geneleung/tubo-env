@@ -17,19 +17,18 @@
                   load-path)))))
    (list "~/.emacs.d/site-lisp/" "~/.emacs.d/rc" "~/.emacs.d/elpa")))
 
-(require '01-rc-functions)
-(require '02-rc-generic)
-
  ;;
 
 (defvar package-init-statistic nil "Package loading statistics.")
+(defvar init-timestamp nil "Nil.")
 
 ;; Function to collect information of packages.
 ;; attempt to load a feature/library, failing silently
 (defun try-require (feature &optional click)
-  "Attempt to load a library or module.
+  "Attempt to load a library or module named FEATURE.
 Return true if the library given as argument is successfully loaded.
-If not, instead of an error, just add the package to a list of missing packages."
+If not, instead of an error, just add the package to a list of missing packages.
+If CLICK is t, calculate time cost."
   (let ((timestamp (current-time))
         (package (if (stringp feature) feature (symbol-name feature))))
     (condition-case err
@@ -80,11 +79,13 @@ If not, instead of an error, just add the package to a list of missing packages.
 
  ;; Load all configuration and packages.
 (let ((ts-init (current-time)))
-  (require '03-rc-prog-mode)
-  (require '04-rc-other-modes)
+  (require '01-rc-generics)
+  (require '02-rc-functions)
+  (require '03-rc-fundamental-mode)
+  (require '04-rc-prog-mode)
   (require '05-rc-misc)
+  (require '05-rc-other-modes)
   (require '06-rc-complete)
-  (require '07-blog-setting)
   (require '08-rc-keybindings)
   (try-require '10-priv)
   (require '99-proj)

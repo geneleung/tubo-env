@@ -1,80 +1,10 @@
-;;; emacs-rc-modes.el -- other modes.
+;;; 05-rc-other-modes.el -- Brief introduction here.
+
+;; Author: YangYingchao <yangyingchao@gmail.com>
+
 ;;; Commentary:
+
 ;;; Code:
-
- ;; *********************** auctex for LaTeX Mode ************************
-
-;; ;; (load "auctex.el" nil t t)
-;; ;; (load "preview-latex.el" nil t t)
-
-
-;; (require 'tex-site)
-;; (autoload 'TeX-tex-mode "tex" "Major mode in AUCTeX for editing TeX or LaTeX files."  t)
-;; (autoload 'TeX-latex-mode "latex" ""   t)
-
-;; (yc/eval-after-load
-;;  "tex"
-;;  (require 'prv-emacs)
-;;  (require 'font-latex)
-;;  (require 'preview)
-;;  (require 'texmathp)
-
-;;  (setq TeX-auto-save t
-;;        TeX-global-PDF-mode t
-;;        TeX-output-view-style (quote (("^pdf$" "." "evince %o %(outpage)")))
-;;        TeX-parse-self t
-;;        reftex-plug-into-AUCTeX t)
-;;  (setq-default   TeX-master t)
-
-
-;;  (defun yc/insert-new-item ()
-;;    "description"
-;;    (interactive)
-;;    (move-end-of-line 1)
-;;    (LaTeX-insert-item))
-
-;;  (add-hook 'LaTeX-mode-hook (lambda()
-;;                               (TeX-PDF-mode t)
-;;                               (add-to-list 'TeX-command-list '("XeLaTeX" "%`xelatex%(mode)%' %t" TeX-run-TeX nil t))
-;;                               (setq TeX-command-default "XeLaTeX")
-;;                               (setq TeX-save-query  nil )
-;;                               (setq TeX-show-compilation nil)
-;;                               (setq fill-column 78)
-;;                               (LaTeX-math-mode)
-;;                               (turn-on-reftex)
-;;                               (local-set-key (kbd "<C-return>")
-;;                                              'yc/insert-new-item)
-;;                               ))
-;;  (defun tex-mode-auto-pair ()
-;;    (interactive)
-;;    (make-local-variable 'skeleton-pair-alist)
-;;    (setq skeleton-pair t)
-;;    (local-set-key (kbd "（") 'skeleton-pair-insert-maybe)
-;;    (local-set-key (kbd "“") 'skeleton-pair-insert-maybe)
-;;    (local-set-key (kbd "$") 'skeleton-pair-insert-maybe)
-;;    )
-;;  (defvar LaTeX-environment-list nil)
-;;  (push '(("lstlisting" LaTeX-env-args
-;;           [TeX-arg-key-val LaTeX-listings-key-val-options])) LaTeX-environment-list)
-
-
-;; ;;; Redefine following keys to make them in accord with  other modes.
-;; ;;; 重新定义下列命令，使之与其他模式保持一致。
-;;  (define-key TeX-mode-map "\C-c;"    'TeX-comment-region)
-;;  (define-key TeX-mode-map "\C-c:"    'TeX-uncomment-region)
-
-;;  (defun yc/latex-mode-hook ()
-;;    "Hooks for latex mode."
-;;    (interactive)
-;;    (auto-fill-mode nil)
-;;    (yc/show-prog-keywords)
-;;    (tex-mode-auto-pair)
-;;    (LaTeX-math-mode)
-;;    (turn-on-reftex)
-;;    (flyspell-mode))
-
-;;  (add-hook 'LaTeX-mode-hook 'yc/latex-mode-hook))
-
 
  ;; ****************************** HTTP Code *****************************
 ;; Explain the meaning of an HTTP status code. Copy httpcode.el to your
@@ -220,101 +150,101 @@
              (cons "\\.\\(org\\|org_archive\\|/TODO\\)$"  'utf-8))
 
 (yc/eval-after-load "org"
-  (push (purecopy (append '(org) (version-to-list org-version))) package--builtin-versions)
-  (setq org-export-time-stamp-file nil
-        org-confirm-babel-evaluate nil
-        org-startup-indented t
-        org-directory (convert-standard-filename "~/Work/Orgs")
-        org-default-notes-file (convert-standard-filename "~/Work/Orgs/notes.org"))
-  (custom-set-variables
-   '(org-ditaa-jar-path "~/.emacs.d/site-lisp/org_contrib/ditaa.jar")
-   '(org-blank-before-new-entry (quote ((heading . auto) (plain-list-item))))
-   '(org-enforce-todo-checkbox-dependencies t)
-   '(org-hide-leading-stars t)
-   '(org-log-done (quote time))
-   '(org-special-ctrl-a/e t)
-   '(org-special-ctrl-k t)
-   '(org-startup-folded nil)
-   '(org-src-lang-modes '(("ocaml" . tuareg)
-                          ("elisp" . emacs-lisp)
-                          ("ditaa" . artist)
-                          ("asymptote" . asy)
-                          ("dot" . graphviz-dot)
-                          ("sqlite" . sql)
-                          ("calc" . fundamental)
-                          ("C" . c)
-                          ("cpp" . c++)
-                          ("C++" . c++)
-                          ("screen" . shell-script)))
-   ;; WAITING: Assigned to others, and waiting for their report.
-   ;; PENDING: Pending for some reason, maybe scheduled but not started because task dependency.
-   '(org-todo-keywords (quote ((sequence "TODO(t)" "WAITING(w)" "DOING(g)"
-                                         "DONE(d)" "CANCELED(c)" "PENDING(p)" ))))
-   '(org-use-property-inheritance t))
-  (org-indent-mode 1)
+                    (push (purecopy (append '(org) (version-to-list org-version))) package--builtin-versions)
+                    (setq org-export-time-stamp-file nil
+                          org-confirm-babel-evaluate nil
+                          org-startup-indented t
+                          org-directory (convert-standard-filename "~/Work/Orgs")
+                          org-default-notes-file (convert-standard-filename "~/Work/Orgs/notes.org"))
+                    (custom-set-variables
+                     '(org-ditaa-jar-path "~/.emacs.d/site-lisp/org_contrib/ditaa.jar")
+                     '(org-blank-before-new-entry (quote ((heading . auto) (plain-list-item))))
+                     '(org-enforce-todo-checkbox-dependencies t)
+                     '(org-hide-leading-stars t)
+                     '(org-log-done (quote time))
+                     '(org-special-ctrl-a/e t)
+                     '(org-special-ctrl-k t)
+                     '(org-startup-folded nil)
+                     '(org-src-lang-modes '(("ocaml" . tuareg)
+                                            ("elisp" . emacs-lisp)
+                                            ("ditaa" . artist)
+                                            ("asymptote" . asy)
+                                            ("dot" . graphviz-dot)
+                                            ("sqlite" . sql)
+                                            ("calc" . fundamental)
+                                            ("C" . c)
+                                            ("cpp" . c++)
+                                            ("C++" . c++)
+                                            ("screen" . shell-script)))
+                     ;; WAITING: Assigned to others, and waiting for their report.
+                     ;; PENDING: Pending for some reason, maybe scheduled but not started because task dependency.
+                     '(org-todo-keywords (quote ((sequence "TODO(t)" "WAITING(w)" "DOING(g)"
+                                                           "DONE(d)" "CANCELED(c)" "PENDING(p)" ))))
+                     '(org-use-property-inheritance t))
+                    (org-indent-mode 1)
 
 ;;; Key bingdings
-  (defun yc/show-pomodoro-keywords ()
-    "Pomodoro Keywords, used by pomodoro technique "
-    (interactive)
-    ;; highlight additional keywords
-    (font-lock-add-keywords nil '(("\\<\\(TODO \\)"
-                                   1 font-lock-comment-face t)))
-    (font-lock-add-keywords nil '(("\\<\\(DONE \\):"
-                                   1 font-lock-builtin-face t)))
-    (font-lock-add-keywords nil '(("\\<\\(DOING \\):"
-                                   1 font-lock-function-name-face t)))
-    )
+                    (defun yc/show-pomodoro-keywords ()
+                      "Pomodoro Keywords, used by pomodoro technique "
+                      (interactive)
+                      ;; highlight additional keywords
+                      (font-lock-add-keywords nil '(("\\<\\(TODO \\)"
+                                                     1 font-lock-comment-face t)))
+                      (font-lock-add-keywords nil '(("\\<\\(DONE \\):"
+                                                     1 font-lock-builtin-face t)))
+                      (font-lock-add-keywords nil '(("\\<\\(DOING \\):"
+                                                     1 font-lock-function-name-face t)))
+                      )
 
-  (setq org-html-postamble nil
-        ;; (lambda (x) "postamble"
-;;           "<div style=\"margin-top: 15px; font-size: 13px;color: #cc0000;\"><p align=center><strong>
-;;  <a href=\"http://tubocurarine.is-programmer.com\">.</a>，
-;; </strong></div>")
-        )
+                    (setq org-html-postamble nil
+                          ;; (lambda (x) "postamble"
+                          ;;           "<div style=\"margin-top: 15px; font-size: 13px;color: #cc0000;\"><p align=center><strong>
+                          ;;  <a href=\"http://tubocurarine.is-programmer.com\">.</a>，
+                          ;; </strong></div>")
+                          )
 
-  (defun yc/org-mode-hooks ()
-    "Functions will run when entering org-mode"
-    (interactive)
-    (org-defkey org-mode-map "\C-cl" 'org-store-link)
-    (org-defkey org-mode-map "\C-ca" 'org-agenda)
-    (org-defkey org-mode-map "\C-cb" 'org-iswitchb)
-    (org-defkey org-mode-map (kbd "<C-tab>") 'indent-or-complete)
-    (org-defkey org-mode-map [(control ?,)]     'backward-page)
-    (yc/show-pomodoro-keywords)
-    (flyspell-mode)
-    )
+                    (defun yc/org-mode-hooks ()
+                      "Functions will run when entering org-mode"
+                      (interactive)
+                      (org-defkey org-mode-map "\C-cl" 'org-store-link)
+                      (org-defkey org-mode-map "\C-ca" 'org-agenda)
+                      (org-defkey org-mode-map "\C-cb" 'org-iswitchb)
+                      (org-defkey org-mode-map (kbd "<C-tab>") 'indent-or-complete)
+                      (org-defkey org-mode-map [(control ?,)]     'backward-page)
+                      (yc/show-pomodoro-keywords)
+                      (flyspell-mode)
+                      )
 
-  (defun org-summary-todo (n-done n-not-done)
-    "Switch entry to DONE when all subentries are done, to TODO otherwise."
-    (let (org-log-done org-log-states)   ; turn off logging
-      (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
+                    (defun org-summary-todo (n-done n-not-done)
+                      "Switch entry to DONE when all subentries are done, to TODO otherwise."
+                      (let (org-log-done org-log-states)   ; turn off logging
+                        (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
 
-  (defadvice org-html-paragraph (before fsh-org-html-paragraph-advice
-                                        (paragraph contents info) activate)
-    "Join consecutive Chinese lines into a single long line without
+                    (defadvice org-html-paragraph (before fsh-org-html-paragraph-advice
+                                                          (paragraph contents info) activate)
+                      "Join consecutive Chinese lines into a single long line without
 unwanted space when exporting org-mode to html."
-    (let ((fixed-contents)
-          (orig-contents (ad-get-arg 1))
-          (reg-han "[[:multibyte:]]"))
-      (setq fixed-contents (replace-regexp-in-string
-                            (concat "\\(" reg-han "\\) *\n *\\(" reg-han "\\)")
-                            "\\1\\2" orig-contents))
-      (ad-set-arg 1 fixed-contents)
-      ))
+                      (let ((fixed-contents)
+                            (orig-contents (ad-get-arg 1))
+                            (reg-han "[[:multibyte:]]"))
+                        (setq fixed-contents (replace-regexp-in-string
+                                              (concat "\\(" reg-han "\\) *\n *\\(" reg-han "\\)")
+                                              "\\1\\2" orig-contents))
+                        (ad-set-arg 1 fixed-contents)
+                        ))
 
-  (ad-activate 'org-html-paragraph)
+                    (ad-activate 'org-html-paragraph)
 
-  (substitute-key-definition
-   'org-cycle-agenda-files  'backward-page org-mode-map)
+                    (substitute-key-definition
+                     'org-cycle-agenda-files  'backward-page org-mode-map)
 
-  (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
-  (add-hook 'org-mode-hook 'yc/org-mode-hooks)
-  (org-babel-do-load-languages
-   'org-babel-load-languages
-   '((ditaa . t)
-     (dot . t)))
-  )
+                    (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+                    (add-hook 'org-mode-hook 'yc/org-mode-hooks)
+                    (org-babel-do-load-languages
+                     'org-babel-load-languages
+                     '((ditaa . t)
+                       (dot . t)))
+                    )
 
 (yc/eval-after-load "org-agenda"
                     (custom-set-variables
@@ -327,20 +257,20 @@ unwanted space when exporting org-mode to html."
                      ))
 
 (yc/eval-after-load "org-capture"
-  (custom-set-variables
-   '(org-capture-templates
-     '(("t" "Todo" entry (file+headline "~/Work/Orgs/gtd.org" "Tasks")
-        "\n* TODO %?\n  %i\n  %a")
-       ("p" "Project" entry (file+headline "~/Work/Orgs/gtd.org" "Project")
-        "
+                    (custom-set-variables
+                     '(org-capture-templates
+                       '(("t" "Todo" entry (file+headline "~/Work/Orgs/gtd.org" "Tasks")
+                          "\n* TODO %?\n  %i\n  %a")
+                         ("p" "Project" entry (file+headline "~/Work/Orgs/gtd.org" "Project")
+                          "
 ** NOTE %?\n %i\n %a" )
-       ("n" "New" entry (file+datetree "~/Work/Orgs/Inbox.org" "Inbox")
-        "* %?\nEntered on %U\n  %i\n  %a")
-       ("i" "Idea" entry (file+headline "~/Work/Orgs/task.org" "Idea")
-        "* %?\nEntered on %U\n  %i\n  %a")
-       ("j" "Journal" entry (file+datetree "~/Work/Orgs/journal.org")
-        "* %?\nEntered on %U\n  %i\n  %a")
-       ))))
+                         ("n" "New" entry (file+datetree "~/Work/Orgs/Inbox.org" "Inbox")
+                          "* %?\nEntered on %U\n  %i\n  %a")
+                         ("i" "Idea" entry (file+headline "~/Work/Orgs/task.org" "Idea")
+                          "* %?\nEntered on %U\n  %i\n  %a")
+                         ("j" "Journal" entry (file+datetree "~/Work/Orgs/journal.org")
+                          "* %?\nEntered on %U\n  %i\n  %a")
+                         ))))
 
 ;; (yc/eval-after-load "ox-html"
 ;;                     (setq org-html-head-extra
@@ -404,59 +334,59 @@ unwanted space when exporting org-mode to html."
        'nxml-mode))
 
 (yc/eval-after-load "nxml-mode"
-  (defun my-xhtml-extras ()
-    (make-local-variable 'outline-regexp)
-    (setq outline-regexp "\\s *<\\([h][1-6]\\|html\\|body\\|head\\)\\b")
-    (make-local-variable 'outline-level)
-    (setq outline-level 'my-xhtml-outline-level)
-    (outline-minor-mode 1)
-    (hs-minor-mode 1))
+                    (defun my-xhtml-extras ()
+                      (make-local-variable 'outline-regexp)
+                      (setq outline-regexp "\\s *<\\([h][1-6]\\|html\\|body\\|head\\)\\b")
+                      (make-local-variable 'outline-level)
+                      (setq outline-level 'my-xhtml-outline-level)
+                      (outline-minor-mode 1)
+                      (hs-minor-mode 1))
 
-  (defun my-xhtml-outline-level ()
-    (save-excursion (re-search-forward html-outline-level))
-    (let ((tag (buffer-substring (match-beginning 1) (match-end 1))))
-      (if (eq (length tag) 2)
-          (- (aref tag 1) ?0)
-        0)))
+                    (defun my-xhtml-outline-level ()
+                      (save-excursion (re-search-forward html-outline-level))
+                      (let ((tag (buffer-substring (match-beginning 1) (match-end 1))))
+                        (if (eq (length tag) 2)
+                            (- (aref tag 1) ?0)
+                          0)))
 
 
-  (defun my-nxml-forward-element ()
-    (interactive)
-    (let ((nxml-sexp-element-flag))
-      (setq nxml-sexp-element-flag (not (looking-at "<!--")))
-      (unless (looking-at outline-regexp)
-        (condition-case nil
-            (nxml-forward-balanced-item 1)
-          (error nil)))))
+                    (defun my-nxml-forward-element ()
+                      (interactive)
+                      (let ((nxml-sexp-element-flag))
+                        (setq nxml-sexp-element-flag (not (looking-at "<!--")))
+                        (unless (looking-at outline-regexp)
+                          (condition-case nil
+                              (nxml-forward-balanced-item 1)
+                            (error nil)))))
 
-  (defun my-nxml-mode-hook ()
-    (local-set-key "\C-c/" 'nxml-finish-element)
-    (auto-fill-mode)
-    (rng-validate-mode)
-    (yc/customize-variable ispell-skip-html t)
-    (hs-minor-mode 1)
-    (yc/basic-prog-keybinding)
-    )
+                    (defun my-nxml-mode-hook ()
+                      (local-set-key "\C-c/" 'nxml-finish-element)
+                      (auto-fill-mode)
+                      (rng-validate-mode)
+                      (yc/customize-variable ispell-skip-html t)
+                      (hs-minor-mode 1)
+                      (yc/basic-prog-keybinding)
+                      )
 
-  (custom-set-variables
-   '(nxml-attribute-indent 4)
-   '(nxml-child-indent 4)
-   '(nxml-outline-child-indent 4)
-   '(nxml-auto-insert-xml-declaration-flag t)
-   '(nxml-bind-meta-tab-to-complete-flag t)
-   '(nxml-slash-auto-complete-flag t))
+                    (custom-set-variables
+                     '(nxml-attribute-indent 4)
+                     '(nxml-child-indent 4)
+                     '(nxml-outline-child-indent 4)
+                     '(nxml-auto-insert-xml-declaration-flag t)
+                     '(nxml-bind-meta-tab-to-complete-flag t)
+                     '(nxml-slash-auto-complete-flag t))
 
-  (add-hook 'nxml-mode-hook 'my-nxml-mode-hook)
+                    (add-hook 'nxml-mode-hook 'my-nxml-mode-hook)
 
-  (add-to-list
-   'hs-special-modes-alist
-   '(nxml-mode
-     "<!--\\|<[^/>]>\\|<[^/][^>]*[^/]>"
-     ""
-     "<!--" ;; won't work on its own; uses syntax table
-     (lambda (arg) (my-nxml-forward-element))
-     nil))
-)
+                    (add-to-list
+                     'hs-special-modes-alist
+                     '(nxml-mode
+                       "<!--\\|<[^/>]>\\|<[^/][^>]*[^/]>"
+                       ""
+                       "<!--" ;; won't work on its own; uses syntax table
+                       (lambda (arg) (my-nxml-forward-element))
+                       nil))
+                    )
 
 
 
@@ -489,19 +419,19 @@ unwanted space when exporting org-mode to html."
 
 (autoload 'edit-server-start "edit-server" nil t)
 (yc/eval-after-load "edit-server"
-  (setq edit-server-new-frame nil)
-  ;; (setq-default edit-server-default-major-mode 'html-mode)
-  (setq edit-server-url-major-mode-alist
-        (list
-         (cons (rx (or (: ".css" eow)
-                       "Configure.aspx"
-                       (: "/admin/plugins" eow)))
-               'css-mode)
-         (cons (rx (or (: ".htm" (? "l") eow)
-                       (: "/posts/" (+ alnum))
-                       (: ".asp" eow)))
-               'html-mode)
-          )))
+                    (setq edit-server-new-frame nil)
+                    ;; (setq-default edit-server-default-major-mode 'html-mode)
+                    (setq edit-server-url-major-mode-alist
+                          (list
+                           (cons (rx (or (: ".css" eow)
+                                         "Configure.aspx"
+                                         (: "/admin/plugins" eow)))
+                                 'css-mode)
+                           (cons (rx (or (: ".htm" (? "l") eow)
+                                         (: "/posts/" (+ alnum))
+                                         (: ".asp" eow)))
+                                 'html-mode)
+                           )))
 ;; (edit-server-start)
 
  ;; ***************************** Mode Alias **************************
@@ -520,8 +450,8 @@ unwanted space when exporting org-mode to html."
 
 (autoload 'logviewer-mode "logviewer"   "Major mode for editing Logviewer files"  t)
 (yc/set-mode 'logviewer-mode (rx (or (: bow "messages" eow)
-                                          (: "." (or "log" "LOG" "Log"))
-                                          (: (or "log" "LOG" "Log") ".txt"))))
+                                     (: "." (or "log" "LOG" "Log"))
+                                     (: (or "log" "LOG" "Log") ".txt"))))
 
 
 (autoload 'qml-mode "qml-mode")
@@ -582,11 +512,11 @@ unwanted space when exporting org-mode to html."
 
 
 
-(provide '04-rc-other-modes)
+(provide '05-rc-other-modes)
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:
 
-;;; emacs-rc-modes.el ends here
+;;; 05-rc-other-modes.el ends here

@@ -1,11 +1,14 @@
-;;;  07-blog-setting.el -- settings about my blog
+;;; tblog.el -- Brief introduction here.
+
+;; Author: YangYingchao <yangyingchao@gmail.com>
+
 ;;; Commentary:
+
 ;;; Code:
 
 
 (defconst github-io
-  (expand-file-name "~/Work/yangyingchao.github.io")
-  )
+  (expand-file-name "~/Work/yangyingchao.github.io"))
 
 (defcustom yc/media-object-suffix-list
   '("jpg" "jpeg" "png" "gif" "mp4" "zip" "gz" "bz2")
@@ -59,8 +62,9 @@
         yc/media-object-suffix-list)
   buf-str)
 
+;;;###autoload
 (defun yc/new-post ()
-  "description"
+  "Start a new post."
   (interactive)
   (let ((name (expand-file-name
                (format "%s/org/%s-%s.org"
@@ -83,9 +87,9 @@
   "Escape special characters in INPUT."
   (when (stringp input)
     (apply 'concat (mapcar (lambda (x)
-                              (let ((kv (assoc x blog-escape-alist)))
-                                (if kv (cdr kv) (string x))))
-                            input))))
+                             (let ((kv (assoc x blog-escape-alist)))
+                               (if kv (cdr kv) (string x))))
+                           input))))
 
 (defun yc/fetch-field (fmt &optional default &optional escape)
   (if (string-match fmt yc/buffer-content)
@@ -145,7 +149,7 @@ TOLOWER: if specified, turn fields into lower case."
                 (buffer-substring-no-properties
                  (yc/point-template-head-end)
                  (point-max))))))
-)
+  )
 
 (defun yc/b2p-other ()
   (delq nil
@@ -221,6 +225,7 @@ TOLOWER: if specified, turn fields into lower case."
              (format-time-string  "%Y-%m-%d" (current-time)) "-" bfn))
           ".html"))
 
+;;;###autoload
 (defun yc/prepare-post (&optional skip)
   "Convert current buffer into html file and prepare send to github.
 SKIP: skip running magit."
@@ -231,8 +236,8 @@ SKIP: skip running magit."
          (hfn (yc/get-post-name bfn))
          (dir (file-name-directory fn))
          (git (executable-find "git"))
-        (content (yc/current-buffer-to-post))
-        (final-content ))
+         (content (yc/current-buffer-to-post))
+         (final-content ))
     (with-temp-file (format "%s/_posts/%s" github-io hfn)
       (goto-char (point-min))
       (insert "---
@@ -249,10 +254,11 @@ layout : post
              (not skip))
         (magit-status dir))))
 
-(provide '07-blog-setting)
+(provide 'tblog)
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:
-;;; 07-blog-setting.el ends here
+
+;;; tblog.el ends here

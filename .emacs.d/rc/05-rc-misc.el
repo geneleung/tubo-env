@@ -2,54 +2,6 @@
 ;;; Commentary:
 ;;; Code:
 
-
-
-(require 'icomplete)
-(icomplete-mode t)
-
-
-(yc/autoload 'helm-projectile-find-file "helm-projectile")
-(define-key (current-global-map) (kbd "C-x M-f") 'helm-projectile-find-file)
-
-
-;;;; ido -- disabled for helm
-;; (require 'ido)
-;; (ido-mode 'buffer)
-;; (setq ido-enable-flex-matching t) ;; enable fuzzy matching
-;; (define-key ctl-x-map "\C-f" 'ido-find-file)
-
-
-(autoload 'makefile-mode "make-mode" nil t)
-
-(add-to-list 'auto-mode-alist
-             (cons (rx (or (: (or "Makefile" "makefile") "." (+ alnum))
-                        (: (+ alnum) ".mk"))) 'makefile-mode))
-
-
-(autoload 'recentf-mode "recentf")
-(yc/eval-after-load "recentf"
-  (setq recentf-auto-cleanup 'never
-        recentf-max-menu-items 10
-        recentf-max-saved-items 200))
-(recentf-mode 1)
-(define-key ctl-x-map "\C-r" 'recentf-open-files)
-
-;; session
-(custom-set-variables
- '(session-use-package t nil (session))
- )
-
-(autoload 'session-initialize "session")
-(add-hook 'after-init-hook 'session-initialize)
-
- ;;; ABBREV-MODE;;;
-
-(setq abbrev-file-name  "~/.emacs.d/abbrev_defs")
-(setq save-abbrevs t)
-(if (file-exists-p abbrev-file-name)
-    (quietly-read-abbrev-file))
-
-(setq-default abbrev-mode t)
 
  ;;; Woman
 ;; (autoload 'woman "woman" "Browse UN*X man page for TOPIC."  t)
@@ -59,21 +11,6 @@
 ;;   (let ((woman-topic-at-point t))
 ;;     (woman)))
 ;; (global-set-key [(f1)] 'peer-woman)   ;;设定F1为woman快捷键
-
-(yc/eval-after-load
- "woman"
- (let ((paths
-        (cond ((string= system-type "windows-nt")
-               (setq woman-manpath '("d:/gnu/share/man")))
-              ((string= system-type "darwin")
-               (setq woman-manpath (quote ("/opt/usr/share/man"
-                                           "/opt/usr/local/share/man/"))))
-              (t
-               (setq woman-manpath (quote ("/usr/share/man"
-                                           "/usr/local/share/man/")))))))
-   (custom-set-variables
-    '(woman-use-own-frame nil) ;; 不打开新的 frame
-    '(woman-manpath paths))))
 
  ;; Info settings.
 
@@ -772,6 +709,12 @@ If there is no .svn directory, examine if there is CVS and run
                            (: "." (? "_") (? "g")  "vimrc")
                            ".exrc"))
                    'vimrc-mode))
+
+
+(yc/autoload 'yc/new-post t "tblog")
+(yc/autoload 'yc/prepare-post t "tblog")
+
+
 (provide '05-rc-misc)
 
 ;; Local Variables:
