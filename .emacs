@@ -86,7 +86,7 @@ If CLICK is t, calculate time cost."
   (require '05-rc-misc)
   (require '05-rc-other-modes)
   (require '06-rc-complete)
-  (require '08-rc-keybindings)
+  (require '09-rc-keybindings)
   (try-require '10-priv)
   (require '99-proj)
 

@@ -22,24 +22,24 @@
   '(helm-grep-default-recurse-command "grep --color=never -d recurse %e -n%cH -e %p %f")
   '(helm-grep-default-command helm-grep-default-recurse-command)))
 
-;; (yc/eval-after-load
-;;  "helm-ring"
-;;  (define-or-set helm-source-kill-ring
-;;    (helm-build-sync-source "Kill Ring"
-;;      :init (lambda () (helm-attrset 'last-command last-command))
-;;      :candidates #'helm-kill-ring-candidates
-;;      :filtered-candidate-transformer #'helm-kill-ring-transformer
-;;      :action '(("Yank" . helm-kill-ring-action)
-;;                ("Delete" . (lambda (candidate)
-;;                              (cl-loop for cand in (helm-marked-candidates)
-;;                                       do (setq kill-ring
-;;                                                (delete cand kill-ring))))))
-;;      :persistent-action (lambda (_candidate) (ignore))
-;;      :persistent-help "DoNothing"
-;;      :keymap helm-kill-ring-map
-;;      :migemo t
-;;      :multiline t)
-;;    "Source for browse and insert contents of kill-ring."))
+(yc/eval-after-load
+ "helm-ring"
+ (define-or-set helm-source-kill-ring
+   (helm-build-sync-source "Kill Ring"
+     :init (lambda () (helm-attrset 'last-command last-command))
+     :candidates #'helm-kill-ring-candidates
+     :filtered-candidate-transformer #'helm-kill-ring-transformer
+     :action '(("Yank" . helm-kill-ring-action)
+               ("Delete" . (lambda (candidate)
+                             (cl-loop for cand in (helm-marked-candidates)
+                                      do (setq kill-ring
+                                               (delete cand kill-ring))))))
+     :persistent-action (lambda (_candidate) (ignore))
+     :persistent-help "DoNothing"
+     :keymap helm-kill-ring-map
+     :migemo t
+     :multiline t)
+   "Source for browse and insert contents of kill-ring."))
 
 
 (yc/eval-after-load

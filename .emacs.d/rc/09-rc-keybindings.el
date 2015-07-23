@@ -1,4 +1,4 @@
-;;; 08-rc-keybindings.el --- keybinds
+;;; 09-rc-keybindings.el --- keybinds
 ;;; Commentary:
 ;;; Code:
 
@@ -89,10 +89,10 @@
 ;; (define-key ctl-x-map "\C-f" 'ido-find-file)
 
 
-(provide '08-rc-keybindings)
+(provide '09-rc-keybindings)
 
 ;; Local Variables:
 ;; coding: utf-8
 ;; indent-tabs-mode: nil
 ;; End:
-;;; 08-rc-keybindings.el ends here
+;;; 09-rc-keybindings.el ends here
