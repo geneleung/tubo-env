@@ -101,15 +101,15 @@ THEN-FORM and ELSE-FORMS are then excuted just like in `if'."
 (defmacro yc/autoload (func &rest args)
   "Wrapper to autoload FUNC.
 ARGS provide extra information: first element in ARGS specifies whether this is an
-  interactive funtion, second element in ARGS specifies filename where to load this FUNC."
-  `(let ((interact t)
-         (file (symbol-name ,func))
-         (first ,(car args))
-         (second ,(cadr args)))
-     (if (stringp first)
-         (setq file first)
-       (setq interact first))
-     (autoload ,func file ""  interact)))
+  interactive funtion, second element in ARGS specifies filename where to load this
+  FUNC."
+  `,(list 'autoload func
+          (cond
+           ((stringp (car args)) (car args))
+           ((stringp (cadr args)) (cadr args))
+           (t `(symbol-name ,func)))
+          "autoloaded function."
+          (if (stringp (car args)) t (car args))))
 
 (defmacro yc/add-keyword (sym type)
   `(font-lock-add-keywords
