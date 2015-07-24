@@ -239,89 +239,49 @@
 
 ;; (global-set-key (kbd "<C-tab>") 'yas/expand)
 
-
-;; *********************** Autocomplete ***********************
-(require 'auto-complete-config)
+ ;; company mode..
+(require 'company)
+(global-company-mode)
+(yc/eval-after-load
+ "company"
+ (define-key company-active-map [tab] 'company-complete)
+ (define-key company-active-map (kbd "TAB") 'company-complete))
 
 (custom-set-variables
- '(ac-auto-start 2)
- '(ac-dwim t)
- '(ac-auto-show-menu 0.8)
- '(ac-quick-help-delay 0.8)
- '(ac-ignore-case nil)
- '(ac-use-menu-map t)
- '(ac-candidate-limit 20)
- '(ac-comphist-file (yc/make-cache-path "ac-comphist.dat"))
- '(ac-modes (quote (cmake-mode protobuf-mode antlr-mode objc-mode flyspell-mode
-   sawfish-mode nxml-mode powershell-mode graphviz-dot-mode eshell-mode text-mode
-   org-mode literate-haskell-mode latex-mode emms-tag-editor-mode html-mode conf-mode
-   asm-mode emacs-lisp-mode lisp-mode lisp-interaction-mode slime-repl-mode c-mode
-   cc-mode c++-mode go-mode java-mode malabar-mode clojure-mode clojurescript-mode
-   scala-mode scheme-mode ocaml-mode tuareg-mode coq-mode haskell-mode agda-mode
-   agda2-mode perl-mode cperl-mode python-mode ruby-mode lua-mode tcl-mode
-   ecmascript-mode javascript-mode js-mode js2-mode php-mode css-mode scss-mode
-   less-css-mode makefile-mode sh-mode fortran-mode f90-mode ada-mode xml-mode
-   sgml-mode web-mode ts-mode sclang-mode verilog-mode qml-mode mediawiki-mode))))
+ '(company-backends
+   (quote
+    (company-bbdb
+     company-oddmuse company-files company-dabbrev company-abbrev))))
 
-
-(setq-default ac-sources
-              '(ac-source-yasnippet ac-source-abbrev ac-source-dictionary
-                                    ac-source-words-in-same-mode-buffers))
-
-(defun yc/add-ac-sources (&rest sources)
-  "Add sources.."
-  (setq ac-sources (append sources ac-sources)))
+(defmacro yc/add-company-backends (backends)
+  `(set (make-local-variable 'company-backends)
+        (append ,backends company-backends)))
 
 (add-hook 'prog-mode-hook
           (lambda ()
-            (yc/add-ac-sources
-             ;; ac-source-semantic
-             ac-source-gtags)))
+            (yc/add-company-backends
+             '(company-semantic
+              company-capf
+              (company-dabbrev-code company-gtags company-keywords)))))
 
-(add-hook 'emacs-lisp-mode-hook
+(add-hook 'java-mode-hook
           (lambda ()
-            (yc/add-ac-sources ac-source-features ac-source-functions
-                               ac-source-variables ac-source-symbols)))
+            (yc/add-company-backends '(company-eclim))))
+
+(add-hook 'nxml-mode-hook
+          (lambda ()
+            (yc/add-company-backends
+             '(company-nxml))))
 
 (add-hook 'css-mode-hook
           (lambda ()
-            (yc/add-ac-sources ac-source-css-property)))
+            (yc/add-company-backends
+             '(company-css))))
 
-;; only try to start complete after meaningful characters.
-(advice-add
- 'ac-handle-post-command :around
- (lambda (func &rest args)
-   (if (and (> (point) (point-min))
-            (looking-back (rx (>= 2 (or alnum "_"))) 2))
-     (apply func args))))
-
-(ac-flyspell-workaround)
-
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/templates/ac-dict")
-
-(global-auto-complete-mode t)
-
-;; Autofill Keybinding.
-(define-key ac-complete-mode-map (kbd "<C-tab>") 'ac-expand)
-(define-key ac-complete-mode-map "\M-\r" 'ac-complete)
-(define-key ac-complete-mode-map [(tab)] 'ac-complete)
-(define-key ac-complete-mode-map "\M-n" 'ac-next)
-(define-key ac-complete-mode-map "\M-p" 'ac-previous)
-(define-key global-map "\C-\\" 'auto-complete)
-(global-set-key (kbd "<S-iso-lefttab>") 'ac-complete-semantic-raw)
-
-(yc/autoload 'ac-ispell-setup "ac-ispell")
-(custom-set-variables
- '(ac-ispell-requires 4)
- '(ac-ispell-fuzzy-limit 4))
-
-(dolist (hk '(git-commit-mode-hook mail-mode-hook mediawiki-mode-hook org-mode-hook))
-  (add-hook hk
+(add-hook 'cmake-mode-hook
             (lambda ()
-              (ac-ispell-setup)
-              (ac-ispell-ac-setup))))
+            (yc/add-company-backends '(company-cmake))))
 
-;
 (provide '06-rc-complete)
 
 ;; Local Variables:
