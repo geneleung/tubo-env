@@ -1505,10 +1505,11 @@ and is reversed for better performence.")
     (let* ((win-src (selected-window))
            (win-gud (split-window-right))
            (win-stack (split-window win-src ( / ( * (window-height win-src) 3) 4)))
-           (win-bk (split-window win-gud ( / ( * (window-height win-gud) 3) 4)))
-           (win-local (split-window win-gud ( / (window-height  win-gud) 3))))
+           (win-bk (split-window win-gud ( / (window-height win-gud) 2)))
+           ;; (win-local (split-window win-gud ( / (window-height  win-gud) 3)))
+           )
 
-      (gdb-set-window-buffer (gdb-locals-buffer-name) nil win-local)
+      ;; (gdb-set-window-buffer (gdb-locals-buffer-name) nil win-local)
       (set-window-buffer
        win-src
        (if gud-last-last-frame
