@@ -251,7 +251,9 @@
  '(company-backends
    (quote
     (company-bbdb
-     company-oddmuse company-files company-dabbrev company-abbrev))))
+     company-oddmuse company-files company-dabbrev company-abbrev)))
+ '(company-minimum-prefix-length 2)
+ '(company-idle-delay 0))
 
 (defmacro yc/add-company-backends (backends)
   `(set (make-local-variable 'company-backends)
