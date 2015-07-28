@@ -506,9 +506,6 @@ If there is no .svn directory, examine if there is CVS and run
 (setq mail-default-directory "/tmp/")
 
 
-(try-require 'sudo-ext)
-
-
 (autoload 'global-undo-tree-mode "undo-tree" ""  t)
 (global-undo-tree-mode)
 (define-key undo-tree-map (kbd "\C-x u") 'undo-tree-undo)

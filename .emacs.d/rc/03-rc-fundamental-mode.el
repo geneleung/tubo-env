@@ -129,6 +129,11 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
 
 (define-key global-map [remap list-buffers] 'ibuffer)
 
+(defun suedit (file)
+  "Run sudo edit FILE."
+  (interactive "FSudoedit: ")
+  (helm-find-file-as-root "/boot/grub/grub.cfg"))
+
 
 (yc/autoload 'helm-projectile-find-file "helm-projectile")
 (define-key (current-global-map) (kbd "C-x M-f") 'helm-projectile-find-file)
