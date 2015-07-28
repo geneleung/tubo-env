@@ -1,4 +1,4 @@
-;;; 05-rc-complete.el -- complete
+;;; 06-rc-complete.el -- complete
 ;;; Commentary:
 ;;; Code:
 
@@ -159,7 +159,7 @@
 (autoload 'yas-global-mode "yasnippet" "yas-global-mode" t)
 
 (defmacro yas-with-comment (str)
-  "description"
+  "Insert string STR."
   `(let (surrounded)
      (save-excursion
        (beginning-of-line)
@@ -171,8 +171,7 @@
          (insert (format "%s%s%s" ,comment-start ,str ,comment-end)))
 
        (auto-update-defaults)
-       (buffer-substring-no-properties (point-min) (point-max)))
-))
+       (buffer-substring-no-properties (point-min) (point-max)))))
 
 (yc/eval-after-load "yasnippet"
   (custom-set-variables
@@ -253,7 +252,7 @@
     (company-bbdb
      company-oddmuse company-files company-dabbrev company-abbrev)))
  '(company-minimum-prefix-length 2)
- '(company-idle-delay 0))
+ '(company-idle-delay 0.5))
 
 (defmacro yc/add-company-backends (backends)
   `(set (make-local-variable 'company-backends)
@@ -291,4 +290,4 @@
 ;; indent-tabs-mode: nil
 ;; End:
 
-;;; 05-rc-complete.el ends here
+;;; 06-rc-complete.el ends here

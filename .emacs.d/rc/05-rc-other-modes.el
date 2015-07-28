@@ -139,7 +139,6 @@
                              (local-set-key (kbd "C-c i") 'yc/insert-b64-img)
                              (local-set-key (kbd "C-c s") 'yc/small-font)
                              (yc/basic-prog-keybinding)
-                             (auto-complete-mode)
                              (html-autoview-mode nil)
                              (setq html-autoview-mode nil)
                              (remove-hook 'after-save-hook 'browse-url-of-buffer t)

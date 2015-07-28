@@ -12,7 +12,6 @@
 (autoload 'flyspell-prog-mode "flyspell" ""  t)
 (autoload 'highlight-parentheses-mode "highlight-parentheses"  "" t)
 (autoload 'flycheck-mode "flycheck" ""  t)
-(autoload 'auto-complete-mode "auto-complete" ""  t)
 
 ;;;; Function and macro to add an regular expression string formed by (rx)
 ;;;; macro into specified face.
@@ -58,8 +57,7 @@
   (yc/basic-prog-keybinding)
   (setup-program-keybindings)
   (autopair-mode 1)
-  (flycheck-mode 1)
-  (auto-complete-mode t))
+  (flycheck-mode 1))
 
 (yc/eval-after-load
  "prog-mode"
@@ -717,52 +715,6 @@ and is reversed for better performence.")
    (completing-read
     "Import File:" (yc/get-python-modules)))
 
-
- ;; (defun prefix-list-elements (list prefix)
- ;;   (let (value)
- ;;     (nreverse
- ;;      (dolist (element list value)
- ;;        (setq value (cons (format "%s%s" prefix element) value))))))
-
- ;; (defvar ac-source-rope
- ;;   '((candidates
- ;;      . (lambda ()
- ;;          (prefix-list-elements (rope-completions) ac-target))))
- ;;   "Source for Rope")
-
- ;; (defun ac-python-find ()
- ;;   "Python `ac-find-function'."
- ;;   (require 'thingatpt)
- ;;   (let ((symbol (car-safe (bounds-of-thing-at-point 'symbol))))
- ;;     (if (null symbol)
- ;;         (if (string= "." (buffer-substring (- (point) 1) (point)))
- ;;             (point)
- ;;           nil)
- ;;       symbol)))
-
- ;; (defun ac-python-candidate ()
- ;;   "Python `ac-candidates-function'"
- ;;   (let (candidates)
- ;;     (dolist (source ac-sources)
- ;;       (if (symbolp source)
- ;;           (setq source (symbol-value source)))
- ;;       (let* ((ac-limit (or (cdr-safe (assq 'limit source)) ac-limit))
- ;;              (requires (cdr-safe (assq 'requires source)))
- ;;              cand)
- ;;         (if (or (null requires)
- ;;                 (>= (length ac-target) requires))
- ;;             (setq cand
- ;;                   (delq nil
- ;;                         (mapcar (lambda (candidate)
- ;;                                   (propertize candidate 'source source))
- ;;                                 (funcall (cdr (assq 'candidates source)))))))
- ;;         (if (and (> ac-limit 1)
- ;;                  (> (length cand) ac-limit))
- ;;             (setcdr (nthcdr (1- ac-limit) cand) nil))
- ;;         (setq candidates (append candidates cand))))
- ;;     (delete-dups candidates)))
-
- ;; (try-require 'auto-complete-pycomplete)
  (add-hook
   'python-mode-hook
   (lambda ()
