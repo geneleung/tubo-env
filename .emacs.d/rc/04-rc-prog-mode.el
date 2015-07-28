@@ -1887,7 +1887,7 @@ notify-send --hint=int:transient:1 \"Compile finished: failed\""
                       (do-compile arg)))))
 
 (yc/eval-after-load
- "compile"
+ 'compile
  (yc/set-keys
   (list
    (cons (kbd "<S-f9>")

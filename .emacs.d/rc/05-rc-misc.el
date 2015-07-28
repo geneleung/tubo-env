@@ -374,7 +374,7 @@ If there is no .svn directory, examine if there is CVS and run
  ;; Cool magit tool for git.
 (autoload 'magit-status "magit" "magit"  t)
 (autoload 'magit-blame-mode "magit-blame" "blame"  t)
-(define-or-set magit-last-seen-setup-instructions "1.4.0")
+(global-set-key "\C-xgs" 'magit-status)
 
 (yc/eval-after-load
  "git-commit-mode"
@@ -383,17 +383,13 @@ If there is no .svn directory, examine if there is CVS and run
  (substitute-key-definition
   'ido-kill-buffer  'git-commit-abort git-commit-mode-map))
 
-(global-set-key "\C-xgs" 'magit-status)
-
-(yc/eval-after-load
- "magit"
- (add-hook 'git-commit-mode-hook
-           (lambda ()
-             (turn-on-flyspell))) )
-
 (custom-set-variables
  '(magit-revert-buffers t)
- )
+ '(magit-push-always-verify nil))
+
+(add-hook 'git-commit-mode-hook
+          (lambda ()
+            (turn-on-flyspell)))
 
 (add-hook 'magit-mode-hook
           (lambda ()
