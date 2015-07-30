@@ -121,16 +121,6 @@
   (semanticdb-enable-gnu-global-databases 'c-mode)
   (semanticdb-enable-gnu-global-databases 'c++-mode))
 
-;; enable ctags for some languages:
-;;  Unix Shell, Perl, Pascal, Tcl, Fortran, Asm
-
-;; (when (not (or (string= system-type "windows-nt")
-;;                (string= system-type "ms-dos")))
-;;   (when (cedet-ectag-version-check)
-;;     (semantic-load-enable-primary-exuberent-ctags-support))
-;;   )
-
-
 ;; (require 'eieio-loaddefs)
 ;; (require 'cogre-loaddefs)
 ;; (yc/eval-after-load "cogre-uml" (cogre-uml-enable-unicode))
