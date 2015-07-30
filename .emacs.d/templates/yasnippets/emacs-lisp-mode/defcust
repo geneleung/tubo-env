@@ -1,6 +1,7 @@
 # -*- mode: snippet -*-
 # name: defcustom
 # key: dfcus
+# key: dfu
 # --
 (defcustom ${1:name} $0
   "${2:Descriptions.}"

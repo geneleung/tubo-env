@@ -2,7 +2,11 @@
 # name: defadvice
 # key: dfa
 # --
-(defadvice ${1:func} (${2:class} ${3:name} ${4:(args)})
+(defadvice ${1:func} (${2:b}${2:$(cond
+                                      ((string-match "^b" yas-text) "efore")
+                                      ((string-match "^ar" yas-text) "ound")
+                                      ((string-match "^a" yas-text) "fter")
+                                      (t ""))} yc/$1 (${4:args}))
   $0)
 
  (ad-activate '$1)
