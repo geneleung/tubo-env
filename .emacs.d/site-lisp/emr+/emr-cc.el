@@ -47,14 +47,6 @@ detailed descriptions."
 
   :group 'emr)
 
-
-(defun emr-cc:bob-after-comments ()
-  "Move to the first non-comment character in the buffer."
-  (goto-char (point-min))
-  (while (emr-looking-at-comment?)
-    (forward-line 1))
-  (point))
-
 ;;; EMR Declarations
 
 (autoload 'clang-format-region "clang-format" ""  t)

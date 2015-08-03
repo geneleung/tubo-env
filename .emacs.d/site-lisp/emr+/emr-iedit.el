@@ -18,7 +18,7 @@
 ;; along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
 ;;; Commentary:
-;; Integrate iedit with EMR.
+;; Rename variables/functions/macros with iedit.
 
 ;;; Code:
 
