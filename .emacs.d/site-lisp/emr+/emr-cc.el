@@ -101,7 +101,8 @@ detailed descriptions."
   :description "using clang"
   :modes '(c-mode c++-mode)
   :predicate (lambda ()
-               (executable-find "clang-format")))
+               (and (not mark-active)
+                    (executable-find "clang-format"))))
 
 (provide 'emr-cc)
 
