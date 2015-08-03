@@ -147,7 +147,9 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
 (custom-set-variables
  '(recentf-auto-cleanup 'never)
  '(recentf-max-menu-items 10)
- '(recentf-max-saved-items 200))
+ '(recentf-max-saved-items 200)
+ '(recentf-save-file (yc/make-cache-path "recentf")))
+
 (autoload 'recentf-mode "recentf")
 (define-key ctl-x-map "\C-r" 'recentf-open-files)
 
@@ -156,6 +158,7 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
 (add-hook 'after-init-hook 'session-initialize)
 (custom-set-variables
  '(session-use-package t nil (session))
+ '(session-save-file (yc/make-cache-path "session"))
  )
 
  ;;; ABBREV-MODE;;;

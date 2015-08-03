@@ -2,18 +2,7 @@
 ;;; Commentary:
 ;;; Code:
 
-
- ;;; Woman
-;; (autoload 'woman "woman" "Browse UN*X man page for TOPIC."  t)
-;; (defun peer-woman() ;; 这个名字有点罪过……
-;;   "Wrap of linux man command"
-;;   (interactive)
-;;   (let ((woman-topic-at-point t))
-;;     (woman)))
-;; (global-set-key [(f1)] 'peer-woman)   ;;设定F1为woman快捷键
-
  ;; Info settings.
-
 (setq Info-directory-list nil)
 (if (string= system-type "darwin")
     (setq Info-default-directory-list
@@ -564,7 +553,7 @@ If there is no .svn directory, examine if there is CVS and run
    doc-view-mode-map
    )
   (custom-set-variables
-   '(doc-view-cache-directory (yc/make-cache-dir "docview")))
+   '(doc-view-cache-directory (yc/make-cache-path "docview"))))
 
 
 
@@ -591,19 +580,11 @@ If there is no .svn directory, examine if there is CVS and run
                (not alnum))  " . -rI"))
   )
 
-(yc/eval-after-load "eshell"
-  (require 'esh-io)
-  (setq eshell-buffer-shorthand t))
+(custom-set-variables
+ '(eshell-buffer-shorthand t)
+ '(eshell-directory-name (yc/make-cache-path "eshell"))
+ )
 
-
-;; (require 'wcy-desktop)
-;; (wcy-desktop-init)
-;; (add-hook 'emacs-startup-hook
-;;           (lambda ()
-;;             (ignore-errors
-;;               (wcy-desktop-open-last-opened-files))))
-
-;; (provide 'wcy-desktop-settings)
 
 (autoload 'hexview-find-file "hexview-mode" ""  t)
 (lazy-set-key
@@ -639,6 +620,10 @@ If there is no .svn directory, examine if there is CVS and run
         (add-hook hook (lambda ()
                          (hl-line-mode 1))))
       (list 'dired-mode-hook 'ibuffer-mode-hook 'bookmark-bmenu-mode-hook))
+
+
+(custom-set-variables
+ '(bookmark-default-file (yc/make-cache-path "bookmarks")))
 
 
 (autoload 'hl-line-mode "hl-line" ""  t)

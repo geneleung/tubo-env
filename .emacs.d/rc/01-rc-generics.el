@@ -147,12 +147,12 @@
 (defvar yc/emacs-cache-dir (expand-file-name "~/.cache/emacs/")
   "Caching directory.")
 
-(defun yc/make-cache-dir (path)
+(defun yc/make-cache-path (path)
   "Compose cache directory for PATH."
-  (concat yc/emacs-cache-dir path))
+  (expand-file-name path yc/emacs-cache-dir ))
 
 ;;;; backup settings 备份设置
-(let ((emacs-backup-dir (yc/make-cache-dir "backups")))
+(let ((emacs-backup-dir (yc/make-cache-path "backups")))
   (setq backup-directory-alist   `((".*" . ,emacs-backup-dir))
         ;; auto-save-file-name-transforms `((".*" ,emacs-backup-dir t))
         auto-save-list-file-prefix  emacs-backup-dir))
