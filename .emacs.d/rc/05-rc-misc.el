@@ -563,7 +563,9 @@ If there is no .svn directory, examine if there is CVS and run
      )
    doc-view-mode-map
    )
-  (setq doc-view-cache-directory "~/.emacs.d/docview"))
+  (custom-set-variables
+   '(doc-view-cache-directory (yc/make-cache-dir "docview")))
+
 
 
 (autoload 'stringtemplate-mode "stringtemplate-mode" ""  t)

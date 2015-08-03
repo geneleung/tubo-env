@@ -144,11 +144,18 @@
 ;; 可以递归的使用 minibuffer
 (setq enable-recursive-minibuffers t)
 
+(defvar yc/emacs-cache-dir (expand-file-name "~/.cache/emacs/")
+  "Caching directory.")
+
+(defun yc/make-cache-dir (path)
+  "Compose cache directory for PATH."
+  (concat yc/emacs-cache-dir path))
+
 ;;;; backup settings 备份设置
-(let ((emacs-tmp-dir (expand-file-name "~/.emacs.d/tmpfiles/backups")))
-  (setq backup-directory-alist   `((".*" . ,emacs-tmp-dir))
-        auto-save-file-name-transforms `((".*" ,emacs-tmp-dir t))
-        auto-save-list-file-prefix  emacs-tmp-dir))
+(let ((emacs-backup-dir (yc/make-cache-dir "backups")))
+  (setq backup-directory-alist   `((".*" . ,emacs-backup-dir))
+        ;; auto-save-file-name-transforms `((".*" ,emacs-backup-dir t))
+        auto-save-list-file-prefix  emacs-backup-dir))
 (setq delete-old-versions t) ; Delete Old verion of backup files.
 (setq kept-new-versions 2)
 (setq kept-old-versions 2)

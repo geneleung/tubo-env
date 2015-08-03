@@ -111,8 +111,11 @@
                  '(project unloaded system recursive))
 
 (global-semanticdb-minor-mode 1)
-(yc/customize-variable semanticdb-default-save-directory
-                       (expand-file-name "~/.emacs.d/tmpfiles/semanticdb"))
+(custom-set-variables
+ '(semanticdb-default-save-directory
+   (expand-file-name (concat yc/emacs-cache-dir "semanticdb"))))
+
+
 
 ;; ;; if you want to enable support for gnu global
 (require 'cedet-global)
