@@ -91,14 +91,14 @@ detailed descriptions."
 
 (emr-declare-command 'emr-cc-format-region
   :title "Format region"
-  :description "using clang"
+  :description "with clang"
   :modes '(c-mode c++-mode)
   :predicate (lambda ()
                (and mark-active (not (equal (mark) (point)))
                     (executable-find "clang-format"))))
 (emr-declare-command 'emr-cc-format-buffer
   :title "Format Buffer"
-  :description "using clang"
+  :description "with clang"
   :modes '(c-mode c++-mode)
   :predicate (lambda ()
                (and (not mark-active)
