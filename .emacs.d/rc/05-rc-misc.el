@@ -382,14 +382,15 @@ If there is no .svn directory, examine if there is CVS and run
 
 (add-hook 'magit-mode-hook
           (lambda ()
-            (when (load "magit-svn-mode" t)
-              (if (and (file-exists-p ".git/svn/.metadata")
-                       (string-match ".*/svn"
-                                     (with-temp-buffer
-                                       (insert-file-contents ".git/HEAD")
-                                       (buffer-substring-no-properties (point-min) (point-max)))))
-                  (magit-svn-mode 1)
-                (magit-svn-mode -1)))))
+            (if (and (file-exists-p ".git/svn/.metadata")
+                     (string-match ".*/svn"
+                                   (with-temp-buffer
+                                     (insert-file-contents ".git/HEAD")
+                                     (buffer-substring-no-properties (point-min) (point-max)))))
+                (progn
+                  (load "magit-svn")
+                  (magit-svn-mode 1))
+              (and (fboundp 'magit-svn-mode) (magit-svn-mode -1)))))
 
  ;; **************************** RFCs ******************************
 
