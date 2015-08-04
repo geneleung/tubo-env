@@ -241,47 +241,49 @@
  ;; company mode..
 (require 'company)
 (global-company-mode)
+
+(yc/autoload 'company-yasnippet)
+
 (yc/eval-after-load
  "company"
  (define-key company-active-map [tab] 'company-complete)
  (define-key company-active-map (kbd "TAB") 'company-complete))
 
 (custom-set-variables
- '(company-backends
-   (quote
-    (company-bbdb
-     company-oddmuse company-files company-dabbrev company-abbrev)))
+ '(company-backends '((company-files company-dabbrev company-abbrev :with company-yasnippet)))
  '(company-minimum-prefix-length 2)
  '(company-idle-delay 0.5))
 
-(defmacro yc/add-company-backends (backends)
+(defmacro yc/add-company-backends-with-yasnippet (&rest backends)
   `(set (make-local-variable 'company-backends)
-        (append ,backends company-backends)))
+        (push ',(append backends '(:with company-yasnippet)) company-backends)))
+
+(defmacro yc/add-company-backends (&rest backends)
+  `(set (make-local-variable 'company-backends)
+        (push ',backends company-backends)))
 
 (add-hook 'prog-mode-hook
           (lambda ()
             (yc/add-company-backends
-             '(company-semantic
-              company-capf
-              (company-dabbrev-code company-gtags company-keywords)))))
+             company-keywords company-gtags company-dabbrev-code company-capf)
+            (yc/add-company-backends-with-yasnippet
+             company-semantic)))
 
 (add-hook 'java-mode-hook
           (lambda ()
-            (yc/add-company-backends '(company-eclim))))
+            (yc/add-company-backends-with-yasnippet company-eclim)))
 
 (add-hook 'nxml-mode-hook
           (lambda ()
-            (yc/add-company-backends
-             '(company-nxml))))
+            (yc/add-company-backends-with-yasnippet company-nxml)))
 
 (add-hook 'css-mode-hook
           (lambda ()
-            (yc/add-company-backends
-             '(company-css))))
+            (yc/add-company-backends-with-yasnippet company-css)))
 
 (add-hook 'cmake-mode-hook
             (lambda ()
-            (yc/add-company-backends '(company-cmake))))
+            (yc/add-company-backends-with-yasnippet company-cmake)))
 
 (provide '06-rc-complete)
 
