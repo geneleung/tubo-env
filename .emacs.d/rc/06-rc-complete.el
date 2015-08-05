@@ -242,54 +242,67 @@
 ;; *********************** Autocomplete ***********************
 (require 'auto-complete-config)
 
-;; Overwrite original ac-handle-pos-command
-(defun ac-handle-post-command ()
-  (condition-case var
-    (when (and ac-triggered
-               (or ac-auto-start
-                   ac-completing)
-               (not isearch-mode)
-               (looking-back (rx alnum)))
-      (setq ac-last-point (point))
-      (ac-start :requires (unless ac-completing ac-auto-start))
-      (unless ac-disable-inline
-        (ac-inline-update)))
-    (error (ac-error var))))
+(custom-set-variables
+ '(ac-auto-start 2)
+ '(ac-dwim t)
+ '(ac-auto-show-menu 0.8)
+ '(ac-quick-help-delay 0.8)
+ '(ac-ignore-case nil)
+ '(ac-modes
+   (quote (cmake-mode protobuf-mode antlr-mode objc-mode flyspell-mode sawfish-mode
+    nxml-mode powershell-mode graphviz-dot-mode eshell-mode text-mode org-mode
+    literate-haskell-mode latex-mode emms-tag-editor-mode html-mode conf-mode asm-mode
+    emacs-lisp-mode lisp-mode lisp-interaction-mode slime-repl-mode c-mode cc-mode c++-mode
+    go-mode java-mode malabar-mode clojure-mode clojurescript-mode scala-mode scheme-mode
+    ocaml-mode tuareg-mode coq-mode haskell-mode agda-mode agda2-mode perl-mode cperl-mode
+    python-mode ruby-mode lua-mode tcl-mode ecmascript-mode javascript-mode js-mode js2-mode
+    php-mode css-mode scss-mode less-css-mode makefile-mode sh-mode fortran-mode f90-mode
+    ada-mode xml-mode sgml-mode web-mode ts-mode sclang-mode verilog-mode qml-mode))))
 
-(defun yc/ac-cc-mode-hook ()
-  "cc mode hook"
-  ;; (add-to-list 'ac-sources 'ac-source-semantic)
-  )
+
+(setq-default ac-sources
+              '(ac-source-yasnippet ac-source-abbrev ac-source-dictionary
+                                    ac-source-words-in-same-mode-buffers))
+
+(defun yc/add-ac-sources (&rest sources)
+  "Add sources.."
+  (setq ac-sources (append sources ac-sources)))
+
+(add-hook 'prog-mode-hook
+          (lambda ()
+            (yc/add-ac-sources
+             ac-source-semantic ac-source-gtags)))
 
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()
-            (add-to-list 'ac-sources 'ac-source-symbols)
-            (ac-emacs-lisp-mode-setup)))
+            (yc/add-ac-sources ac-source-features ac-source-functions
+                               ac-source-variables ac-source-symbols)))
 
-(add-hook 'ruby-mode-hook 'ac-ruby-mode-setup)
-(add-hook 'css-mode-hook 'ac-css-mode-setup)
-(add-hook 'auto-complete-mode-hook 'ac-common-setup)
-(add-hook 'c-mode-common-hook
+(add-hook 'css-mode-hook
           (lambda ()
-            (setq ac-sources '(ac-source-yasnippet
-                               ;; ac-source-semantic-raw
-                               ac-source-semantic
-                               ac-source-gtags
-                               ac-source-abbrev
-                               ac-source-dictionary
-                               ac-source-words-in-same-mode-buffers))))
+            (yc/add-ac-sources ac-source-css-property)))
+
+;; Overwrite original ac-handle-pos-command
+;; (defun ac-handle-post-command ()
+;;   (condition-case var
+;;     (when (and ac-triggered
+;;                (or ac-auto-start
+;;                    ac-completing)
+;;                (not isearch-mode)
+;;                (looking-back (rx alnum)))
+;;       (setq ac-last-point (point))
+;;       (ac-start :requires (unless ac-completing ac-auto-start))
+;;       (unless ac-disable-inline
+;;         (ac-inline-update)))
+;;     (error (ac-error var))))
+
+
 (ac-flyspell-workaround)
 
-(custom-set-variables
- '(ac-auto-start 3)
- '(ac-dwim t)
- '(ac-auto-show-menu 1.5)
- '(ac-quick-help-delay 0.5)
- '(ac-ignore-case nil))
-
 (add-to-list 'ac-dictionary-directories "~/.emacs.d/templates/ac-dict")
-(ac-config-default)
+
 (global-auto-complete-mode t)
+
 (mapc
  (lambda(mode)
    (add-to-list 'ac-modes mode))
