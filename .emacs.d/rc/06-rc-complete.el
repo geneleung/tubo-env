@@ -248,16 +248,19 @@
  '(ac-auto-show-menu 0.8)
  '(ac-quick-help-delay 0.8)
  '(ac-ignore-case nil)
- '(ac-modes
-   (quote (cmake-mode protobuf-mode antlr-mode objc-mode flyspell-mode sawfish-mode
-    nxml-mode powershell-mode graphviz-dot-mode eshell-mode text-mode org-mode
-    literate-haskell-mode latex-mode emms-tag-editor-mode html-mode conf-mode asm-mode
-    emacs-lisp-mode lisp-mode lisp-interaction-mode slime-repl-mode c-mode cc-mode c++-mode
-    go-mode java-mode malabar-mode clojure-mode clojurescript-mode scala-mode scheme-mode
-    ocaml-mode tuareg-mode coq-mode haskell-mode agda-mode agda2-mode perl-mode cperl-mode
-    python-mode ruby-mode lua-mode tcl-mode ecmascript-mode javascript-mode js-mode js2-mode
-    php-mode css-mode scss-mode less-css-mode makefile-mode sh-mode fortran-mode f90-mode
-    ada-mode xml-mode sgml-mode web-mode ts-mode sclang-mode verilog-mode qml-mode))))
+ '(ac-use-menu-map t)
+ ;; '(ac-candidate-limit 20)
+ '(ac-comphist-file (yc/make-cache-path "ac-comphist.dat"))
+ '(ac-modes (quote (cmake-mode protobuf-mode antlr-mode objc-mode flyspell-mode
+   sawfish-mode nxml-mode powershell-mode graphviz-dot-mode eshell-mode text-mode
+   org-mode literate-haskell-mode latex-mode emms-tag-editor-mode html-mode conf-mode
+   asm-mode emacs-lisp-mode lisp-mode lisp-interaction-mode slime-repl-mode c-mode
+   cc-mode c++-mode go-mode java-mode malabar-mode clojure-mode clojurescript-mode
+   scala-mode scheme-mode ocaml-mode tuareg-mode coq-mode haskell-mode agda-mode
+   agda2-mode perl-mode cperl-mode python-mode ruby-mode lua-mode tcl-mode
+   ecmascript-mode javascript-mode js-mode js2-mode php-mode css-mode scss-mode
+   less-css-mode makefile-mode sh-mode fortran-mode f90-mode ada-mode xml-mode
+   sgml-mode web-mode ts-mode sclang-mode verilog-mode qml-mode))))
 
 
 (setq-default ac-sources

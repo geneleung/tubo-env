@@ -1331,7 +1331,7 @@ and is reversed for better performence.")
 
  ;; Lisp mode.
 
-(cdsq yc/lisp-keywords
+(defvar yc/lisp-keywords
       (rx bow (group (or "add-to-list" "try-require" "add-hook" "autoload"
                          "yc/eval-after-load" "try-require-autoloads"
                          "fboundp" "boundp" "featurep" "define-or-set"
@@ -1355,14 +1355,14 @@ and is reversed for better performence.")
   ")")
 
 (defun my-lisp-hook ()
-  (local-set-key  [(tab)] 'indent-or-complete)
+  "Hook to run for Lisp mode."
   (yc/add-keyword yc/lisp-keywords 'font-lock-keyword-face)
-  (make-local-variable 'header-field-list)
-  (setq header-field-list
+  (set (make-local-variable 'header-field-list)
         '(lisp_desc blank copyright blank author blank n_emacs gpl
                     blank e_comment blank))
   (make-local-variable 'autopair-skip-whitespace)
-  (setq autopair-skip-whitespace 'chmop))
+  (setq autopair-skip-whitespace 'chmop
+        fill-column 86))
 
 (define-abbrev-table 'emacs-lisp-mode-abbrev-table
   '(
