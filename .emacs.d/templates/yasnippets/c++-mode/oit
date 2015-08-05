@@ -1,5 +1,6 @@
 # -*- mode: snippet -*-
 # name: out_it
 # key: oiter
+# key: outer
 # --
 ostream_iterator<${1:T}> out_it (cout,${2:", "});

@@ -272,3 +272,6 @@ tmp/
 /Google 云端硬盘/
 /.cgdb/
 /.tgdb/
+/.install4j
+/.Spark/.settings
+/.Spark/

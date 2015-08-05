@@ -4,5 +4,4 @@
 # --
 namespace ${1:NameSpace}
 {
-$0
-}
+$0}

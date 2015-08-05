@@ -120,6 +120,7 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
   "description"
   `(add-to-list 'auto-mode-alist
                 (cons ,expr ,mode)))
+
  ;; Functions
 
 ;;; Start debug on error.
@@ -700,6 +701,9 @@ inserts comment at the end of the line."
               (message "Skipping directory: %s" fn)
             (message "Processing file: %s" fn)
             (shell-command (concat cmd (file-name-nondirectory fn)))))))))
+
+(defun yc/set-c-env (&rest args)
+  (setenv "LANG" "C"))
 
 
 (defun yc/setup-exec-path ()

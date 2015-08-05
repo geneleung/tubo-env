@@ -1193,33 +1193,6 @@ and is reversed for better performence.")
 
 
 
-;;
-;; Something private or confidential (such as Copyright of source code) should
-;; get set in ~/.emacs.d/rc/100-priv.el. This file will not be updated to
-;; github.
-;;
-;; Example of 100-priv.el:
-;;
-;; (when (try-require  'auto-header)
-;;   (setq header-max-search (* fill-column 2))
-;;   (setq header-email-address "yangyingchao@gmail.com")
-;;   (setq header-copyright-notice  "Copyright (C) 2011, Yang, Ying-chao")
-;;   (setq-default header-field-list
-;;                 '(copyright  yc/sep author yc/sep gpl  yc/sep
-;;                              description yc/sep)))
-;; (provide '100-priv)
-
-;; (when (not (try-require '100-private))
-;;   (when (try-require  'auto-header)
-;;     (setq header-max-search (* fill-column 2))
-;;     (setq header-email-address "yangyingchao@gmail.com")
-;;     (setq header-copyright-notice  "Copyright (C) 2011, Yang, Ying-chao")
-;;     (setq-default header-field-list
-;;                   '(copyright  yc/sep author yc/sep gpl  yc/sep
-;;                                description yc/sep))))
-
-(autoload 'header-make "auto-header" ""  t)
-
 (defun yc/header-make ()
   "Make header based on srecode"
   (interactive)
@@ -1903,7 +1876,10 @@ ARG specifies the number of cores.
 
 \(fn &optional ARG)" t nil)
 
-(global-set-key (kbd "<M-f6>")  'helm-make)
+(advice-add 'helm-make :before #'yc/set-c-env)
+(advice-add 'helm-make-projectile :before #'yc/set-c-env)
+
+(global-set-key (kbd "<M-f6>") 'helm-make)
 (global-set-key (kbd "<C-S-f6>")  'helm-make-projectile)
 
 
