@@ -271,8 +271,17 @@ which is options for `diff'."
    '(ediff-custom-diff-options "-urNa")
    '(ediff-diff-options "")
    '(ediff-split-window-function 'split-window-horizontally)
-   '(ediff-window-setup-function 'ediff-setup-windows-plain)
-   ))
+   '(ediff-window-setup-function 'ediff-setup-windows-plain))
+  (define-key 'ediff-mode-map "d" 'ediff-copy-both-to-C))
+
+(defun ediff-copy-both-to-C ()
+  "Copy both regions into C."
+  (interactive)
+  (ediff-copy-diff
+   ediff-current-difference nil 'C nil
+   (concat
+    (ediff-get-region-contents ediff-current-difference 'A ediff-control-buffer)
+    (ediff-get-region-contents ediff-current-difference 'B ediff-control-buffer))))
 
 (defun yc/kill-buffer-file (fn)
   "Kill buffer which contains file specified by fn"
