@@ -117,9 +117,16 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
          (list ,sym 1 ,type t ))))
 
 (defmacro yc/set-mode (mode expr)
-  "description"
+  "Set MODE EXPR into `auto-mode-alist."
   `(add-to-list 'auto-mode-alist
                 (cons ,expr ,mode)))
+
+(defmacro yc/with-prefix (func &rest args)
+  "Call FUNC with ARGS as prefix."
+  `(lambda ()
+     (interactive)
+     (let ((current-prefix-arg ',args))
+       (call-interactively ,func))))
 
  ;; Functions
 

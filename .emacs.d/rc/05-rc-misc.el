@@ -330,45 +330,6 @@ which is options for `diff'."
 (global-set-key [(meta f3)] 'highlight-symbol-prev)
 (global-set-key [(control meta f3)] 'highlight-symbol-query-replace)
 
-
-;; ************************** SVN Settings *****************************
-
-(autoload 'svn-checkout "psvn" "\
-Run svn checkout REPOS-URL PATH.
-
-\(fn REPOS-URL PATH)" t nil)
-(defalias 'svn-examine 'svn-status)
-
-(autoload 'svn-status "psvn" "\
-Examine the status of Subversion working copy in directory DIR.
-If ARG is -, allow editing of the parameters. One could add -N to
-run svn status non recursively to make it faster.
-For every other non nil ARG pass the -u argument to `svn status', which
-asks svn to connect to the repository and check to see if there are updates
-there.
-
-If there is no .svn directory, examine if there is CVS and run
-`cvs-examine'. Otherwise ask if to run `dired'.
-
-\(fn DIR &optional ARG)" t nil)
-
-(add-to-list 'auto-mode-alist '("svn-commit.*" . log-edit-mode))
-(global-set-key "\C-xvs" 'svn-status)
-(yc/eval-after-load
- "psvn"
- ;; C-xvv Bind to vc-next-action.
- (global-set-key "\C-xvv" 'svn-status-commit)
- (global-set-key "\C-xvl" 'svn-status-show-svn-log)
- (global-set-key "\C-xvu" 'svn-status-update-cmd)
- (define-key svn-status-mode-map (kbd "d") 'svn-status-rm)
- )
-
-
-
-(defun svn-status-curdir()
-  (interactive)
-  (svn-status (file-name-directory (buffer-file-name))))
-
  ;; Cool magit tool for git.
 (autoload 'magit-status "magit" "magit"  t)
 (autoload 'magit-blame-mode "magit-blame" "blame"  t)
@@ -389,17 +350,24 @@ If there is no .svn directory, examine if there is CVS and run
           (lambda ()
             (turn-on-flyspell)))
 
-(add-hook 'magit-mode-hook
-          (lambda ()
-            (if (and (file-exists-p ".git/svn/.metadata")
-                     (string-match ".*/svn"
-                                   (with-temp-buffer
-                                     (insert-file-contents ".git/HEAD")
-                                     (buffer-substring-no-properties (point-min) (point-max)))))
-                (progn
-                  (load "magit-svn")
-                  (magit-svn-mode 1))
-              (and (fboundp 'magit-svn-mode) (magit-svn-mode -1)))))
+(add-hook
+ 'magit-status-mode-hook
+ (lambda ()
+   (message "called...")
+   (if (and (file-exists-p ".git/svn/.metadata")
+            (string-match ".*/svn"
+                          (with-temp-buffer
+                            (insert-file-contents ".git/HEAD")
+                            (buffer-substring-no-properties (point-min) (point-max)))))
+       (progn
+         (load "magit-svn")
+         (message "Turning on svn mode")
+         (setq magit-svn-mode t))
+         (magit-svn-mode))
+     (when (fboundp 'magit-svn-mode)
+       (message "Turning off svn mode")
+       (setq magit-svn-mode nil)
+       (magit-svn-mode))))
 
  ;; **************************** RFCs ******************************
 

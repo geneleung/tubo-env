@@ -1882,8 +1882,8 @@ ARG specifies the number of cores.
 (advice-add 'helm-make :before #'yc/set-c-env)
 (advice-add 'helm-make-projectile :before #'yc/set-c-env)
 
-(global-set-key (kbd "<M-f6>") 'helm-make)
-(global-set-key (kbd "<C-S-f6>")  'helm-make-projectile)
+(global-set-key (kbd "<M-f6>") (yc/with-prefix 'helm-make (yc/get-cpu-number)))
+(global-set-key (kbd "<C-S-f6>") (yc/with-prefix 'helm-make-projectile (yc/get-cpu-number)))
 
 
 
