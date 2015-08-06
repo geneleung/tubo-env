@@ -252,6 +252,15 @@ which is options for `diff'."
 (autoload 'ediff-buffers "ediff" "" t)
 (autoload 'smerge-ediff "smerge-mode" "Invoke ediff to resolve the conflicts."  t)
 
+(defun ediff-copy-both-to-C ()
+  "Copy both regions into C."
+  (interactive)
+  (ediff-copy-diff
+   ediff-current-difference nil 'C nil
+   (concat
+    (ediff-get-region-contents ediff-current-difference 'A ediff-control-buffer)
+    (ediff-get-region-contents ediff-current-difference 'B ediff-control-buffer))))
+
 (yc/eval-after-load
  "ediff"
  (setq-default ediff-ignore-similar-regions t)
@@ -272,16 +281,11 @@ which is options for `diff'."
    '(ediff-diff-options "")
    '(ediff-split-window-function 'split-window-horizontally)
    '(ediff-window-setup-function 'ediff-setup-windows-plain))
-  (define-key 'ediff-mode-map "d" 'ediff-copy-both-to-C))
+  )
 
-(defun ediff-copy-both-to-C ()
-  "Copy both regions into C."
-  (interactive)
-  (ediff-copy-diff
-   ediff-current-difference nil 'C nil
-   (concat
-    (ediff-get-region-contents ediff-current-difference 'A ediff-control-buffer)
-    (ediff-get-region-contents ediff-current-difference 'B ediff-control-buffer))))
+(add-hook 'ediff-keymap-setup-hook
+          (lambda ()
+            (define-key 'ediff-mode-map "d" 'ediff-copy-both-to-C)))
 
 (defun yc/kill-buffer-file (fn)
   "Kill buffer which contains file specified by fn"
@@ -333,6 +337,7 @@ which is options for `diff'."
  ;; Cool magit tool for git.
 (autoload 'magit-status "magit" "magit"  t)
 (autoload 'magit-blame-mode "magit-blame" "blame"  t)
+
 (global-set-key "\C-xgs" 'magit-status)
 
 (yc/eval-after-load
@@ -350,24 +355,29 @@ which is options for `diff'."
           (lambda ()
             (turn-on-flyspell)))
 
+(defun yc/update-magit-svn-mode ()
+  "Enable or disable magit-svn-mode."
+  (interactive)
+  (when (and (fboundp 'magit-svn-mode)
+             (boundp 'magit-svn-mode))
+    (if (and (file-exists-p ".git/svn/.metadata")
+             (string-match ".*/svn"
+                           (with-temp-buffer
+                             (insert-file-contents ".git/HEAD")
+                             (buffer-substring-no-properties (point-min) (point-max)))))
+        (progn
+          (unless (fboundp 'magit-svn-mode)
+            (load "magit-svn"))
+          (unless magit-svn-mode
+            (call-interactively 'magit-svn-mode)))
+      (when (fboundp 'magit-svn-mode)
+        (if magit-svn-mode
+            (call-interactively 'magit-svn-mode))))))
 (add-hook
  'magit-status-mode-hook
- (lambda ()
-   (message "called...")
-   (if (and (file-exists-p ".git/svn/.metadata")
-            (string-match ".*/svn"
-                          (with-temp-buffer
-                            (insert-file-contents ".git/HEAD")
-                            (buffer-substring-no-properties (point-min) (point-max)))))
-       (progn
-         (load "magit-svn")
-         (message "Turning on svn mode")
-         (setq magit-svn-mode t))
-         (magit-svn-mode))
-     (when (fboundp 'magit-svn-mode)
-       (message "Turning off svn mode")
-       (setq magit-svn-mode nil)
-       (magit-svn-mode))))
+  'yc/update-magit-svn-mode)
+
+(advice-add 'magit-refresh :after #'yc/update-magit-svn-mode)
 
  ;; **************************** RFCs ******************************
 
