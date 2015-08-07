@@ -151,11 +151,6 @@
 
 (yc/eval-after-load "org"
                     (push (purecopy (append '(org) (version-to-list org-version))) package--builtin-versions)
-                    (setq org-export-time-stamp-file nil
-                          org-confirm-babel-evaluate nil
-                          org-startup-indented t
-                          org-directory (convert-standard-filename "~/Work/Orgs")
-                          org-default-notes-file (convert-standard-filename "~/Work/Orgs/notes.org"))
                     (custom-set-variables
                      '(org-ditaa-jar-path "~/.emacs.d/site-lisp/org_contrib/ditaa.jar")
                      '(org-blank-before-new-entry (quote ((heading . auto) (plain-list-item))))
@@ -165,6 +160,11 @@
                      '(org-special-ctrl-a/e t)
                      '(org-special-ctrl-k t)
                      '(org-startup-folded nil)
+                     '(org-export-time-stamp-file nil)
+                     '(org-confirm-babel-evaluate nil)
+                     '(org-startup-indented t)
+                     '(org-directory (convert-standard-filename "~/Work/Orgs"))
+                     '(org-default-notes-file (expand-file-name "~/Work/Orgs/notes.org"))
                      '(org-src-lang-modes '(("ocaml" . tuareg)
                                             ("elisp" . emacs-lisp)
                                             ("ditaa" . artist)
@@ -220,21 +220,17 @@
                       (let (org-log-done org-log-states)   ; turn off logging
                         (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
 
-                    (defadvice org-html-paragraph (before fsh-org-html-paragraph-advice
-                                                          (paragraph contents info) activate)
-                      "Join consecutive Chinese lines into a single long line without
+                    (advice-add
+                     'org-html-paragraph :around
+                     (lambda (func &rest args)
+                       "Join consecutive Chinese lines into a single long line without
 unwanted space when exporting org-mode to html."
-                      (let ((fixed-contents)
-                            (orig-contents (ad-get-arg 1))
-                            (reg-han "[[:multibyte:]]"))
-                        (setq fixed-contents (replace-regexp-in-string
-                                              (concat "\\(" reg-han "\\) *\n *\\(" reg-han "\\)")
-                                              "\\1\\2" orig-contents))
-                        (ad-set-arg 1 fixed-contents)
-                        ))
-
-                    (ad-activate 'org-html-paragraph)
-
+                       (let ((orig-contents (cadr args))
+                             (reg-han "[[:multibyte:]]"))
+                         (setf (cadr args) (replace-regexp-in-string
+                                             (concat "\\(" reg-han "\\) *\n *\\(" reg-han "\\)")
+                                             "\\1\\2" orig-contents))
+                         (apply func args))))
                     (substitute-key-definition
                      'org-cycle-agenda-files  'backward-page org-mode-map)
 

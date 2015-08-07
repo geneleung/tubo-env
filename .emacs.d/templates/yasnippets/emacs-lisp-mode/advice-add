@@ -2,8 +2,10 @@
 # name: advice-add
 # key: adva
 # --
-(advice-add '${1:ORIG_FUNC} :${2:b}${2:$(cond
-                                      ((string-match "^b" yas-text) "efore")
-                                      ((string-match "^ar" yas-text) "ound")
-                                      ((string-match "^a" yas-text) "fter")
-                                      (t ""))} #'${3:CUSTOM_FUNC})
+(advice-add
+  '${1:ORIG_FUNC} :${2:b}${2:$(cond
+                               ((string-match "^b" yas-text) "efore")
+                               ((string-match "^a" yas-text) "round")
+                               ((string-match "^af" yas-text) "ter")
+                               (t ""))}
+  #'$0)

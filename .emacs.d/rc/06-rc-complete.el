@@ -198,11 +198,12 @@
       (yas-load-directory my-yasnippet-dir)))
 
   (defvar yc/yas-loaded nil "Flag -- if snippets are loaded or not")
-  (defadvice yas-reload-all (before yc/yas-reload-all )
-    (interactive)
-    (if yc/yas-loaded
-        (yas-recompile-all)))
-  (ad-activate 'yas-reload-all)
+
+  (advice-add
+   'yas-reload-all :before
+   (lambda (&rest args)
+     (if yc/yas-loaded
+         (yas-recompile-all))))
 
   (defun yc/new-snippet (name)
     "Create snippet for current mode."
@@ -285,35 +286,19 @@
           (lambda ()
             (yc/add-ac-sources ac-source-css-property)))
 
-;; Overwrite original ac-handle-pos-command
-;; (defun ac-handle-post-command ()
-;;   (condition-case var
-;;     (when (and ac-triggered
-;;                (or ac-auto-start
-;;                    ac-completing)
-;;                (not isearch-mode)
-;;                (looking-back (rx alnum)))
-;;       (setq ac-last-point (point))
-;;       (ac-start :requires (unless ac-completing ac-auto-start))
-;;       (unless ac-disable-inline
-;;         (ac-inline-update)))
-;;     (error (ac-error var))))
-
+;; only try to start complete after meaningful characters.
+(advice-add
+ 'ac-handle-post-command :around
+ (lambda (func &rest args)
+   (if (and (> (point) (point-min))
+            (looking-back (rx (>= 2 (or alnum "_"))) 2))
+     (apply func args))))
 
 (ac-flyspell-workaround)
 
 (add-to-list 'ac-dictionary-directories "~/.emacs.d/templates/ac-dict")
 
 (global-auto-complete-mode t)
-
-(mapc
- (lambda(mode)
-   (add-to-list 'ac-modes mode))
- '(asm-mode conf-mode html-mode
-            emms-tag-editor-mode haskell-mode latex-mode lisp-mode
-            literate-haskell-mode org-mode text-mode eshell-mode
-            graphviz-dot-mode powershell-mode nxml-mode
-            sawfish-mode flyspell-mode objc-mode antlr-mode protobuf-mode cmake-mode tcl-mode))
 
 ;; Autofill Keybinding.
 (define-key ac-complete-mode-map (kbd "<C-tab>") 'ac-expand)

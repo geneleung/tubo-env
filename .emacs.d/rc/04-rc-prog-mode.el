@@ -464,17 +464,17 @@ and is reversed for better performence.")
   '(hide-ifdef-initially t)
   '(hide-ifdef-read-only nil)
   '(hide-ifdef-shadow t))
- (defadvice hide-ifdefs (around yc/hideifdefs (&optional nomsg))
-   (interactive)
-   (setq hif-outside-read-only buffer-read-only)
-   (unless hide-ifdef-mode (hide-ifdef-mode 1)) ; turn on hide-ifdef-mode
-   (if hide-ifdef-hiding
-       (show-ifdefs))			; Otherwise, deep confusion.
-   (setq hide-ifdef-hiding t)
-   (hide-ifdef-guts)
-   (setq buffer-read-only (or hide-ifdef-read-only hif-outside-read-only))
-   )
- (ad-activate 'hide-ifdefs)
+ (advice-add
+  'hide-ifdefs :around
+  (lambda (&rest args)
+    (interactive)
+    (setq hif-outside-read-only buffer-read-only)
+    (unless hide-ifdef-mode (hide-ifdef-mode 1)) ; turn on hide-ifdef-mode
+    (if hide-ifdef-hiding
+        (show-ifdefs))			; Otherwise, deep confusion.
+    (setq hide-ifdef-hiding t)
+    (hide-ifdef-guts)
+    (setq buffer-read-only (or hide-ifdef-read-only hif-outside-read-only))))
 
  (defun yc/add-to-ifdef-env (lst)
    "Helper function to update ifdef-env."
@@ -1461,44 +1461,43 @@ and is reversed for better performence.")
   (custom-set-variables
    '(gdb-many-windows t))
 
-  (defadvice gdb-setup-windows (around yc/gdb-setup-windows ())
-    (gdb-get-buffer-create 'gdb-locals-buffer)
-    (gdb-get-buffer-create 'gdb-stack-buffer)
-    (gdb-get-buffer-create 'gdb-breakpoints-buffer)
-    (set-window-dedicated-p (selected-window) nil)
-    (switch-to-buffer gud-comint-buffer) ;;0
-    (delete-other-windows)
-    (let* ((win-src (selected-window))
-           (win-gud (split-window-right))
-           (win-stack (split-window win-src ( / ( * (window-height win-src) 3) 4)))
-           (win-bk (split-window win-gud ( / (window-height win-gud) 2)))
-           ;; (win-local (split-window win-gud ( / (window-height  win-gud) 3)))
-           )
+  (advice-add
+   'gdb-setup-windows :around
+   (lambda ()
+     (interactive)
+     (gdb-get-buffer-create 'gdb-locals-buffer)
+     (gdb-get-buffer-create 'gdb-stack-buffer)
+     (gdb-get-buffer-create 'gdb-breakpoints-buffer)
+     (set-window-dedicated-p (selected-window) nil)
+     (switch-to-buffer gud-comint-buffer) ;;0
+     (delete-other-windows)
+     (let* ((win-src (selected-window))
+            (win-gud (split-window-right))
+            (win-stack (split-window win-src ( / ( * (window-height win-src) 3) 4)))
+            (win-bk (split-window win-gud ( / (window-height win-gud) 2)))
+            ;; (win-local (split-window win-gud ( / (window-height  win-gud) 3)))
+            )
 
-      ;; (gdb-set-window-buffer (gdb-locals-buffer-name) nil win-local)
-      (set-window-buffer
-       win-src
-       (if gud-last-last-frame
-           (gud-find-file (car gud-last-last-frame))
-         (if gdb-main-file
-             (gud-find-file gdb-main-file)
-           ;; Put buffer list in window if we
-           ;; can't find a source file.
-           (list-buffers-noselect))))
+       ;; (gdb-set-window-buffer (gdb-locals-buffer-name) nil win-local)
+       (set-window-buffer
+        win-src
+        (if gud-last-last-frame
+            (gud-find-file (car gud-last-last-frame))
+          (if gdb-main-file
+              (gud-find-file gdb-main-file)
+            ;; Put buffer list in window if we
+            ;; can't find a source file.
+            (list-buffers-noselect))))
 
-      (setq gdb-source-window win-src)
+       (setq gdb-source-window win-src)
 
-      (gdb-set-window-buffer (gdb-stack-buffer-name) nil win-stack)
+       (gdb-set-window-buffer (gdb-stack-buffer-name) nil win-stack)
 
-      (gdb-set-window-buffer (if gdb-show-threads-by-default
-                                 (gdb-threads-buffer-name)
-                               (gdb-breakpoints-buffer-name))
-                             nil win-bk)
-      (select-window win-gud)))
-
-  (ad-activate 'gdb-setup-windows)
-  )
-
+       (gdb-set-window-buffer (if gdb-show-threads-by-default
+                                  (gdb-threads-buffer-name)
+                                (gdb-breakpoints-buffer-name))
+                              nil win-bk)
+       (select-window win-gud)))))
 
 
 ;;;;;;;; configurations of powershell-mode ;;;;;;;;
@@ -1745,11 +1744,11 @@ and is reversed for better performence.")
 
 (global-set-key (kbd "<S-f6>") 'emr-show-refactor-menu)
 
-(defadvice emr-initialize (around yc/emr-initialize ())
-  (load-library "emr-iedit")
-  (load-library "emr-cc")
-  ad-do-it)
-(ad-activate 'emr-initialize)
+(advice-add
+ 'emr-initialize :before
+ (lambda (&rest args)
+   (load-library "emr-iedit")
+   (load-library "emr-cc")))
 
 (yc/eval-after-load
  "emr"

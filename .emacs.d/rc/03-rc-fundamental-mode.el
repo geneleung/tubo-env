@@ -88,20 +88,21 @@
 
  ;; redefine some functions with helm.
 
- (defadvice edit-project (around helm/edit-project ())
+ (defun edit-project ()
    (interactive)
    (helm-rc-list-directory "~/.emacs.d/rc" "^99[0-9]?.*?\.el"))
- (ad-activate 'edit-project)
 
- (defadvice edit-rcs (around helm/edit-rcs ())
+ (defun edit-rcs ()
    (interactive)
    (helm-rc-list-directory "~/.emacs.d/rc" "^[0-9]+.*?\.el"))
- (ad-activate 'edit-rcs)
 
- (defadvice edit-template (around helm/edit-template ())
+ (defun edit-template ()
    (interactive)
    (helm-rc-list-directory "~/.emacs.d/templates" (rx (or alnum "_"))))
- (ad-activate 'edit-template)
+
+ (defun edit-site-lisp ()
+   (interactive)
+   (helm-rc-list-directory "~/.emacs.d/site-lisp" (rx (or alnum "_"))))
 
  (define-key helm-map (kbd "<M-return>")  'helm-kill-marked-buffers)
  (define-key helm-map (kbd "<tab>") 'helm-execute-persistent-action)

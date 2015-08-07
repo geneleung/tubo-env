@@ -201,37 +201,9 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
 ;; *********** Fuctions for edit special rc-files quickly ************
 
 (defun edit-emacs ()
+  "Edit Emacs configuration."
   (interactive)
   (find-file "~/.emacs"))
-
-(defun edit-project ()
-  (interactive)
-  (find-file "~/.emacs.d/rc/99-proj.el"))
-
-(defun edit-private ()
-  (interactive)
-  (find-file "~/.emacs.d/rc/100-private.el"))
-
-(defun edit-rcs ()
-  "Jump to directory where rc files located"
-  (interactive)
-  (find-file "~/.emacs.d/rc/"))
-
-(defun edit-functions ()
-  "Jump to directory where rc files located"
-  (interactive)
-  (find-file "~/.emacs.d/rc/02-rc-functions.el"))
-
-(defun edit-site-lisp ()
-  "Jump to directory where rc files located"
-  (interactive)
-  (find-file "~/.emacs.d/site-lisp"))
-
-
-(defun edit-template ()
-  "Dired into template."
-  (interactive)
-  (find-file "~/.emacs.d/templates/"))
 
 
 ;; ******************** Others ***************************************
@@ -634,27 +606,6 @@ Uses `current-date-time-format' for the formatting the date/time."
             (forward-line))))
       (widen))))
 
-(dolist (command '(yank yank-pop))
-  (eval
-   `(defadvice ,command (after indent-region activate)
-      (and (not current-prefix-arg)
-           (member major-mode
-                   '(emacs-lisp-mode
-                     lisp-mode
-                     clojure-mode
-                     scheme-mode
-                     haskell-mode
-                     ruby-mode
-                     rspec-mode
-                     python-mode
-                     c-mode
-                     c++-mode
-                     objc-mode
-                     latex-mode
-                     js-mode
-                     plain-tex-mode))
-           (let ((mark-even-if-inactive transient-mark-mode))
-             (indent-region (region-beginning) (region-end) nil))))))
 
 (defun yc/txt-to-png ()
   "Change a txt file into png file using ditaa"
@@ -1132,12 +1083,23 @@ args should be a list, but to make caller's life easier, it can accept one atom 
                       (format-time-string  "%Y-%m-%d" (current-time))))))
 
  ;; Advice
-;; Handle file-error and suggest to install missing packages...
-(defadvice normal-mode (around yc/normal-mode (&optional find-file))
+
+;; Auto indent regions for prog/sgml based modes.
+(dolist (command (list 'yank 'yank-pop))
+  (advice-add command :after
+              (lambda (&rest args)
+                (when (and (not current-prefix-arg)
+                           (or (derived-mode-p 'prog-mode)
+                               (derived-mode-p 'sgml-mode)))
+                  (let ((mark-even-if-inactive transient-mark-mode))
+                    (indent-region (region-beginning) (region-end) nil))))))
+
+(defun yc/install-package-on-error (func &rest args)
+  "Apply FUNC with ARGS.
+And install necessary packages if there are errors while executing FUNC."
   (interactive)
   (let ((debug-on-error t) )
-    (condition-case err
-        ad-do-it
+    (condition-case err (apply func args)
       (file-error
        (let ((msg (prin1-to-string err)))
          (message "Failed to open file: %s" msg)
@@ -1150,25 +1112,11 @@ args should be a list, but to make caller's life easier, it can accept one atom 
                          (package-install (intern package-name))
                          (set-auto-mode)))))))))))
 
-(ad-activate 'normal-mode)
+;; Handle file-error and suggest to install missing packages...
+(advice-add 'normal-mode :around #'yc/install-package-on-error)
 
-(defadvice command-execute (around yc/command-execute
-                                   (CMD &optional RECORD-FLAG KEYS SPECIAL))
-  (condition-case err
-      ad-do-it
-    (file-error
-     (let ((msg (prin1-to-string err)))
-       (message "Failed to open file: %s" msg)
-       (if (string-match ".*Cannot open load file.*" msg)
-           (if (listp err)
-               (let* ((package-name (nth (1- (length err)) err))
-                      (fmt "Package %s can not be loaded, install it with ELPA? "))
-                 (if package-name
-                     (when (yes-or-no-p (format fmt package-name))
-                       (package-install (intern package-name))
-                       (set-auto-mode))))))))))
-
-(ad-activate 'command-execute)
+(advice-add
+ 'command-execute :around #'yc/install-package-on-error)
 
 (provide '02-rc-functions)
 ;; Local Variables:

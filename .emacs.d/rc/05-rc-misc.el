@@ -206,22 +206,22 @@ which is options for `diff'."
                               newname)
                           out-name))))))))
 
-  (defadvice dired-compress (around yc/dired-compress )
-    "customized compress.."
-    (let* (buffer-read-only
-           (from-file (dired-get-filename))
-           (new-file (yc/dired-compress-file from-file)))
-      (if new-file
-          (let ((start (point)))
-            ;; Remove any preexisting entry for the name NEW-FILE.
-            (ignore-errors (dired-remove-entry new-file))
-            (goto-char start)
-            ;; Now replace the current line with an entry for NEW-FILE.
-            (dired-update-file-line new-file) nil)
-        (dired-log (concat "Failed to compress" from-file))
-        from-file))
-    )
-  (ad-activate 'dired-compress)
+  (advice-add
+   'dired-compress :around
+   (lambda (&rest args)
+     "Customized compress."
+     (let* (buffer-read-only
+            (from-file (dired-get-filename))
+            (new-file (yc/dired-compress-file from-file)))
+       (if new-file
+           (let ((start (point)))
+             ;; Remove any preexisting entry for the name NEW-FILE.
+             (ignore-errors (dired-remove-entry new-file))
+             (goto-char start)
+             ;; Now replace the current line with an entry for NEW-FILE.
+             (dired-update-file-line new-file) nil)
+         (dired-log (concat "Failed to compress" from-file))
+         from-file))))
 
     ;; Keybindings for dired-mode
   (lazy-set-key
