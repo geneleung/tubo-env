@@ -34,7 +34,7 @@
 
 ;;; Code:
 
-(defcustom logviewer-log-pattern (rx (or "LOG" "log" "Log"))
+(defcustom logviewer-log-pattern (rx "." (or "LOG" "log" "Log"))
   "Pattern to decide if a file is a log file."
   :type 'string
   :group 'logviewer
@@ -169,21 +169,24 @@
     (logviewer-mode)
     (error "See this instead")))
 
-(defadvice abort-if-file-too-large (around yc/abort-if-file-too-large (size op-type filename))
-    "If file SIZE larger than `large-file-warning-threshold', allow user to abort.
-OP-TYPE specifies the file operation being performed (for message to user)."
-    (if (and (string-match logviewer-log-pattern filename)
-             (string= op-type "open")
-             (executable-find "split"))
-        (if (y-or-n-p
-             (format "LogFile %s is large (%dMB), really %s? "
-                     (file-name-nondirectory filename)
-                     (/ size 1048576) op-type))
-            (split-and-view-log filename)
-          (error "Abort"))
-        ad-to-it))
-
-(ad-activate 'abort-if-file-too-large)
+(advice-add
+ 'abort-if-file-too-large :around
+ (lambda (func &rest args)
+   (let ((size (car args))
+         (op-type (cadr args))
+         (filename (nth 2 args)))
+     (if (string-match logviewer-log-pattern filename)
+         (if (and (string= op-type "open")
+                  (executable-find "split")
+                  large-file-warning-threshold size
+                  (> size large-file-warning-threshold))
+             (if (y-or-n-p
+                  (format "LogFile %s is large (%dMB), really %s? "
+                          (file-name-nondirectory filename)
+                          (/ size 1048576) op-type))
+                 (split-and-view-log filename)
+               (error "Abort")))
+         (apply func args)))))
 
 (defun logviewer-is-tmpfile ()
   "See whether current file is a temporary file or not."

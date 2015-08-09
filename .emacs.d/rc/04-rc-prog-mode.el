@@ -1463,7 +1463,7 @@ and is reversed for better performence.")
 
   (advice-add
    'gdb-setup-windows :around
-   (lambda ()
+   (lambda (&rest args)
      (interactive)
      (gdb-get-buffer-create 'gdb-locals-buffer)
      (gdb-get-buffer-create 'gdb-stack-buffer)
@@ -1761,6 +1761,10 @@ and is reversed for better performence.")
 
 
 
+(defun yc/get-compiling-threads ()
+  "Return proper number of threads."
+  (1+ (yc/get-cpu-number)))
+
 (defun make-command(arg)
   (let* ((file (if buffer-file-name (file-name-nondirectory buffer-file-name)))
          (ext-name (if file (file-name-extension file)))
@@ -1770,9 +1774,9 @@ and is reversed for better performence.")
            ((or (file-exists-p "makefile")
                 (file-exists-p "Makefile"))
             (if arg
-                (format "make -j%d %s" (1+ (string-to-number (yc/get-cpu-number))) arg)
+                (format "make -j%d %s" (yc/get-compiling-threads) arg)
               (format "make -j%d"
-                      (1+ (string-to-number (yc/get-cpu-number))))))
+                      (yc/get-compiling-threads))))
            ;; CMake
            ((file-exists-p "CMakeLists.txt")
             (format "cmake CMakeLists.txt" ))
@@ -1881,8 +1885,8 @@ ARG specifies the number of cores.
 (advice-add 'helm-make :before #'yc/set-c-env)
 (advice-add 'helm-make-projectile :before #'yc/set-c-env)
 
-(global-set-key (kbd "<M-f6>") (yc/with-prefix 'helm-make (yc/get-cpu-number)))
-(global-set-key (kbd "<C-S-f6>") (yc/with-prefix 'helm-make-projectile (yc/get-cpu-number)))
+(global-set-key (kbd "<M-f6>") (yc/with-prefix 'helm-make (yc/get-compiling-threads)))
+(global-set-key (kbd "<C-S-f6>") (yc/with-prefix 'helm-make-projectile (yc/get-compiling-threads)))
 
 
 

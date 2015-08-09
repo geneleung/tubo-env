@@ -121,17 +121,18 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
   `(add-to-list 'auto-mode-alist
                 (cons ,expr ,mode)))
 
-(defmacro yc/with-prefix (func &rest args)
-  "Call FUNC with ARGS as prefix."
+(defmacro yc/with-prefix (func arg)
+  "Call FUNC with ARG as prefix."
   `(lambda ()
      (interactive)
-     (let ((current-prefix-arg ',args))
+     (let ((current-prefix-arg ,arg))
        (call-interactively ,func))))
 
  ;; Functions
 
 ;;; Start debug on error.
-(cdsq debug-on-error nil)
+(custom-set-variables
+ '(debug-on-error nil))
 
 (defun yc/toggle-debug ()
   "Toggle debug mode."
@@ -301,19 +302,16 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
     )
   )
 
-(defun yc/get-cpu-number ( )
-  "Return CPU number in a string"
-  (let ((cpu-number "1")
-        (reg-match-cpu (rx (+? digit ) eol))
-        (cpuinfo-file "/proc/cpuinfo"))
-    (when (file-exists-p cpuinfo-file)
-      (defun yc/parse-cat-output (msg)
-        (if (string-match reg-match-cpu msg)
-            (setq cpu-number (match-string 0 msg))))
-      (setq cpu-number
-            (yc/parse-cat-output
-             (shell-command-to-string (format "cat %s | grep processor|wc -l" cpuinfo-file)))))
-    cpu-number))
+(defun yc/get-cpu-number ()
+  "Return CPU number."
+  (if (file-exists-p "/proc/cpuinfo")
+      (let ((cpuinfo (shell-command-to-string "cat /proc/cpuinfo | grep processor|wc -l"))
+            (r-match-cpu (rx (+? digit ) eol))
+            (cpu-number "1"))
+        (if (string-match r-match-cpu cpuinfo)
+            (setq cpu-number (match-string 0 cpuinfo)))
+        (string-to-number cpu-number))
+    1))
 
 (defun yc/get-env (env &optional func &rest backups)
   (let ((ret (getenv env)))
@@ -1098,19 +1096,18 @@ args should be a list, but to make caller's life easier, it can accept one atom 
   "Apply FUNC with ARGS.
 And install necessary packages if there are errors while executing FUNC."
   (interactive)
-  (let ((debug-on-error t) )
-    (condition-case err (apply func args)
-      (file-error
-       (let ((msg (prin1-to-string err)))
-         (message "Failed to open file: %s" msg)
-         (if (string-match ".*Cannot open load file.*" msg)
-             (if (listp err)
-                 (let* ((package-name (nth (1- (length err)) err))
-                        (fmt "Package %s can not be loaded, install it with ELPA? "))
-                   (if package-name
-                       (when (yes-or-no-p (format fmt package-name))
-                         (package-install (intern package-name))
-                         (set-auto-mode)))))))))))
+  (condition-case err (apply func args)
+    (file-error
+     (let ((msg (prin1-to-string err)))
+       (message "Failed to open file: %s" msg)
+       (if (string-match ".*Cannot open load file.*" msg)
+           (if (listp err)
+               (let* ((package-name (nth (1- (length err)) err))
+                      (fmt "Package %s can not be loaded, install it with ELPA? "))
+                 (if package-name
+                     (when (yes-or-no-p (format fmt package-name))
+                       (package-install (intern package-name))
+                       (set-auto-mode))))))))))
 
 ;; Handle file-error and suggest to install missing packages...
 (advice-add 'normal-mode :around #'yc/install-package-on-error)
