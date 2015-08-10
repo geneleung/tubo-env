@@ -109,5 +109,5 @@ function emacs_eidt ()
 
 alias ee=emacs_eidt
 alias edit=emacs_eidt
-
+alias tmux="tmux attach || tmux"
 which xdg-open > /dev/null 2>&1 && alias open=xdg-open
