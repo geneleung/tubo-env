@@ -23,7 +23,7 @@
                                       "TODO" "FIXME" "YYC" "BUG" "TODOLIST" "note" "NOTE")
                     (?? ":")) eow))
         (yc/r-match-builtin
-         (rx bow (group (or "PDEBUG" "NEW")) (zero-or-one ":")))
+         (rx bow (group (or "PDEBUG" "NEW")) (or (zero-or-one ":") eow)))
         (yc/r-match-builtin-2
          (rx bow (group (+ (or upper "_"))) (* blank) "("))
         (yc/r-match-longline

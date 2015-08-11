@@ -241,7 +241,7 @@ member functions into a read only file.")
       (forward-char))
     (if (looking-at "//")               ; skip over C++ style comments.
         (end-of-line))
-    (if (looking-at (rx (* blank) "DISABLE_COPY("))
+    (if (looking-at (rx (* blank) (or "DISABLE_COPY(" "inline")))
         (end-of-line))
     (if (looking-at "/\\*")             ; skip over C style comments.
         (re-search-forward "\\*/"))))

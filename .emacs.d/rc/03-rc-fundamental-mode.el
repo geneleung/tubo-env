@@ -127,6 +127,7 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
 (helm-load-and-bind 'show-kill-ring "ring" [remap yank-pop])
 (helm-load-and-bind 'surfraw "net" (kbd "C-c C-s"))
 (helm-load-and-bind 'find "files" (kbd "C-x M-f"))
+(helm-load-and-bind 'info-at-point "info" [remap info])
 
 (define-key global-map [remap list-buffers] 'ibuffer)
 

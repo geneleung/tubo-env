@@ -9,7 +9,21 @@
           (append Info-default-directory-list
                   (list "/opt/usr/share/info"
                         "/opt/usr/share/gcc-data/x86_64-apple-darwin12/4.2.1/info"
-                        (format "/opt/usr/share/info/emacs-%s" emacs-major-version)))))
+                        (format "/opt/usr/share/info/emacs-%s"
+                                emacs-major-version)))))
+
+(yc/eval-after-load
+ "helm-info"
+ (let* ((r-match-info (rx (group (+ ascii)) ".info" (* ascii)))
+        res)
+   (dolist (dir (or (split-string (yc/get-env "INFOPATH") ":")
+                    Info-default-directory-list))
+     (setq res (append (mapcar (lambda (file)
+                                 (when (string-match r-match-info file)
+                                   (match-string 1 file))) (directory-files dir nil r-match-info)
+                                   ) res)))
+   (setq-default
+    helm-default-info-index-list res)))
 
  ;;; ispell
 (autoload 'flyspell-mode "flyspell" "On-the-fly spelling checker." t)
@@ -28,9 +42,9 @@
   (setq-default ispell-program-name "aspell")
   (setq-default ispell-extra-args '("--reverse"))
   (set-default 'ispell-skip-html t)
-  (setq ispell-dictionary "english")
-  (setq ispell-local-dictionary "english")
-)
+  (custom-set-variables
+   '(ispell-dictionary "english")
+   '(ispell-local-dictionary "english")))
 
 (defun turn-on-flyspell ()
   "Force flyspell-mode on using a positive arg.  For use in hooks."
