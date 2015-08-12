@@ -15,15 +15,17 @@
 (yc/eval-after-load
  "helm-info"
  (let* ((r-match-info (rx (group (+ ascii)) ".info" (* ascii)))
+        (info-path (yc/get-env "INFOPATH"))
         res)
-   (dolist (dir (or (split-string (yc/get-env "INFOPATH") ":")
+   (dolist (dir (or (and (stringp info-path)
+                         (split-string  info-path ":"))
                     Info-default-directory-list))
-     (setq res (append (mapcar (lambda (file)
-                                 (when (string-match r-match-info file)
-                                   (match-string 1 file))) (directory-files dir nil r-match-info)
-                                   ) res)))
-   (setq-default
-    helm-default-info-index-list res)))
+     (when (file-directory-p dir)
+       (setq res (append (mapcar (lambda (file)
+                                   (when (string-match r-match-info file)
+                                     (match-string 1 file)))
+                                 (directory-files dir nil r-match-info)) res))))
+   (setq-default helm-default-info-index-list res)))
 
  ;;; ispell
 (autoload 'flyspell-mode "flyspell" "On-the-fly spelling checker." t)

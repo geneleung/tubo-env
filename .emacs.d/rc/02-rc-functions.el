@@ -323,8 +323,7 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
               (setq ret var)
               (signal error nil)))
         ('error nil)))
-    (if ret ret
-      (error "No proper value found!"))))
+    ret))
 
 ;;;; Add new line before or after current line.
 (defun zl-newline nil
