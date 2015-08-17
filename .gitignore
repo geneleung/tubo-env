@@ -182,7 +182,6 @@ GTAGS
 /.repoconfig/
 /.repopickle*
 /.tilda/
-/.tmux.conf
 /.tor/
 /.vidalia/
 /.vnc/
