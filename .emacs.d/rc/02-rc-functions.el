@@ -304,14 +304,23 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
 
 (defun yc/get-cpu-number ()
   "Return CPU number."
-  (if (file-exists-p "/proc/cpuinfo")
-      (let ((cpuinfo (shell-command-to-string "cat /proc/cpuinfo | grep processor|wc -l"))
-            (r-match-cpu (rx (+? digit ) eol))
-            (cpu-number "1"))
-        (if (string-match r-match-cpu cpuinfo)
-            (setq cpu-number (match-string 0 cpuinfo)))
-        (string-to-number cpu-number))
-    1))
+  (case system-type
+    ('gnu/linux
+     (let ((cpuinfo (shell-command-to-string "cat /proc/cpuinfo | grep processor|wc -l"))
+           (r-match-cpu (rx (+? digit ) eol))
+           (cpu-number "1"))
+       (if (string-match r-match-cpu cpuinfo)
+           (setq cpu-number (match-string 0 cpuinfo)))
+       (string-to-number cpu-number)))
+    ('darwin
+     (let ((cpuinfo (shell-command-to-string "sysctl -n hw.ncpu"))
+           (r-match-cpu (rx (+? digit ) eol))
+           (cpu-number "1"))
+       (if (string-match r-match-cpu cpuinfo)
+           (setq cpu-number (match-string 0 cpuinfo)))
+       (string-to-number cpu-number)))
+    (t 1)
+    ))
 
 (defun yc/get-env (env &optional func &rest backups)
   (let ((ret (getenv env)))
