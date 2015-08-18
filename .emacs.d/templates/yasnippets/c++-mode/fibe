@@ -2,8 +2,16 @@
 # name: fibe
 # key: fibe
 # --
-${1:V}<${2:T}>::const_iterator iter = ${3:v}.begin();
-$1<$2>::const_iterator end = $3.end();
-for (; iter != end; ++iter) {
+${1:V}<${2:T}>::${3:i}${3:$(if (string-match "^i" yas-text)
+                               "terator"
+                               (if (string-match "^c" yas-text)
+                                "onst_iterator" ""))
+                               } ${4:iter} = ${5:array}.begin();
+$1<$2>::${3:$(if (string-match "^i" yas-text)
+                               "iterator"
+                               (if (string-match "^c" yas-text)
+                                "const_iterator" ""))
+                               } end = $5.end();
+for (; $4 != end; ++$4) {
     $0
 }
