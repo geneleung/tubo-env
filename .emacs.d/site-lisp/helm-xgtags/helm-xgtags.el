@@ -222,21 +222,8 @@ Always update if value of this variable is nil."
   (let ((keymap (make-sparse-keymap)))
     (define-key keymap "\C-m" 'helm-xgtags-select-tag-near-point)
     (define-key keymap "\e." 'helm-xgtags-select-tag-near-point)
-    (do ((k (string-to-char "a") (+ 1 k))) ((> k (string-to-char "z")))
-      (define-key
-    	keymap
-    	(read-kbd-macro (char-to-string k))
-    	'helm-xgtags--activate))
-    (do ((k (string-to-char "A") (+ 1 k))) ((> k (string-to-char "Z")))
-      (define-key
-    	keymap
-    	(read-kbd-macro (char-to-string k))
-        'helm-xgtags--activate))
-    (do ((k (string-to-char "0") (+ 1 k))) ((> k (string-to-char "9")))
-      (define-key
-    	keymap
-    	(read-kbd-macro (char-to-string k))
-        'helm-xgtags--activate))
+    (define-key keymap (kbd "SPC") 'helm-xgtags--activate)
+    (define-key keymap (kbd "g") 'helm-xgtags-refresh)
     keymap)
   "Keymap used in helm-xgtags select mode.")
 
@@ -530,22 +517,23 @@ funcalls FUNC with the match as argument."
 ;;; handling the context and the context stack
 
 (defstruct helm-xgtags--context
-  type buffer point tags selected-tag)
+  type tagname buffer point tags selected-tag)
 
-(defun helm-xgtags--make-context (&optional option)
+(defun helm-xgtags--make-context (tagname &optional option)
   "Create a context object with OPTION."
   (make-helm-xgtags--context :type option
-                        :buffer (current-buffer)
-                        :point (point-marker)
-                        :tags helm-xgtags--tags
-                        :selected-tag helm-xgtags--selected-tag))
+                             :tagname tagname
+                             :buffer (current-buffer)
+                             :point (point-marker)
+                             :tags helm-xgtags--tags
+                             :selected-tag helm-xgtags--selected-tag))
 
 (defun helm-xgtags--stacked-p (buffer)
   "If BUFFER exists on the helm-xgtags stack."
   (memq buffer (mapcar 'helm-xgtags--context-buffer helm-xgtags--stack)))
 
-(defun helm-xgtags--push-context (&optional option)
-  (first (push (helm-xgtags--make-context option) helm-xgtags--stack)))
+(defun helm-xgtags--push-context (tagname &optional option)
+  (first (push (helm-xgtags--make-context tagname option) helm-xgtags--stack)))
 
 (defun helm-xgtags--pop-context ()
   "Pop context from stack and return it."
@@ -765,7 +753,7 @@ a list with those."
          (type (if helm-xgtags--stack (helm-xgtags--context-type (car helm-xgtags--stack)) nil)))
     (if (= num-tags 0)
         (error (helm-xgtags--option-error-msg option) tagname)
-      (helm-xgtags--push-context option)
+      (helm-xgtags--push-context tagname option)
       (helm-xgtags--update-minor-mode-text)
       (with-xgtags-buffer (:save-excursion t :read-only nil)
         (setq helm-xgtags--tags tags)
@@ -795,6 +783,16 @@ a list with those."
   "Select the tag near point and follow it."
   (interactive)
   (helm-xgtags--select-and-follow-tag (helm-xgtags--find-tag-near-point)))
+
+(defun helm-xgtags-refresh ()
+  "Refresh current display."
+  (interactive)
+  (let ((context (helm-xgtags--pop-context)))
+    (assert context nil "The tags stack is empty")
+    (let ((type (helm-xgtags--context-type context))
+          (tagname (helm-xgtags--context-tagname context)))
+      (helm-xgtags--update-minor-mode-text)
+      (helm-xgtags--goto-tag tagname type))))
 
 
 ;;; interactive commands
