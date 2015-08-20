@@ -62,196 +62,6 @@
 
 (flyspell-prog-mode)
 
- ;;Dired
-
-;; Ugly, just to ensure "ls" is loaded from "ls-lisp"
-(define-or-set ls-lisp-use-insert-directory-program nil)
-(load-library "ls-lisp")
-(setq ls-lisp-dirs-first t)
-
-(custom-set-variables
- '(ls-lisp-use-insert-directory-program nil)
- '(ls-lisp-dirs-first t)
- '(dired-dwim-target t)
- '(dired-dnd-protocol-alist nil)
- '(dired-recursive-copies 'always)
- '(dired-recursive-deletes 'top))
-
-(autoload 'dired-jump "dired-x" "" t nil)
-(define-key ctl-x-map "\C-j" 'dired-jump)
-
-(yc/eval-after-load
- "dired"
- (require 'dired-async)
- (csq dired-listing-switches "-alh")
-  ;use the lisp ls implementation (using this sort by extension works)
-  (add-to-list 'auto-mode-alist (cons "[^/]\\.dired$" 'dired-virtual-mode))
-
-  ;; Overwrite some functions
-  (defun dired-ediff (file)
-    "Compare file at point with file FILE using `diff'.
-FILE defaults to the file at the mark.  (That's the mark set by
-\\[set-mark-command], not by Dired's \\[dired-mark] command.)
-The prompted-for file is the first file given to `diff'.
-With prefix arg, prompt for second argument SWITCHES,
-which is options for `diff'."
-    (interactive
-     (let* ((current (dired-get-filename t))
-            ;; Get the file at the mark.
-            (file-at-mark (if (mark t)
-                              (save-excursion (goto-char (mark t))
-                                              (dired-get-filename t t))))
-            ;; Use it as default if it's not the same as the current file,
-            ;; and the target dir is the current dir or the mark is active.
-            (default (or (if (and (not (equal file-at-mark current))
-                                  (or (equal (dired-dwim-target-directory)
-                                             (dired-current-directory))
-                                      mark-active))
-                             file-at-mark)
-                         (concat (dired-dwim-target-directory) (file-name-nondirectory current))
-                         ))
-            (target-dir (if default
-                            (dired-current-directory)
-                          (dired-dwim-target-directory)))
-            (defaults (dired-dwim-target-defaults (list current) target-dir)))
-       (list
-        (minibuffer-with-setup-hook
-            (lambda ()
-              (set (make-local-variable 'minibuffer-default-add-function) nil)
-              (setq minibuffer-default defaults))
-          (read-file-name
-           (format "Diff %s with%s: " current
-                   (if default (format " (default %s)" default) ""))
-           target-dir default t)))))
-    (let ((current (dired-get-filename t)))
-      (when (or (equal (expand-file-name file)
-                       (expand-file-name current))
-                (and (file-directory-p file)
-                     (equal (expand-file-name current file)
-                            (expand-file-name current))))
-        (error "Attempt to compare the file to itself"))
-      (ediff-files file current)))
-
-  (autoload 'wdired-change-to-wdired-mode "wdired" ""  t)
-  (define-key dired-mode-map "r" 'wdired-change-to-wdired-mode)
-
-  ;; Use 7z and tar to compress/decompress file if possible.
-  (defvar yc/dired-compress-file-suffixes
-    (list
-     ;; Regexforsuffix-Programm-Args.
-     (list (rx "." (or "tar.gz" "tgz")) "tar" "xzvf")
-     (list (rx "." (or "tar.bz2" "tbz")) "tar" "xjvf")
-     (list (rx ".tar.xz") "tar" "xJvf")
-     (list (rx "." (or "gz" "Z" "z" "dz" "bz2" "xz" "zip" "rar" "7z")) "7z" "x"))
-    "nil")
-
-  (defun yc/dired-check-process (msg program &rest arguments)
-    (let (err-buffer err (dir default-directory))
-      (message "%s..." msg )
-      (save-excursion
-        ;; Get a clean buffer for error output:
-        (setq err-buffer (get-buffer-create " *dired-check-process output*"))
-        (set-buffer err-buffer)
-        (erase-buffer)
-        (setq default-directory dir	; caller's default-directory
-              err (not (eq 0 (apply 'process-file program nil t nil
-                                    (append (if (string= "7z" program) (list "-y")
-                                              nil) arguments)))))
-        (if err
-            (progn
-              (if (listp arguments)
-                  (let ((args "") )
-                    (mapc (lambda (X)
-                            (setq args (concat args X " ")))
-                          arguments)
-                    (setq arguments args)))
-              (dired-log (concat program " " (prin1-to-string arguments) "\n"))
-              (dired-log err-buffer)
-              (or arguments program t))
-          (kill-buffer err-buffer)
-          (message "%s...done" msg)
-          nil))))
-
-  (defun yc/dired-compress-file (file)
-    ;; Compress or uncompress FILE.
-    ;; Return the name of the compressed or uncompressed file.
-    ;; Return nil if no change in files.
-    (let ((handler (find-file-name-handler file 'dired-compress-file))
-          suffix newname
-          (suffixes yc/dired-compress-file-suffixes))
-
-      ;; See if any suffix rule matches this file name.
-      (while suffixes
-        (let (case-fold-search)
-          (if (string-match (car (car suffixes)) file)
-              (setq suffix (car suffixes) suffixes nil))
-          (setq suffixes (cdr suffixes))))
-      ;; If so, compute desired new name.
-      (if suffix
-          (setq newname (substring file 0 (match-beginning 0))))
-      (cond (handler
-             (funcall handler 'dired-compress-file file))
-            ((file-symlink-p file)
-             nil)
-            ((and suffix (nth 1 suffix))
-             ;; We found an uncompression rule.
-             (if
-                 (and (or (not (file-exists-p newname))
-                          (y-or-n-p
-                           (format "File %s already exists.  Replace it? "
-                                   newname)))
-                      (not (yc/dired-check-process (concat "Uncompressing " file)
-                                                   (nth 1 suffix) (nth 2 suffix) file)))
-                 newname))
-            (t
-           ;;; We don't recognize the file as compressed, so compress it.
-           ;;; Try gzip; if we don't have that, use compress.
-             (condition-case nil
-                 (let ((out-name (concat file ".7z")))
-                   (and (or (not (file-exists-p out-name))
-                            (y-or-n-p
-                             (format "File %s already exists.  Really compress? "
-                                     out-name)))
-                        (not (yc/dired-check-process (concat "Compressing " file)
-                                                     "7z" "a" out-name file))
-                        ;; Rename the compressed file to NEWNAME
-                        ;; if it hasn't got that name already.
-                        (if (and newname (not (equal newname out-name)))
-                            (progn
-                              (rename-file out-name newname t)
-                              newname)
-                          out-name))))))))
-
-  (advice-add
-   'dired-compress :around
-   (lambda (&rest args)
-     "Customized compress."
-     (let* (buffer-read-only
-            (from-file (dired-get-filename))
-            (new-file (yc/dired-compress-file from-file)))
-       (if new-file
-           (let ((start (point)))
-             ;; Remove any preexisting entry for the name NEW-FILE.
-             (ignore-errors (dired-remove-entry new-file))
-             (goto-char start)
-             ;; Now replace the current line with an entry for NEW-FILE.
-             (dired-update-file-line new-file) nil)
-         (dired-log (concat "Failed to compress" from-file))
-         from-file))))
-
-    ;; Keybindings for dired-mode
-  (lazy-set-key
-   (list
-    (cons (kbd "M-p") 'dired-up-directory)
-    (cons (kbd "C-S-r") 'dired-rar-add-files)
-    (cons (kbd "C-j") 'dired-find-file)
-    (cons (kbd "<C-return>") 'dired-find-file-other-window)
-    (cons (kbd "<C-M-return>") (lambda ()
-                                 (interactive)
-                                 (yc/open-with-external-app (dired-get-file-for-visit))))
-    (cons [f12] 'dired-ediff))
-   dired-mode-map))
-
  ;; image-mode
 
 (yc/eval-after-load
@@ -623,7 +433,204 @@ which is options for `diff'."
 (mapc (lambda (hook)
         (add-hook hook (lambda ()
                          (hl-line-mode 1))))
-      (list 'dired-mode-hook 'ibuffer-mode-hook 'bookmark-bmenu-mode-hook))
+      (list 'ibuffer-mode-hook 'bookmark-bmenu-mode-hook))
+
+
+ ;;Dired
+
+;; Ugly, just to ensure "ls" is loaded from "ls-lisp"
+(define-or-set ls-lisp-use-insert-directory-program nil)
+(load-library "ls-lisp")
+(setq ls-lisp-dirs-first t)
+
+(custom-set-variables
+ '(ls-lisp-use-insert-directory-program nil)
+ '(ls-lisp-dirs-first t)
+ '(dired-dwim-target t)
+ '(dired-dnd-protocol-alist nil)
+ '(dired-recursive-copies 'always)
+ '(dired-recursive-deletes 'top))
+
+(autoload 'dired-jump "dired-x" "" t nil)
+(define-key ctl-x-map "\C-j" 'dired-jump)
+
+(yc/eval-after-load
+ "dired"
+ (require 'dired-async)
+ (csq dired-listing-switches "-alh")
+                                        ;use the lisp ls implementation (using this sort by extension works)
+ (add-to-list 'auto-mode-alist (cons "[^/]\\.dired$" 'dired-virtual-mode))
+
+ ;; Overwrite some functions
+ (defun dired-ediff (file)
+   "Compare file at point with file FILE using `diff'.
+FILE defaults to the file at the mark.  (That's the mark set by
+\\[set-mark-command], not by Dired's \\[dired-mark] command.)
+The prompted-for file is the first file given to `diff'.
+With prefix arg, prompt for second argument SWITCHES,
+which is options for `diff'."
+   (interactive
+    (let* ((current (dired-get-filename t))
+           ;; Get the file at the mark.
+           (file-at-mark (if (mark t)
+                             (save-excursion (goto-char (mark t))
+                                             (dired-get-filename t t))))
+           ;; Use it as default if it's not the same as the current file,
+           ;; and the target dir is the current dir or the mark is active.
+           (default (or (if (and (not (equal file-at-mark current))
+                                 (or (equal (dired-dwim-target-directory)
+                                            (dired-current-directory))
+                                     mark-active))
+                            file-at-mark)
+                        (concat (dired-dwim-target-directory) (file-name-nondirectory current))
+                        ))
+           (target-dir (if default
+                           (dired-current-directory)
+                         (dired-dwim-target-directory)))
+           (defaults (dired-dwim-target-defaults (list current) target-dir)))
+      (list
+       (minibuffer-with-setup-hook
+           (lambda ()
+             (set (make-local-variable 'minibuffer-default-add-function) nil)
+             (setq minibuffer-default defaults))
+         (read-file-name
+          (format "Diff %s with%s: " current
+                  (if default (format " (default %s)" default) ""))
+          target-dir default t)))))
+   (let ((current (dired-get-filename t)))
+     (when (or (equal (expand-file-name file)
+                      (expand-file-name current))
+               (and (file-directory-p file)
+                    (equal (expand-file-name current file)
+                           (expand-file-name current))))
+       (error "Attempt to compare the file to itself"))
+     (ediff-files file current)))
+
+ (autoload 'wdired-change-to-wdired-mode "wdired" ""  t)
+ (define-key dired-mode-map "r" 'wdired-change-to-wdired-mode)
+
+ ;; Use 7z and tar to compress/decompress file if possible.
+ (defvar yc/dired-compress-file-suffixes
+   (list
+    ;; Regexforsuffix-Programm-Args.
+    (list (rx "." (or "tar.gz" "tgz")) "tar" "xzvf")
+    (list (rx "." (or "tar.bz2" "tbz")) "tar" "xjvf")
+    (list (rx ".tar.xz") "tar" "xJvf")
+    (list (rx "." (or "gz" "Z" "z" "dz" "bz2" "xz" "zip" "rar" "7z")) "7z" "x"))
+   "nil")
+
+ (defun yc/dired-check-process (msg program &rest arguments)
+   (let (err-buffer err (dir default-directory))
+     (message "%s..." msg )
+     (save-excursion
+       ;; Get a clean buffer for error output:
+       (setq err-buffer (get-buffer-create " *dired-check-process output*"))
+       (set-buffer err-buffer)
+       (erase-buffer)
+       (setq default-directory dir	; caller's default-directory
+             err (not (eq 0 (apply 'process-file program nil t nil
+                                   (append (if (string= "7z" program) (list "-y")
+                                             nil) arguments)))))
+       (if err
+           (progn
+             (if (listp arguments)
+                 (let ((args "") )
+                   (mapc (lambda (X)
+                           (setq args (concat args X " ")))
+                         arguments)
+                   (setq arguments args)))
+             (dired-log (concat program " " (prin1-to-string arguments) "\n"))
+             (dired-log err-buffer)
+             (or arguments program t))
+         (kill-buffer err-buffer)
+         (message "%s...done" msg)
+         nil))))
+
+ (defun yc/dired-compress-file (file)
+   ;; Compress or uncompress FILE.
+   ;; Return the name of the compressed or uncompressed file.
+   ;; Return nil if no change in files.
+   (let ((handler (find-file-name-handler file 'dired-compress-file))
+         suffix newname
+         (suffixes yc/dired-compress-file-suffixes))
+
+     ;; See if any suffix rule matches this file name.
+     (while suffixes
+       (let (case-fold-search)
+         (if (string-match (car (car suffixes)) file)
+             (setq suffix (car suffixes) suffixes nil))
+         (setq suffixes (cdr suffixes))))
+     ;; If so, compute desired new name.
+     (if suffix
+         (setq newname (substring file 0 (match-beginning 0))))
+     (cond (handler
+            (funcall handler 'dired-compress-file file))
+           ((file-symlink-p file)
+            nil)
+           ((and suffix (nth 1 suffix))
+            ;; We found an uncompression rule.
+            (if
+                (and (or (not (file-exists-p newname))
+                         (y-or-n-p
+                          (format "File %s already exists.  Replace it? "
+                                  newname)))
+                     (not (yc/dired-check-process (concat "Uncompressing " file)
+                                                  (nth 1 suffix) (nth 2 suffix) file)))
+                newname))
+           (t
+           ;;; We don't recognize the file as compressed, so compress it.
+           ;;; Try gzip; if we don't have that, use compress.
+            (condition-case nil
+                (let ((out-name (concat file ".7z")))
+                  (and (or (not (file-exists-p out-name))
+                           (y-or-n-p
+                            (format "File %s already exists.  Really compress? "
+                                    out-name)))
+                       (not (yc/dired-check-process (concat "Compressing " file)
+                                                    "7z" "a" out-name file))
+                       ;; Rename the compressed file to NEWNAME
+                       ;; if it hasn't got that name already.
+                       (if (and newname (not (equal newname out-name)))
+                           (progn
+                             (rename-file out-name newname t)
+                             newname)
+                         out-name))))))))
+
+ (advice-add
+  'dired-compress :around
+  (lambda (&rest args)
+    "Customized compress."
+    (let* (buffer-read-only
+           (from-file (dired-get-filename))
+           (new-file (yc/dired-compress-file from-file)))
+      (if new-file
+          (let ((start (point)))
+            ;; Remove any preexisting entry for the name NEW-FILE.
+            (ignore-errors (dired-remove-entry new-file))
+            (goto-char start)
+            ;; Now replace the current line with an entry for NEW-FILE.
+            (dired-update-file-line new-file) nil)
+        (dired-log (concat "Failed to compress" from-file))
+        from-file))))
+
+ ;; Keybindings for dired-mode
+ (lazy-set-key
+  (list
+   (cons (kbd "M-p") 'dired-up-directory)
+   (cons (kbd "C-S-r") 'dired-rar-add-files)
+   (cons (kbd "C-j") 'dired-find-file)
+   (cons (kbd "<C-return>") 'dired-find-file-other-window)
+   (cons (kbd "<C-M-return>") (lambda ()
+                                (interactive)
+                                (yc/open-with-external-app (dired-get-file-for-visit))))
+   (cons [f12] 'dired-ediff))
+  dired-mode-map))
+
+(add-hook 'dired-mode-hook
+          (lambda ()
+            (hl-line-mode 1)
+            (setq fill-column 9999)))
+
 
 
 (custom-set-variables
