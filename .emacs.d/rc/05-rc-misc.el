@@ -705,6 +705,12 @@ which is options for `diff'."
 (yc/autoload 'yc/new-post t "tblog")
 (yc/autoload 'yc/prepare-post t "tblog")
 
+
+
+
+(yc/autoload 'ztree-diff)
+(yc/autoload 'ztree-dir)
+
 
 (provide '05-rc-misc)
 

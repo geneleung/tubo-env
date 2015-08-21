@@ -109,7 +109,8 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
            ((stringp (cadr args)) (cadr args))
            (t `(symbol-name ,func)))
           "autoloaded function."
-          (if (stringp (car args)) t (car args))))
+          (if (or (stringp (car args))
+                  (not args)) t (car args))))
 
 (defmacro yc/add-keyword (sym type)
   `(font-lock-add-keywords
