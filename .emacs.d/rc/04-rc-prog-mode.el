@@ -1888,6 +1888,24 @@ ARG specifies the number of cores.
 (global-set-key (kbd "<M-f6>") (yc/with-prefix 'helm-make (yc/get-compiling-threads)))
 (global-set-key (kbd "<C-S-f6>") (yc/with-prefix 'helm-make-projectile (yc/get-compiling-threads)))
 
+ ;; php mode
+
+(defvar php-extra-constants 'nil "\
+A list of additional strings to treat as PHP constants.")
+
+(custom-autoload 'php-extra-constants "php-mode" nil)
+
+(add-to-list 'interpreter-mode-alist (cons "php" 'php-mode))
+
+(autoload 'php-mode "php-mode" "\
+Major mode for editing PHP code.
+
+\\{php-mode-map}
+
+\(fn)" t nil)
+
+(dolist (pattern '("\\.php[s345t]?\\'" "\\.phtml\\'" "Amkfile" "\\.amk$")) (add-to-list 'auto-mode-alist `(,pattern . php-mode) t))
+
 
 
 (provide '04-rc-prog-mode)
