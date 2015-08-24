@@ -134,7 +134,7 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
 (defun suedit (file)
   "Run sudo edit FILE."
   (interactive "FSudoedit: ")
-  (helm-find-file-as-root "/boot/grub/grub.cfg"))
+  (helm-find-file-as-root file))
 
 
 (yc/autoload 'helm-projectile-find-file "helm-projectile")
