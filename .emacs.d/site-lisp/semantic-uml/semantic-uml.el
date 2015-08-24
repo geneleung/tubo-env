@@ -1,4 +1,6 @@
-;;; semantic-uml.el --- Utility to transform structures into UML node.
+;;; semantic-uml.el -- Brief introduction here.
+
+;; Author: YangYingchao <yangyingchao@gmail.com>
 ;;
 ;; Copyright (C) 2015 Yang,Ying-chao
 ;;
@@ -19,10 +21,16 @@
 ;; the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor,
 ;; Boston, MA 02110-1301, USA.
 
+;;; Commentary:
 ;; Usage:
 ;; Open a file that can be analyzed by CEDET and select a region, calls uml/struct-to-UML
 ;; and it will generate a node which can be drawn by graphiviz.
-;;
+;; (add-hook 'c-mode-common-hook
+;; (lambda ()
+;;              (local-set-key "\C-csD" 'uml/struct-to-UML)
+;;              (local-set-key "\C-csd" 'uml/struct-to-UML-full)))
+
+;;; Code:
 
 
  ;; Function used to add fields of struct into a dot file (for Graphviz).
@@ -81,32 +89,40 @@
    # : protected
    - : private")
 
-(defun uml/parse-tag-element (ele)
+(defun uml/stringify-args (pl)
+  (let (res)
+    (dolist (item pl)
+      (push (uml/stringify-semantic-ele item t) res))
+    (concat "(" (mapconcat 'identity res ", " )")")))
+
+(defun uml/parse-tag-element (ele &optional type-only)
   "Parse an element and return a list of string that can be concat into a string."
-  (let ((result (cons (semantic-tag-name ele) nil)) ;; name added
-        (type (semantic-tag-type ele)))
+  (let ((result nil) ;; name added
+        (type (semantic-tag-type ele))
+        (modifier ""))
+    (unless type-only
+      (push (semantic-tag-name ele) result))
     (case (semantic-tag-class ele)
       ('function ;; member functions
-       (setq result (cons  "(...)" result)))
+       (push (uml/stringify-args (semantic-tag-get-attribute ele
+                                                             :arguments)
+                                 ) result))
       ('variable
-       (setq result (cons  "" result))))
+       (push "" result)))
 
     (cond
      ((semantic-tag-get-attribute ele :template-specifier)
-      (setq result
-            (cons ;; TODO: Update to remove calling uml/stringify here!
-             (format " %s\\<%s\\> " result
-                     (uml/stringify-semantic-ele
-                      (car (semantic-tag-get-attribute ele
-                                                       :template-specifier))))
-             result)))
+      (push (format " %s\\<%s\\> " result
+                    (uml/stringify-semantic-ele
+                     (car (semantic-tag-get-attribute ele
+                                                      :template-specifier)))) result))
      ((semantic-tag-get-attribute ele :functionpointer-flag)
       (let ((tmp (car (last result))))
         (setf (car (last result)) (format "(*%s)()" tmp))))
      ((semantic-tag-get-attribute ele :pointer)
-      (setq result (cons "*" result)))
+      (setq modifier "*"))
      ((semantic-tag-get-attribute ele :dereference)
-      (setq result (cons "[]"  result))))
+      (setq modifier "[]")))
 
     (when type
       (if (semantic-tag-p type)
@@ -117,12 +133,12 @@
         (when (stringp type)
           (cond
            ((string= type "class") nil)
-           (t (setq result (push type result)))))))
+           (t (push (concat type modifier) result))))))
     result))
 
-(defun uml/stringify-semantic-ele (ele)
+(defun uml/stringify-semantic-ele (ele  &optional type-only)
   "Stringify semantic type"
-  (let* ((result (nreverse (uml/parse-tag-element ele)))
+  (let* ((result (nreverse (uml/parse-tag-element ele type-only)))
          (varname (subseq result 0 2))
          (vartype (subseq result 2))
          (result  (append varname (nreverse vartype))))
@@ -330,4 +346,9 @@
 
 
 (provide 'semantic-uml)
-;;;;; semantic-uml.el ends here
+
+;; Local Variables:
+;; coding: utf-8
+;; indent-tabs-mode: nil
+;; End:
+;;; semantic-uml.el ends here

@@ -309,6 +309,17 @@
 (define-key global-map "\C-\\" 'auto-complete)
 (global-set-key (kbd "<S-iso-lefttab>") 'ac-complete-semantic-raw)
 
+(yc/autoload 'ac-ispell-setup "ac-ispell")
+(custom-set-variables
+ '(ac-ispell-requires 4)
+ '(ac-ispell-fuzzy-limit 4))
+(eval-after-load "auto-complete"
+  '(progn
+     (ac-ispell-setup)))
+
+(add-hook 'git-commit-mode-hook 'ac-ispell-ac-setup)
+(add-hook 'mail-mode-hook 'ac-ispell-ac-setupa)
+
 ;
 (provide '06-rc-complete)
 

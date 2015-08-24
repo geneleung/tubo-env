@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name: ifdef
+# name: ifd
 # --
 #ifdef ${1:VAR}
 ${2:TODO}
