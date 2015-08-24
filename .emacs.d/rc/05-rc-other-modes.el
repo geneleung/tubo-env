@@ -414,21 +414,24 @@ unwanted space when exporting org-mode to html."
  ;; ****************************** Edit Server for Chrome ***************************
 
 (autoload 'edit-server-start "edit-server" nil t)
-(yc/eval-after-load "edit-server"
-                    (setq edit-server-new-frame nil)
-                    ;; (setq-default edit-server-default-major-mode 'html-mode)
-                    (setq edit-server-url-major-mode-alist
-                          (list
-                           (cons (rx (or (: ".css" eow)
-                                         "Configure.aspx"
-                                         (: "/admin/plugins" eow)))
-                                 'css-mode)
-                           (cons (rx (or (: ".htm" (? "l") eow)
-                                         (: "/posts/" (+ alnum))
-                                         (: ".asp" eow)))
-                                 'html-mode)
-                           )))
-;; (edit-server-start)
+(yc/eval-after-load
+ "edit-server"
+ (custom-set-variables
+  '(edit-server-new-frame nil)
+  '(edit-server-url-major-mode-alist
+    (list
+     (cons (rx (or (: ".css" eow)
+                   "Configure.aspx"
+                   (: "/admin/plugins" eow)))
+           'css-mode)
+     (cons (rx (or (: ".htm" (? "l") eow)
+                   (: "/posts/" (+ alnum))
+                   (: ".asp" eow)))
+           'html-mode)
+     (cons (rx "wiki" )
+           'mediawiki-mode))
+    )))
+(edit-server-start)
 
  ;; ***************************** Mode Alias **************************
 
