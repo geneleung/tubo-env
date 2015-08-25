@@ -129,6 +129,13 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
      (let ((current-prefix-arg ,arg))
        (call-interactively ,func))))
 
+(defmacro yc/func-wrapper (func file)
+  "Autoload func form file if necessary"
+  `(lambda()
+     (interactive)
+     (unless (fboundp ,func)
+       (load ,file))
+     (funcall ,func)))
  ;; Functions
 
 ;;; Start debug on error.

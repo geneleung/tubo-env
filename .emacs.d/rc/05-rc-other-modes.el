@@ -310,14 +310,11 @@ unwanted space when exporting org-mode to html."
 
 
  ;; *************************** Wiki Mode ******************************
-;; (autoload 'mediawiki-draft "mediawiki"nil t)
-;; (add-to-list 'auto-mode-alist
-;;              '("\\.wiki\\'" . wikipedia-mode))
-;; (add-to-list 'auto-mode-alist
-;;              '("en\\.wikipedia\\.org" . wikipedia-mode))
-;; (add-to-list 'auto-mode-alist
-;;              '("127\\.0\\.0\\.1" . wikipedia-mode))
-;; (add-hook 'wikipedia-mode-hook 'turn-on-flyspell)
+(autoload 'mediawiki-draft "mediawiki"nil t)
+(yc/set-mode 'mediawiki-mode (rx (or ".wiki"
+                                     ".wikipedia.org"
+                                     "127.0.0.1")))
+(add-hook 'mediawiki-mode-hook 'turn-on-flyspell)
 
  ;; *************************** nxml mode for XML *******************
 
@@ -429,7 +426,7 @@ unwanted space when exporting org-mode to html."
                    (: ".asp" eow)))
            'html-mode)
      (cons (rx "wiki" )
-           'mediawiki-mode))
+           (yc/func-wrapper 'mediawiki-mode "mediawiki")))
     )))
 (edit-server-start)
 
