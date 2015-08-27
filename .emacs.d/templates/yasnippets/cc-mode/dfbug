@@ -4,9 +4,9 @@
 # --
 #if !defined (PDEBUG)
 #define PDEBUG(fmt, ...)                                                \
-do {                                                                  \$>
-fprintf(stderr, "${1:app}: - %s:%d -- %s: ",                        \$>
-__FILE__, __LINE__,__FUNCTION__);                           \$>
-fprintf(stderr, fmt, ##  __VA_ARGS__);                              \$>
+do {                                                                  \\$>
+fprintf(stderr, "${1:app}: - %s:%d -- %s: ",                        \\$>
+__FILE__, __LINE__,__FUNCTION__);                           \\$>
+fprintf(stderr, fmt, ##  __VA_ARGS__);                              \\$>
 } while(0)$>
 #endif  /*End of if PDEBUG*/

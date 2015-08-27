@@ -6,14 +6,14 @@ LDFLAGS=
 OBJS=main.o$>
 TARGET=main$>
 %.d: %.c$>
-@set -e; rm -f $@; \$>
-$(CC) -MM -MT $*.o $(CPPFLAGS) $< > $@.$$$$; \$>
-sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \$>
+@set -e; rm -f $@; \\$>
+$(CC) -MM -MT $*.o $(CPPFLAGS) $< > $@.$$$$; \\$>
+sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \\$>
 rm -f $@.$$$$$>
 %.d: %.cpp$>
-@set -e; rm -f $@; \$>
-$(CC) -MM -MT $*.o $(CPPFLAGS) $< > $@.$$$$; \$>
-sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \$>
+@set -e; rm -f $@; \\$>
+$(CC) -MM -MT $*.o $(CPPFLAGS) $< > $@.$$$$; \\$>
+sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \\$>
 rm -f $@.$$$$$>
 all: $(TARGET)$>
 -include $(OBJS:.o=.d)$>
