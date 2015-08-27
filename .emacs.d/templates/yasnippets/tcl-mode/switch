@@ -4,10 +4,10 @@
 # key: switch
 # --
 switch -- \$${1:var} {
-    ${2:case1} {
-        ${3:#stuff}
-    }
-    ${4:case2} {
-        ${5:#stuff}
-    }
+${2:case1} {$>
+${3:#stuff}$>
+}$>
+${4:case2} {$>
+${5:#stuff}$>
+}$>
 }

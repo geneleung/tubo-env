@@ -2,5 +2,5 @@
 #name : <head>...</head>
 # --
 <head>
-  $0
+$0$>
 </head>

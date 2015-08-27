@@ -4,7 +4,7 @@
 # key: db1
 # --
 db_1row ${1:query_name} {
-    SELECT ${2:*}
-    FROM ${3}
-    WHERE ${4}
+SELECT ${2:*}$>
+FROM ${3}$>
+WHERE ${4}$>
 }

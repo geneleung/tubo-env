@@ -3,9 +3,8 @@
 # key: file
 # --
 public class ${1:`(let ((fn (file-name-nondirectory
-                            (file-name-sans-extension
-                                 (or (buffer-file-name)
-                                     (buffer-name (current-buffer))))))))}
-
-  $0
+(file-name-sans-extension$>
+(or (buffer-file-name)$>
+(buffer-name (current-buffer))))))))}$>
+$0$>
 end

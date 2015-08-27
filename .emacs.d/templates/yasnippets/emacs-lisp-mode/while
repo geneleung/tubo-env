@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # --
 (while $0
-  $0)
+$0)$>

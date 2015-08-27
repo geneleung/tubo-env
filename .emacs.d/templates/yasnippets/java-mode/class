@@ -1,7 +1,7 @@
 # -*- mode: snippet -*-
 # --
 class ${1:Name} {
-    public ${1:$(yas-substr yas-text "[^: ]*")}($2) {
-        $0
-    }
+public ${1:$(yas-substr yas-text "[^: ]*")}($2) {$>
+$0$>
+}$>
 }

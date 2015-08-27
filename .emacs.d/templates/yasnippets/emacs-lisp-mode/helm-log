@@ -5,5 +5,5 @@
 # --
 (helm-log "$1In directory `%s'" default-directory)
 (helm-log (concat "${2:TIP}\n\n"
-           ">>> "
-           $0 "\n\n"))
+">>> "$>
+$0 "\n\n"))$>

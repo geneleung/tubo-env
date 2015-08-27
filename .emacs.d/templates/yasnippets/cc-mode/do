@@ -2,5 +2,6 @@
 # key: do
 # --
 do {
-    $0
+$0$>
+a$>
 } while (${1:condition});

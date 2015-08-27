@@ -3,5 +3,5 @@
 # key: cls
 # --
 \begin{columns}
-   $1
+$1$>
 \end{columns}

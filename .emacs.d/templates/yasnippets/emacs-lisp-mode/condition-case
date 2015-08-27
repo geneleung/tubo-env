@@ -2,8 +2,8 @@
 #key: ccase
 # --
 (condition-case ${1:var}
-    ${2:(progn
-          $0
-      )}
- ${3:handler}
+${2:(progn$>
+$0$>
+)}$>
+${3:handler}$>
 )

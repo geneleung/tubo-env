@@ -3,5 +3,5 @@
 # key: cl-case
 # --
 (cl-case ${1:var}
-   (${2:val} ${3:expr})
+(${2:val} ${3:expr})$>
 )

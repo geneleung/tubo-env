@@ -4,5 +4,5 @@
 #group : table
 # --
 <tr>
-  $0
+$0$>
 </tr>

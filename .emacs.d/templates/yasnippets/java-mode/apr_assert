@@ -3,5 +3,5 @@
 # key: apr_assert
 # --
 if (Globals.useAssertions) {
-   ${1:assert ..};
+${1:assert ..};$>
 }

@@ -3,24 +3,14 @@
 #include <linux/module.h>
 #include <linux/errno.h>
 #include <linux/init.h>
-
-
-MODULE_LICENSE("Dual BSD/GPL");
-
-extern struct resource ioport_resource;
-
-static int __init ${1:my}_init(void)
+MODULE_LICENSE("Dual BSD/GPL");$>
+extern struct resource ioport_resource;$>
+static int __init ${1:my}_init(void)$>
 {
-
-    return 0;
+return 0;$>
 }
-
-
-static void __exit $1_exit(void)
+static void __exit $1_exit(void)$>
 {
-
-}
-
-
-module_init($1_init);
+}$>
+module_init($1_init);$>
 module_exit($1_exit);

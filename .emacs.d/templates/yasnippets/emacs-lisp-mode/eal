@@ -3,7 +3,7 @@
 # key: eal
 # --
 (eval-after-load "${1:FILE}"
-  '(progn
-     (message "Loading configuration for $1")
-     $0
-     ))
+'(progn$>
+(message "Loading configuration for $1")$>
+$0$>
+))$>

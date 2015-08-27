@@ -3,5 +3,5 @@
 # key: foe
 # --
 foreach(${1:item} \${${2:array}})
-        $0
+$0$>
 endforeach()

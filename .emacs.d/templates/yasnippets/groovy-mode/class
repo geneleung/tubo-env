@@ -4,5 +4,5 @@
 # name: class
 # --
 class $1 {
-      $0
+$0$>
 }

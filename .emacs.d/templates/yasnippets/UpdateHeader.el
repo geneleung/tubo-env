@@ -13,16 +13,28 @@
           (kill-line))
       (insert "# -*- mode: snippet; require-final-newline: nil -*-\n"))))
 
-(dolist (dir (directory-files "." t))
+(defconst r-match-leading-spaces
+  (rx bol (+ space) (group (+? anything)) eol)
+  "regular expression to match leading spaces."
+  )
+
+(defun process-indentation ()
+  (while (re-search-forward r-match-leading-spaces nil t)
+    (replace-match "\\1$>" nil nil)))
+
+(dolist (dir (directory-files "." t (rx alnum)))
   (when (file-directory-p dir)
     (message "\nProcessing files in directory %s" dir)
     (dolist (item (directory-files dir t (rx bol alnum)))
       (unless (file-directory-p item)
-        (message "\t Processing file: %s" item)
-              (with-temp-file item
-                (insert-file-contents-literally item)
-                (goto-char (point-min))
-                (process-mode-marker))))))
+        (save-excursion
+          (message "Processing file: %s" item)
+          (find-file item)
+          (goto-char (point-min))
+          (process-indentation)
+          (save-buffer)
+          (kill-buffer))))
+    ))
 
 
 

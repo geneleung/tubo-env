@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # --
 check-syntax:
-	gcc ${1:Source} -Wall
+gcc ${1:Source} -Wall$>

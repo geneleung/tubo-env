@@ -3,7 +3,7 @@
 # key: dfn
 # --
 (defun ${1:function} (${2:})
-  "${3:description}"
-  (interactive)
-  $0
+"${3:description}"$>
+(interactive)$>
+$0$>
 )

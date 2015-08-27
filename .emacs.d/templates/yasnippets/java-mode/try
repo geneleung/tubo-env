@@ -3,9 +3,9 @@
 # key: try
 # --
 try {
-    $0
+$0$>
 }
 catch (${1:Throwable e}) {
-      ${2:System.out.println("Error " + e.getMessage());
-      e.printStackTrace();}
+${2:System.out.println("Error " + e.getMessage());$>
+e.printStackTrace();}$>
 }

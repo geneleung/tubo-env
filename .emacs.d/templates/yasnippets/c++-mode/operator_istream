@@ -4,5 +4,5 @@
 # --
 istream& operator>>(istream& s, const ${1:type}& ${2:c})
 {
-         $0
+$0$>
 }

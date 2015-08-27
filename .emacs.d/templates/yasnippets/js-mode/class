@@ -2,9 +2,9 @@
 #name : Class
 # --
 var ${1:name} = new Class({
-  createNew: function($2) {
-    var ret = {};
-    $0
-    return ret;
-  }
+createNew: function($2) {$>
+var ret = {};$>
+$0$>
+return ret;$>
+}$>
 });

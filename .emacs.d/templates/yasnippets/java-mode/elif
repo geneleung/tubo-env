@@ -3,5 +3,5 @@
 # key: elif
 # --
 else if (${1:cond}) {
-    $0
+$0$>
 }

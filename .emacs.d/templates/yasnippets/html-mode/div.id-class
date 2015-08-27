@@ -2,5 +2,5 @@
 #name : <div id="..." class="...">...</div>
 # --
 <div id="$1" class="$2">
-  $0
+$0$>
 </div>

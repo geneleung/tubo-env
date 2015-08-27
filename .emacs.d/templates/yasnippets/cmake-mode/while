@@ -2,5 +2,5 @@
 # name: while
 # --
 while(${1:cond})
-    $0
+$0$>
 endwhile({$1})

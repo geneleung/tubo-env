@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
 # --
 (progn
-  ${1: functions}
-  )
+${1: functions}$>
+)$>

@@ -3,10 +3,10 @@
 # key: dfab
 # --
 #define ABORT(fmt, ...)                                             \
-    do {                                                            \
-        fprintf(stderr, "Abort: %s:%d -- %s: " fmt,                 \
-                __FILE__, __LINE__, __FUNCTION__,  ##__VA_ARGS__);  \
-        sync();                                                     \
-        sleep(2);                                                   \
-        abort();                                                    \
-    } while (0)
+do {                                                            \$>
+fprintf(stderr, "Abort: %s:%d -- %s: " fmt,                 \$>
+__FILE__, __LINE__, __FUNCTION__,  ##__VA_ARGS__);  \$>
+sync();                                                     \$>
+sleep(2);                                                   \$>
+abort();                                                    \$>
+} while (0)$>

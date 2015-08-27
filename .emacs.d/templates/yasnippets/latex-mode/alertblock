@@ -3,5 +3,5 @@
 # key: al
 # --
 \begin{alertblock}{$2}
-        $0
+$0$>
 \end{alertblock}

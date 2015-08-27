@@ -3,5 +3,5 @@
 # key: def
 # --
 def ${1:method}(${2:args}) {
-    $0
+$0$>
 }

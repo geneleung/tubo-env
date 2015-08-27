@@ -3,5 +3,5 @@
 # key: more
 # --
 #+BEGIN_HTML
-  <!--more-->
+<!--more-->$>
 #+END_HTML

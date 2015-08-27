@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
 # --
-     | STATUS | TO DO TODAY | `(insert-current-date)` |
-     | TODO   |             |                         |
-     | TODO   |             |                         |
+| STATUS | TO DO TODAY | `(insert-current-date)` |$>
+| TODO   |             |                         |$>
+| TODO   |             |                         |$>

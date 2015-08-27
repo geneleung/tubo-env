@@ -3,5 +3,5 @@
 # key: int
 # --
 public interface ${1:`(file-name-sans-extension (file-name-nondirectory (buffer-file-name)))`} {
-  $0
+$0$>
 }

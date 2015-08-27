@@ -3,5 +3,5 @@
 # key: foe
 # --
 for (${1:ele} in ${2:arrary}) {
-    $0;
+$0;$>
 }

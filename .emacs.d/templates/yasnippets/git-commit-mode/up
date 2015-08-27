@@ -1,5 +1,4 @@
 # -*- mode: snippet -*-
 # --
 ${1:Abstract}
-
-${2: }
+${2: }$>

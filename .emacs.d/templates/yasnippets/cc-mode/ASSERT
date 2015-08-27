@@ -3,4 +3,4 @@
 # key: ASS
 # --
 ASSERT(${1:EXPR},"${2:%s}\\n"${2:$(if (string-match "%" yas-text) ", " "\);")
-                           }$3${2:$(if (string-match "%" yas-text) "\);" "")}
+}$3${2:$(if (string-match "%" yas-text) "\);" "")}$>

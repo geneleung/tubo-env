@@ -3,8 +3,8 @@
 # key: with
 # --
 (with-temp-${1:b}${1:$(cond
-                               ((string-match "^b" yas-text) "uffer")
-                               ((string-match "^f" yas-text) "ile")
-                               ((string-match "^m" yas-text) "essage")
-                               (t ""))}
-  $0)
+((string-match "^b" yas-text) "uffer")$>
+((string-match "^f" yas-text) "ile")$>
+((string-match "^m" yas-text) "essage")$>
+(t ""))}$>
+$0)$>

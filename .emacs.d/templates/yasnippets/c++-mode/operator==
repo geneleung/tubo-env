@@ -3,5 +3,5 @@
 # key: op==
 # --
 bool ${1:MyClass}::operator==(const $1 &other) const {
-     $0
+$0$>
 }

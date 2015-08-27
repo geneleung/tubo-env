@@ -3,5 +3,5 @@
 # key: blk
 # --
 \begin{block}{}
-    $1
+$1$>
 \end{block}

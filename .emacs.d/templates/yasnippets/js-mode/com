@@ -2,9 +2,8 @@
 # name: com
 # key: com
 # --
-
-/**
- * $0
- * @param {${1:String}} $2
- * @return {${3:String}}
- */
+/**$>
+* $0$>
+* @param {${1:String}} $2$>
+* @return {${3:String}}$>
+*/$>

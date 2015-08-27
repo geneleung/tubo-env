@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
 # --
- <font color="#a40000">
-  $1
- </font>
+<font color="#a40000">$>
+$1$>
+</font>$>

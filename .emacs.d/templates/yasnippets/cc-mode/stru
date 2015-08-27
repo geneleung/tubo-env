@@ -2,5 +2,5 @@
 # key: stu
 # --
 typedef struct _${1:Name} {
-    $0
+$0$>
 } $1;

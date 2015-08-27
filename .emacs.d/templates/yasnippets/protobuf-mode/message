@@ -3,5 +3,5 @@
 # key: msg
 # --
 message ${1:MSG Name} {
-    ${2:Message Entty};
+${2:Message Entty};$>
 }

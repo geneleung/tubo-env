@@ -1,9 +1,7 @@
 # -*- mode: snippet -*-
 # --
-
-\documentclass[11pt,a4paper]{article}
-
-\usepackage{ctex}
+\documentclass[11pt,a4paper]{article}$>
+\usepackage{ctex}$>
 \setCJKmainfont[BoldFont={SimHei},ItalicFont={KaiTi_GB2312}]{SimSun}
 \setCJKsansfont{SimHei}
 \setCJKmonofont{FangSong_GB2312}
@@ -11,7 +9,6 @@
 \setCJKfamilyfont{zhhei}{SimHei}
 \setCJKfamilyfont{zhkai}{KaiTi_GB2312}
 \setCJKfamilyfont{zhfs}{FangSong_GB2312}
-
-\begin{document}
+\begin{document}$>
 ${1: content}
 \end{document}

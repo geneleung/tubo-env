@@ -4,5 +4,5 @@
 #group : list
 # --
 <ol class="$1">
-  $0
+$0$>
 </ol>

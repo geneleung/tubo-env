@@ -3,4 +3,4 @@
 # key: dfs
 # --
 (defstruct ${1:name}
-    $0)
+$0)$>

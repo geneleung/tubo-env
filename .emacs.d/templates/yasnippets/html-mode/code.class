@@ -2,5 +2,5 @@
 #name : <code class="...">...</code>
 # --
 <code class="$1">
-  $0
+$0$>
 </code>

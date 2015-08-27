@@ -2,5 +2,5 @@
 # name: if
 # --
 if (${1:cond})
-   $0
+$0$>
 endif ($1)

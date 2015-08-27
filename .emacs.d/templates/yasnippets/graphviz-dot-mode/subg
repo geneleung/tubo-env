@@ -3,8 +3,8 @@
 # key: sbg
 # --
 subgraph  {
-    color=invis;
-    style=filled;
-    rank=same;
-    $1
+color=invis;$>
+style=filled;$>
+rank=same;$>
+$1$>
 }

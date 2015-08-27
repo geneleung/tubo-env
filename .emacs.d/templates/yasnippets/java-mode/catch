@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
 # --
 catch ($0 e) {
-    e.printStackTrace();
+e.printStackTrace();$>
 }

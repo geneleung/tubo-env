@@ -4,7 +4,7 @@
 # key: dbfor
 # --
 db_foreach ${1:query_name} {
-    ${2:sql}
+${2:sql}$>
 } {
-    ${3:tcl}
+${3:tcl}$>
 }$0

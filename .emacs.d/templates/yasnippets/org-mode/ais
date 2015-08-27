@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
 # --
-     | STATUS | ACTIVITY INVENTORY | DATE |
-     |        |                    |                         |
-     |        |                    |                         |
+| STATUS | ACTIVITY INVENTORY | DATE |$>
+|        |                    |                         |$>
+|        |                    |                         |$>

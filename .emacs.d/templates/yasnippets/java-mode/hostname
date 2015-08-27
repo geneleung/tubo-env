@@ -2,9 +2,9 @@
 # --
 String hostname;
 try {
-    InetAddress addr = InetAddress.getLocalHost();
-    hostname = addr.getHostName();
+InetAddress addr = InetAddress.getLocalHost();$>
+hostname = addr.getHostName();$>
 }
 catch (UnknownHostException e) {
-    hostname = "UNKNOWN";
+hostname = "UNKNOWN";$>
 }

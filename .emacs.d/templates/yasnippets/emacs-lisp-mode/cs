@@ -3,5 +3,5 @@
 # key: case
 # --
 (case ${1:EXPR}
-  (${2:KEY} ${3:BODY})
+(${2:KEY} ${3:BODY})$>
 )

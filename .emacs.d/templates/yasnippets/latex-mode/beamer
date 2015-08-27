@@ -5,18 +5,15 @@
 \usetheme{lankton-keynote}
 \usecolortheme{lily}
 \usefonttheme[onlymath]{serif}
-
-\usepackage{ctex}
+\usepackage{ctex}$>
 \setCJKmainfont[BoldFont={SimHei},ItalicFont={KaiTi_GB2312}]{SimSun}
 \setCJKsansfont{SimHei}
 \setCJKmonofont{SimSun}
-
-\setCJKfamilyfont{zhsong}{SimSun}
+\setCJKfamilyfont{zhsong}{SimSun}$>
 \setCJKfamilyfont{zhhei}{SimHei}
 \setCJKfamilyfont{zhkai}{KaiTi_GB2312}
 \setCJKfamilyfont{zhfs}{FangSong_GB2312}
-
-\usepackage{amsmath}
+\usepackage{amsmath}$>
 \usepackage{booktabs, longtable}
 \usepackage{cmap}
 \usepackage{enumerate}
@@ -27,52 +24,44 @@
 \usepackage{listings}
 \usepackage{times}
 \usepackage{xcolor}
-
-\lstset{                        %Settings for listings package.
-  language=[ANSI]{C},
-  % backgroundcolor=\color{lightgray},
-  basicstyle=\footnotesize,
-  breakatwhitespace=false,
-  breaklines=true,
-  captionpos=b,
-  commentstyle=\color{red!50!green!50!blue!50},
-  directivestyle=\color{blue},
-  extendedchars=false,
-  frame=shadowbox,
-  framerule=0pt,
-  keywordstyle=\color{blue}\bfseries,
-  morekeywords={*,define,*,include...},
-  numbersep=5pt,
-  rulesepcolor=\color{red!20!green!20!blue!20},
-  showspaces=false,
-  showstringspaces=false,
-  showtabs=false,
-  numbers=left, %none
-  stepnumber=0, %2
-  stringstyle=\color{purple},
-  tabsize=4,
-  title=\lstname
+\lstset{                        %Settings for listings package.$>
+language=[ANSI]{C},$>
+% backgroundcolor=\color{lightgray},$>
+basicstyle=\footnotesize,$>
+breakatwhitespace=false,$>
+breaklines=true,$>
+captionpos=b,$>
+commentstyle=\color{red!50!green!50!blue!50},$>
+directivestyle=\color{blue},$>
+extendedchars=false,$>
+frame=shadowbox,$>
+framerule=0pt,$>
+keywordstyle=\color{blue}\bfseries,$>
+morekeywords={*,define,*,include...},$>
+numbersep=5pt,$>
+rulesepcolor=\color{red!20!green!20!blue!20},$>
+showspaces=false,$>
+showstringspaces=false,$>
+showtabs=false,$>
+numbers=left, %none$>
+stepnumber=0, %2$>
+stringstyle=\color{purple},$>
+tabsize=4,$>
+title=\lstname$>
 }
-
-
-\beamertemplateballitem
-
-\begin{document}
-  %% ------------------------------------------
-  \title{${1:title}}
-  \author{My Name}
-  \institute{Company Name}
-  \date{\today}
-
-  \frame{\titlepage}
-  \frame{\tableofcontents}
-  %% ------------------------------------------
-
-  \section{}
-  \label{}
-
-  \begin{frame}
-    \frametitle{}
-  \end{frame}
-
-\end{document}
+\beamertemplateballitem$>
+\begin{document}$>
+%% ------------------------------------------$>
+\title{${1:title}}$>
+\author{My Name}$>
+\institute{Company Name}$>
+\date{\today}$>
+\frame{\titlepage}$>
+\frame{\tableofcontents}$>
+%% ------------------------------------------$>
+\section{}$>
+\label{}$>
+\begin{frame}$>
+\frametitle{}$>
+\end{frame}$>
+\end{document}$>

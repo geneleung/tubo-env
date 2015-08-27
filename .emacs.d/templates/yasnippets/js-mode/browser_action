@@ -3,5 +3,5 @@
 # key: ba
 # --
 "browser_action" :{
-    $1
+$1$>
 }
