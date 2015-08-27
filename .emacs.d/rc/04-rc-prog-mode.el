@@ -925,7 +925,7 @@ and is reversed for better performence.")
                          (statement-cont
                           . c-lineup-assignments)
                          (label . /)
-                         (case-label . +)
+                         (case-label . 0)
                          (statement-case-open . 0)
                          (statement-case-intro . +) ; case w/o {
                          (access-label . -)
