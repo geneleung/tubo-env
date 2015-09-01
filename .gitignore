@@ -276,3 +276,6 @@ tmp/
 /.Spark/
 /MyPaint/
 /.arcrc
+/.emacs.d/rc/10-emacs-custome.el
+/.claws-mail/
+/.face

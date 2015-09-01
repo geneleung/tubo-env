@@ -1459,7 +1459,9 @@ and is reversed for better performence.")
    )
 
   (custom-set-variables
-   '(gdb-many-windows t))
+   '(gdb-many-windows t)
+   '(gdb-non-stop-setting nil)
+   )
 
   (advice-add
    'gdb-setup-windows :around

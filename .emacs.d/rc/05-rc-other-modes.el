@@ -149,8 +149,11 @@
 (add-to-list 'file-coding-system-alist
              (cons "\\.\\(org\\|org_archive\\|/TODO\\)$"  'utf-8))
 
+(yc/autoload 'org-version "org")
+
 (yc/eval-after-load "org"
-                    (push (purecopy (append '(org) (version-to-list org-version))) package--builtin-versions)
+                    (push (purecopy (append '(org) (version-to-list (org-version))))
+                          package--builtin-versions)
                     (custom-set-variables
                      '(org-ditaa-jar-path "~/.emacs.d/site-lisp/org_contrib/ditaa.jar")
                      '(org-blank-before-new-entry (quote ((heading . auto) (plain-list-item))))

@@ -317,9 +317,8 @@
   '(progn
      (ac-ispell-setup)))
 
-(add-hook 'git-commit-mode-hook 'ac-ispell-ac-setup)
-(add-hook 'mail-mode-hook 'ac-ispell-ac-setupa)
-(add-hook 'mediawiki-mode-hook 'ac-ispell-ac-setup)
+(dolist (hk '(git-commit-mode-hook mail-mode-hook mediawiki-mode-hook org-mode-hook))
+  (add-hook hk 'ac-ispell-ac-setup))
 
 ;
 (provide '06-rc-complete)
