@@ -112,3 +112,16 @@ alias edit=emacs_eidt
 alias tmux="tmux attach || tmux"
 alias ttop="top -u $UID"
 which xdg-open > /dev/null 2>&1 && alias open=xdg-open
+
+
+# Functions used by arc of phabricator.
+function arcd ()
+{
+    if [ $# -ne 0 ]; then
+        cl=$1
+    else
+        cl="HEAD"
+    fi
+
+    arc diff --head $cl "$cl~"
+}
