@@ -83,7 +83,7 @@
 
 
 (emr-declare-command 'emr-iedit-in-function
-  :title "Rename (in function)"
+  :title "rename (in function)"
   :description "in function"
   :modes '(prog-mode)
   :predicate (lambda ()
@@ -92,14 +92,14 @@
                     (which-function))))
 
 (emr-declare-command 'emr-iedit-in-region
-  :title "Rename (in region)"
+  :title "rename (in region)"
   :description "in region"
   :modes '(prog-mode)
   :predicate (lambda ()
                (iedit-region-active)))
 
 (emr-declare-command 'emr-iedit-global
-  :title "Rename"
+  :title "rename"
   :description "globally"
   :modes '(prog-mode)
   :predicate (lambda ()

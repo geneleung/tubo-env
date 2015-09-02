@@ -82,14 +82,14 @@ detailed descriptions."
                (emr-c:looking-at-include?)))
 
 (emr-declare-command 'emr-cc-format-region
-  :title "Format region"
+  :title "format region"
   :description "with clang"
   :modes '(c-mode c++-mode)
   :predicate (lambda ()
                (and mark-active (not (equal (mark) (point)))
                     (executable-find "clang-format"))))
 (emr-declare-command 'emr-cc-format-buffer
-  :title "Format Buffer"
+  :title "format buffer"
   :description "with clang"
   :modes '(c-mode c++-mode)
   :predicate (lambda ()
