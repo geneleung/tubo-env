@@ -1759,7 +1759,7 @@ and is reversed for better performence.")
 (custom-set-variables
  '(emr-clang-format-style '(("BasedOnStyle" . "LLVM")
                             ("IndentWidth" . "4")
-                            ("BreakBeforeBraces" . "Linux")
+                            ("BreakBeforeBraces" . "Stroustrup")
                             ("AllowShortIfStatementsOnASingleLine" . "false")
                             ("IndentCaseLabels" . "false")
                             ("PointerAlignment" . "Left")
