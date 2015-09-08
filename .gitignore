@@ -157,7 +157,6 @@ GTAGS
 /.fsm-*
 /.fvwm
 /.fvwm/
-/.gdbinit
 /.gem/*
 /.globalrc
 /.gnome-commander/

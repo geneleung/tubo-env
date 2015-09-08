@@ -103,7 +103,7 @@
         "\\|^\C-m?$"
         "\\)"))
   (custom-set-variables
-   '(ediff-custom-diff-options "-urNa")
+   '(ediff-custom-diff-options "-urNaw")
    '(ediff-diff-options "")
    '(ediff-split-window-function 'split-window-horizontally)
    '(ediff-window-setup-function 'ediff-setup-windows-plain))
