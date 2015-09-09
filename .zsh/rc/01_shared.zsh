@@ -114,6 +114,17 @@ alias ttop="top -u $UID"
 which xdg-open > /dev/null 2>&1 && alias open=xdg-open
 
 
+# find and open with vim.
+function fvim ()
+{
+    find . -name $1 -exec vim {} \;
+}
+
+function fee ()
+{
+    find . -name $1 -exec emacsclient -n {} \;
+}
+
 # Functions used by arc of phabricator.
 function arcd ()
 {
@@ -125,3 +136,4 @@ function arcd ()
 
     arc diff --head $cl "$cl~"
 }
+
