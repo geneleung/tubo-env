@@ -1,24 +1,29 @@
 # -*- mode: snippet -*-
 # --
 CC=gcc
-CPPFLAGS=-Wall -O2 -g -DDEBUG
+COMMON_FLAGS=-Wall -O2 -g -DDEBUG
+CFLAGS= $(COMMON_FLAGS) -std=c99
+CXX=g++
+CPPFLAGS= $(COMMON_FLAGS) -std=c++11
+
 LDFLAGS=
-OBJS=main.o$>
-TARGET=main$>
-%.d: %.c$>
-@set -e; rm -f $@; \\$>
-$(CC) -MM -MT $*.o $(CPPFLAGS) $< > $@.$$$$; \\$>
-sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \\$>
-rm -f $@.$$$$$>
+OBJS=$0
+TARGET=${1:main}
+
+%.d: %.c
+	@set -e; rm -f $@;
+	$(CC) -MM -MT $*.o $(CPPFLAGS) $< > $@.$$$$;
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@;
+	rm -f $@.$$$$
 %.d: %.cpp$>
-@set -e; rm -f $@; \\$>
-$(CC) -MM -MT $*.o $(CPPFLAGS) $< > $@.$$$$; \\$>
-sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@; \\$>
-rm -f $@.$$$$$>
-all: $(TARGET)$>
--include $(OBJS:.o=.d)$>
-$(TARGET): $(OBJS)$>
-$(CC)  $^ -o $@ $(CPPFLAGS) $(LDFLAGS)$>
-strip -s $@$>
-clean:$>
--rm -f $(TARGET) $(OBJS) $(OBJS:.o=.d)$>
+	@set -e; rm -f $@;
+	$(CC) -MM -MT $*.o $(CPPFLAGS) $< > $@.$$$$;
+	sed 's,\($*\)\.o[ :]*,\1.o $@ : ,g' < $@.$$$$ > $@;
+	rm -f $@.$$$$
+all: $(TARGET)
+
+$(TARGET): $(OBJS)
+	$(CC)  $^ -o $@ $(CPPFLAGS) $(LDFLAGS)
+	strip -s $@
+clean:
+	-rm -f $(TARGET) $(OBJS) $(OBJS:.o=.d)
