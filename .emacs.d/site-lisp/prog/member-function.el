@@ -205,7 +205,7 @@ member functions into a read only file.")
 "
 ))
 
-(defun yc/strip-namespace ()
+(defun mf--strip-namespace ()
   "Stip C++ namespaces. Return list of namespaces if any."
   (interactive)
   (let ((start nil)
@@ -220,6 +220,9 @@ member functions into a read only file.")
       (setq end (1- (point)))
       (setq content (concat content (buffer-substring-no-properties start end))))
     (when content
+      (unless (= (point) (point-max))
+        (setq content (concat content (buffer-substring-no-properties (point) (point-max))))
+        )
       (erase-buffer)
       (goto-char (point-min))
       (insert content))))
@@ -912,8 +915,7 @@ implementation file."
                   (set-buffer (get-buffer-create temp-header))
                   (insert-buffer-substring (get-buffer header))
                   (goto-char (point-min))
-                  (setq namespaces (yc/strip-namespace)) ;;TODO: Add "using namespace" in CPP file
-
+                  (setq namespaces (mf--strip-namespace)) ;;TODO: Add "using namespace" in CPP file
                   (setq mf--saved-string
                         (replace-regexp-in-string
                          (rx (group alnum) (* blank)"<" (+ blank) (group alnum)) "\\1<\\2"
@@ -966,7 +968,8 @@ implementation file."
                      (kill-buffer temp-header)
                      (kill-buffer temp-file)
                      (message (format "Error in expanding member functions in buffer %s: %s"
-                                      c-file (error-message-string var)))))))))))
+                                      c-file (error-message-string var)))))
+            ))))))
 
 (provide 'member-function)
 
