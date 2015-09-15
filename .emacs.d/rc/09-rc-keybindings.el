@@ -32,7 +32,6 @@
 (lazy-set-key
  (list
   (cons (kbd "<C-x C-j>") 'dired-jump)
-  (cons "\C-xF" 'hexview-find-file)
   (cons (kbd "<C-x C-r>") 'recentf-open-files)
   (cons "\C-xt"   'untabify)
   (cons "\C-xT"   'tabify)

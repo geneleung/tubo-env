@@ -161,10 +161,12 @@
 (global-set-key [(control meta f3)] 'highlight-symbol-query-replace)
 
  ;; Cool magit tool for git.
-(autoload 'magit-status "magit" "magit"  t)
-(autoload 'magit-blame-mode "magit-blame" "blame"  t)
+(yc/autoload 'magit-status "magit")
+(yc/autoload 'magit-blame-mode "magit-blame"t)
+(yc/autoload 'magit-find-file "magit")
 
-(global-set-key "\C-xgs" 'magit-status)
+(define-key ctl-x-map "gs"  'magit-status)
+(define-key ctl-x-map "F"   'magit-find-file)
 
 (yc/eval-after-load
  "git-commit-mode"
@@ -401,8 +403,7 @@
 
 
 (autoload 'hexview-find-file "hexview-mode" ""  t)
-(lazy-set-key
- (list (cons "\C-xF" 'hexview-find-file)))
+(define-key ctl-x-map "\M-F" 'hexview-find-file)
 
  ;; *********************** graphviz dot mode ***********
 (autoload 'graphviz-dot-mode "graphviz-dot-mode" "dot mode"  t)
