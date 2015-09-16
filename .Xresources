@@ -8,8 +8,6 @@ Xft.dpi: 96
 Xft.hinting: 1
 Xft.hintstyle: hintsfull
 Xft.rgba: rgb
-Xft.antialias: true
-
 
 xterm*faceName: Monaco:pixelsize=11
 xTerm*scrollBar: false
