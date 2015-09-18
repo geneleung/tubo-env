@@ -275,7 +275,7 @@
 (add-hook 'prog-mode-hook
           (lambda ()
             (yc/add-ac-sources
-             ;; ac-source-semantic
+             ac-source-semantic
              ac-source-gtags)))
 
 (add-hook 'emacs-lisp-mode-hook

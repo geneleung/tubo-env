@@ -34,7 +34,10 @@
     (yc/add-keyword yc/r-match-longline 'font-lock-warning-face)))
 
 
+(yc/autoload 'semantic-mode)
+
 (defun yc/common-program-hook ()
+  (semantic-mode 1)
   (which-function-mode 1)
   (autopair-mode t)
   (srecode-minor-mode t)
@@ -58,8 +61,6 @@
  '(autopair-pair-criteria 'always))
 
  ;;;; CEDET Settings
-;;;; ***** For External CEDET ****
-
 ;; http://lists.gnu.org/archive/html/help-gnu-emacs/2012-04/msg00430.html
 (unless (boundp 'x-max-tooltip-size)
   (setq x-max-tooltip-size (cons 80 40)))
@@ -75,36 +76,32 @@
 (require 'semantic/analyze/refs)
 (require 'semantic/decorate/include)
 
-
-(global-semantic-decoration-mode 1)
-;; (global-semantic-idle-local-symbol-highlight-mode 1)
-(global-semantic-idle-scheduler-mode 1)
-(global-semantic-idle-summary-mode 1)
-(global-semantic-mru-bookmark-mode 1)
-(global-semantic-show-parser-state-mode 1)
-;; (setq semantic-idle-scheduler-idle-time 1)
-
 ;;;;  Helper tools.
 (custom-set-variables
  '(semantic-default-submodes
    (quote (global-semantic-decoration-mode
-           ;; global-semantic-idle-completions-mode
            global-semantic-idle-scheduler-mode
            global-semanticdb-minor-mode
            global-semantic-idle-summary-mode
            global-semantic-mru-bookmark-mode)))
  '(semantic-idle-scheduler-idle-time 1))
 
-(semantic-mode)
-
 ;; (semantic-load-enable-code-helpers)
+
+
+(advice-add
+ 'semantic--tag-link-secondary-overlays :around
+ (lambda (func &rest args)
+   (condition-case err
+       (apply func args)
+     (error nil))))
+
 
 (add-hook 'semantic-lex-reset-hooks 'semantic-lex-spp-reset-hook nil t)
 
      ;;;; Semanticdb 定制
 ;; Semantic DataBase存储位置
 (require 'semantic/db)
-;; smart complitions
 (setq-mode-local c-mode semanticdb-find-default-throttle
                  '(project unloaded system recursive))
 (setq-mode-local c++-mode semanticdb-find-default-throttle
