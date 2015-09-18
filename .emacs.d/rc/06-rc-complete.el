@@ -252,7 +252,7 @@
 (custom-set-variables
  '(company-backends '((company-files company-dabbrev company-abbrev :with company-yasnippet)))
  '(company-minimum-prefix-length 2)
- '(company-idle-delay 0.5))
+ '(company-idle-delay 0.2))
 
 (defmacro yc/add-company-backends-with-yasnippet (&rest backends)
   `(set (make-local-variable 'company-backends)
