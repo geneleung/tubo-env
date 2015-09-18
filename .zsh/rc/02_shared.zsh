@@ -1,6 +1,3 @@
-## Following settings should be shared by both bash and zsh.
-#environement variables
-
 export HISTSIZE=512
 export SAVEHIST=1000
 export HISTFILE=~/.zhistory
@@ -68,72 +65,9 @@ ulimit -c unlimited
 alias rcp="rsync -P "
 which dcfldd > /dev/null 2>&1 && alias dd="dcfldd"
 
-function gtop ()
-{
-    dir=`git rev-parse --show-toplevel`
-    cd $dir
-}
-
-
-function git_submodule_update ()
-{
-    tmpfile=$(mktemp)
-    git submodule update --init | tee $tmpfile
-    TOP=$PWD
-    for dir in `cat $tmpfile | grep "\.emacs.d/site-lisp"`; do
-        dirn=`echo $dir | awk -F "'" '{print $2}'`
-        if [ -d $HOME/$dirn ]; then
-            printf "\ncd to $HOME/$dirn\n"
-            cd $HOME/$dirn
-            if [ -e Makefile ]; then
-                make
-            else
-                printf "Not support for now.\n"
-            fi
-        fi
-    done
-}
-
-function emacs_eidt ()
-{
-    #Every FILE can be either just a FILENAME or [+LINE[:COLUMN]] FILENAME.
-    fn=`expr "$1" : '\([^:]*\):.*' '|' $1`
-    ln=`expr "$1" :  '[^:]*:\(.*\)'` # line_info
-
-    if [ -z $ln ]; then
-        emacsclient -n $fn
-    else
-        emacsclient -n "+$ln" $fn
-    fi
-}
-
 alias ee=emacs_eidt
 alias edit=emacs_eidt
 alias tmux="tmux attach || tmux"
 alias ttop="top -u $UID"
 which xdg-open > /dev/null 2>&1 && alias open=xdg-open
-
-
-# find and open with vim.
-function fvim ()
-{
-    find . -name $1 -exec vim {} \;
-}
-
-function fee ()
-{
-    find . -name $1 -exec emacsclient -n {} \;
-}
-
-# Functions used by arc of phabricator.
-function arcd ()
-{
-    if [ $# -ne 0 ]; then
-        cl=$1
-    else
-        cl="HEAD"
-    fi
-
-    arc diff --head $cl "$cl~"
-}
 

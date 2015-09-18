@@ -35,7 +35,7 @@
 
 (setq-default
  mode-line-format
- '(" %z "
+ '(" %Z "
    ;; mode-line-buffer-identification
    (:eval
     (cond (buffer-read-only
@@ -76,6 +76,7 @@
 
    " "
    (:eval (format-time-string "%H:%M:%S" (current-time)))))
+
 
 ;; 不要闪烁光标
 (blink-cursor-mode 1)

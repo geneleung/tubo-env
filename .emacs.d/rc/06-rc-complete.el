@@ -250,7 +250,7 @@
  '(ac-quick-help-delay 0.8)
  '(ac-ignore-case nil)
  '(ac-use-menu-map t)
- ;; '(ac-candidate-limit 20)
+ '(ac-candidate-limit 20)
  '(ac-comphist-file (yc/make-cache-path "ac-comphist.dat"))
  '(ac-modes (quote (cmake-mode protobuf-mode antlr-mode objc-mode flyspell-mode
    sawfish-mode nxml-mode powershell-mode graphviz-dot-mode eshell-mode text-mode
@@ -275,7 +275,8 @@
 (add-hook 'prog-mode-hook
           (lambda ()
             (yc/add-ac-sources
-             ac-source-semantic ac-source-gtags)))
+             ;; ac-source-semantic
+             ac-source-gtags)))
 
 (add-hook 'emacs-lisp-mode-hook
           (lambda ()
