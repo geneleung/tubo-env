@@ -3,5 +3,4 @@
 # --
 do {
 $0$>
-a$>
 } while (${1:condition});
