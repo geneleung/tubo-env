@@ -1126,7 +1126,7 @@ And install necessary packages if there are errors while executing FUNC."
                        (set-auto-mode))))))))))
 
 ;; Handle file-error and suggest to install missing packages...
-(advice-add 'normal-mode :around #'yc/install-package-on-error)
+(advice-add 'set-auto-mode :around #'yc/install-package-on-error)
 
 (advice-add
  'command-execute :around #'yc/install-package-on-error)

@@ -45,7 +45,10 @@ If CLICK is t, calculate time cost."
       (error "Failed to load %s" feature))))
 
 (require 'package)
-(add-to-list 'package-archives (cons "melpa" "http://melpa.org/packages/"))
+(add-to-list 'package-archives
+             (cons "melpa-stable" "http://stable.melpa.org/packages/")
+             ;; (cons "melpa" "http://melpa.org/packages/")
+             )
 (package-initialize)
 
 (defvar yc/packages
