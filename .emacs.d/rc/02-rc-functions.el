@@ -1096,6 +1096,17 @@ args should be a list, but to make caller's life easier, it can accept one atom 
                       yc/wp-path
                       (format-time-string  "%Y-%m-%d" (current-time))))))
 
+(defun yc/syntax-color-hex ()
+  "Show color text of form #fffffff in current buffer."
+  (interactive)
+  (font-lock-add-keywords
+   nil
+   '(("#[abcdef[:digit:]]\\{6\\}"
+      (0 (put-text-property
+          (match-beginning 0)
+          (match-end 0)
+          'face (list :background (match-string-no-properties 0)))))))
+  (font-lock-fontify-buffer))
  ;; Advice
 
 ;; Auto indent regions for prog/sgml based modes.
