@@ -30,6 +30,9 @@
 
 ;;; Code:
 
+
+(require 'pp)
+(require 'magit-mode)
 (require 'magit)
 
 
@@ -39,7 +42,7 @@
   "arc support for Magit."
   :group 'magit-extensions)
 
-(defcustom magit-arc-rev-db (expand-file-name "~/.emacs.d/magit-arc-db")
+(defcustom magit-arc-db (expand-file-name "~/.emacs.d/magit-arc-db")
   "Database of COMMIT-REVISION mapping.
 We need a mapping between git commits and arc so we can amend commit message
 or close revision.  For now, this mapping will be saved as alist.  There might
@@ -63,10 +66,12 @@ run as a subprocess."
 
 (defvar magit-arc-rev-alist nil
   "AList of commit-rev mapping.
-It will be loaded from and store into `magit-arc-rev-db'.")
+It will be loaded from and store into `magit-arc-db'.")
 
+;;XXX: test only
 (setq magit-arc-rev-alist nil)
-(setq-default magit-arc-rev-db "/tmp/test-arc.db") //XXX: test only
+(setq-default magit-arc-db "/tmp/test-arc.db")
+(setq-default magit-arc-executable "echo")
 
 ;;; Utilities
 (defun magit-arc-run (&rest args)
@@ -84,8 +89,7 @@ repository are reverted if `magit-revert-buffers' is non-nil.
 
 Process output goes into a new section in a buffer specified by
 variable `magit-process-buffer-name-format'."
-  (print args)
-  (magit-call-process magit-arc-executable args)
+  (apply 'magit-call-process magit-arc-executable args)
   (magit-refresh))
 
 ;;; Commands
@@ -96,30 +100,71 @@ variable `magit-process-buffer-name-format'."
   :man-page "git-arc"
   :actions  '(
               (?a "Amend & Close"   magit-arc-amend-close)
-              (?s "Send Review"     magit-arc-fetch)))
+              (?s "Send Review"     magit-arc-send-review)))
 
 (defun magit-arc-commit-to-revision (commit)
   "Find proper revision based on COMMIT."
   (unless magit-arc-rev-alist
     (condition-case error
         (with-temp-buffer
-          (insert-file-contents magit-arc-rev-db)
+          (insert-file-contents magit-arc-db)
           (goto-char (point-min))
           (setq magit-arc-rev-alist (read (current-buffer))))
-      (error (message "Failed to load database from: %s" magit-arc-rev-db))))
+      (error (message "Failed to load database from: %s" magit-arc-db))))
   (cdr (assoc commit magit-arc-rev-alist)))
+
+(defun magit-arc-db-remove-commit (commit &optional without-io)
+  "Remove COMMIT from db.
+If WITHOUT-IO is specified, database will not be written back to disk."
+  (setq magit-arc-rev-alist (assq-delete-all commit magit-arc-rev-alist))
+  (unless without-io (magit-arc-db-write)))
+
+(defun magit-arc-db-add-commit (commit revision &optional without-io)
+  "Add mapping of COMMIT & REVISION.
+Dump this mapping into database If WITHOUT-IO is not specified."
+  (push (cons commit revision) magit-arc-rev-alist)
+  (unless without-io (magit-arc-db-write)))
+
+(defun magit-arc-db-write ()
+  "Write `magit-arc-rev-alist' into database."
+    (with-temp-file magit-arc-db
+      (insert "(")
+      (dolist (i magit-arc-rev-alist) (pp i (current-buffer)))
+      (insert ")")))
+
+(defun magit-arc-get-commit ()
+  "Find COMMIT at cursor as symbol."
+  (let ((commit (magit-commit-at-point)))
+    (if commit (intern commit) nil)))
 
 ;;;###autoload
 (defun magit-arc-amend-close (&optional args)
   "Amend and close commit message."
   (interactive)
-  (let* ((commit (magit-commit-at-point))
+  (let* ((commit (magit-arc-get-commit))
+         (revision (magit-arc-commit-to-revision commit)))
+    (print (cons "A" revision))
+    (if (not revision)
+        (error "Can't find revision for commit: %s" commit))
+    (magit-arc-run "amend" "--revision" revision)
+    (magit-arc-run "close-revision" revision)
+    (magit-arc-db-remove-commit commit)
+    (message "Amend finished.")
+    ))
+
+;;;###autoload
+(defun magit-arc-send-review (&optional args)
+  "Send a commit to review.."
+  (interactive)
+  (let* ((commit (magit-arc-get-commit))
          (revision (magit-arc-commit-to-revision commit)))
     (if (not revision)
         (error "Can't find revision for commit: %s" commit))
     (magit-arc-run "amend" "--revision" revision)
     (magit-arc-run "close-revision" revision)
-    (message "Amend finished.")
+
+    ;; TODO: (magit-arc-db-add-commit)
+    (message "Send finished.")
     ))
 
 (defvar magit-arc-mode-map
@@ -128,10 +173,11 @@ variable `magit-process-buffer-name-format'."
     map))
 
 ;;;###autoload
-(define-minor-mode magit-arc-mode
+(define-derived-mode magit-arc-mode magit-mode
   "Git-Svn support for Magit."
-  :lighter magit-arc-mode-lighter
-  :keymap  magit-arc-mode-map
+  ;; :lighter magit-arc-mode-lighter
+  ;; :keymap  magit-arc-mode-map
+  :group 'magit-arc
   (unless (derived-mode-p 'magit-mode)
     (user-error "This mode only makes sense with Magit"))
   ;; (cond
@@ -148,6 +194,7 @@ variable `magit-process-buffer-name-format'."
   ;;   (remove-hook 'magit-status-sections-hook 'magit-insert-svn-unpulled t)
   ;;   (remove-hook 'magit-status-sections-hook 'magit-insert-svn-unpushed t)
   ;;   (remove-hook 'magit-status-headers-hook  'magit-insert-svn-remote t)))
+  (define-key magit-mode-map (kbd "X") 'magit-arc-popup)
   (when (called-interactively-p 'any)
     (magit-refresh)))
 
