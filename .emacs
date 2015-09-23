@@ -46,8 +46,8 @@ If CLICK is t, calculate time cost."
 
 (require 'package)
 (add-to-list 'package-archives
-             (cons "melpa-stable" "http://stable.melpa.org/packages/")
-             ;; (cons "melpa" "http://melpa.org/packages/")
+             ;;(cons "melpa-stable" "http://stable.melpa.org/packages/")
+             (cons "melpa" "http://melpa.org/packages/")
              )
 (package-initialize)
 

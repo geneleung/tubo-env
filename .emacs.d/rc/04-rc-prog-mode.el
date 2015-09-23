@@ -1710,27 +1710,12 @@ and is reversed for better performence.")
     (message "Not controlled by EDE...")))
 
  ;; Flycheck..
-(yc/eval-after-load
- "flycheck"
- (defun flycheck-toggle-list ()
-   "Toggle error list buffer"
-   (interactive)
-   (if (get-buffer flycheck-error-list-buffer)
-       (if (get-buffer-window flycheck-error-list-buffer)
-           (progn
-             (kill-buffer (get-buffer flycheck-error-list-buffer))
-             (delete-other-windows))
-         (flycheck-list-errors))
-     (flycheck-list-errors)))
-
- (csq flycheck-display-errors-function nil)
-
- (require 'flycheck-tip)
-
- (define-key flycheck-mode-map [f9] 'flycheck-tip-cycle)
- (define-key flycheck-mode-map (kbd "<M-f9>")  'flycheck-tip-cycle-reverse)
- (define-key flycheck-mode-map (kbd "<S-f9>") 'flycheck-toggle-list)
- (define-key flycheck-mode-map (kbd "<M-S-f9>")  'flycheck-first-error)
+(yc/autoload 'flycheck-tip-cycle "flycheck-tip")
+(yc/autoload 'flycheck-tip-cycle-reverse "flycheck-tip")
+(define-key flycheck-mode-map [f9] 'flycheck-tip-cycle)
+(define-key flycheck-mode-map (kbd "<M-f9>")  'flycheck-tip-cycle-reverse)
+(define-key flycheck-mode-map (kbd "<S-f9>") 'flycheck-toggle-list)
+(define-key flycheck-mode-map (kbd "<M-S-f9>")  'flycheck-first-error)
 
  (add-hook 'flycheck-before-syntax-check-hook
            (lambda ()

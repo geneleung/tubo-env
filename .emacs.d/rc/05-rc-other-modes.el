@@ -431,7 +431,6 @@ unwanted space when exporting org-mode to html."
      (cons (rx "wiki" )
            (yc/func-wrapper 'mediawiki-mode "mediawiki")))
     )))
-(edit-server-start)
 
  ;; ***************************** Mode Alias **************************
 
