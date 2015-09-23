@@ -1096,6 +1096,11 @@ args should be a list, but to make caller's life easier, it can accept one atom 
                       yc/wp-path
                       (format-time-string  "%Y-%m-%d" (current-time))))))
 
+(defun yc/expand-color (color)
+  "Expand COLOR of form #FFF into #FFFFFF."
+  (mapconcat
+   (lambda (X) (make-string (if (= X ?#) 1 2 )X)) color ""))
+
 (defun yc/syntax-color-hex ()
   "Show color text of form #fffffff in current buffer."
   (interactive)
@@ -1105,7 +1110,12 @@ args should be a list, but to make caller's life easier, it can accept one atom 
       (0 (put-text-property
           (match-beginning 0)
           (match-end 0)
-          'face (list :background (match-string-no-properties 0)))))))
+          'face (list :background (match-string-no-properties 0)))))
+     ("#[abcdef[:digit:]]\\{3\\}\\>"
+      (0 (put-text-property
+          (match-beginning 0)
+          (match-end 0)
+          'face (list :background (yc/expand-color (match-string-no-properties 0))))))))
   (font-lock-fontify-buffer))
  ;; Advice
 
