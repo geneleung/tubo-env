@@ -1716,7 +1716,7 @@ and is reversed for better performence.")
  "flycheck"
  (define-key flycheck-mode-map [f9] 'flycheck-tip-cycle)
  (define-key flycheck-mode-map (kbd "<M-f9>")  'flycheck-tip-cycle-reverse)
- (define-key flycheck-mode-map (kbd "<S-f9>") 'flycheck-toggle-list)
+ (define-key flycheck-mode-map (kbd "<S-f9>") 'flycheck-list-errors)
  (define-key flycheck-mode-map (kbd "<M-S-f9>")  'flycheck-first-error))
 
 
