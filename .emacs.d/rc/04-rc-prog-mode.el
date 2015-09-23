@@ -1712,16 +1712,19 @@ and is reversed for better performence.")
  ;; Flycheck..
 (yc/autoload 'flycheck-tip-cycle "flycheck-tip")
 (yc/autoload 'flycheck-tip-cycle-reverse "flycheck-tip")
-(define-key flycheck-mode-map [f9] 'flycheck-tip-cycle)
-(define-key flycheck-mode-map (kbd "<M-f9>")  'flycheck-tip-cycle-reverse)
-(define-key flycheck-mode-map (kbd "<S-f9>") 'flycheck-toggle-list)
-(define-key flycheck-mode-map (kbd "<M-S-f9>")  'flycheck-first-error)
+(yc/eval-after-load
+ "flycheck"
+ (define-key flycheck-mode-map [f9] 'flycheck-tip-cycle)
+ (define-key flycheck-mode-map (kbd "<M-f9>")  'flycheck-tip-cycle-reverse)
+ (define-key flycheck-mode-map (kbd "<S-f9>") 'flycheck-toggle-list)
+ (define-key flycheck-mode-map (kbd "<M-S-f9>")  'flycheck-first-error))
+
 
  (add-hook 'flycheck-before-syntax-check-hook
            (lambda ()
              (let ((includes (yc/get-all-includes)))
                (setq flycheck-clang-include-path includes
-                     flycheck-gcc-include-path includes)))))
+                     flycheck-gcc-include-path includes))))
 
 
 

@@ -314,12 +314,12 @@
 (custom-set-variables
  '(ac-ispell-requires 4)
  '(ac-ispell-fuzzy-limit 4))
-(eval-after-load "auto-complete"
-  '(progn
-     (ac-ispell-setup)))
 
 (dolist (hk '(git-commit-mode-hook mail-mode-hook mediawiki-mode-hook org-mode-hook))
-  (add-hook hk 'ac-ispell-ac-setup))
+  (add-hook hk
+            (lambda ()
+              (ac-ispell-setup)
+              (ac-ispell-ac-setup))))
 
 ;
 (provide '06-rc-complete)
