@@ -1581,7 +1581,7 @@ and is reversed for better performence.")
 
 
 (autoload 'cmake-mode "cmake-mode" ""  t)
-;; (autoload 'cmake-font-lock-activate "cmake-font-lock" nil t)
+(autoload 'cmake-font-lock-activate "cmake-font-lock" nil t)
 (yc/set-mode 'cmake-mode (rx (or "CMakeList.txt" "CMakeLists.txt" ".cmake")))
 
 (yc/eval-after-load
@@ -1589,7 +1589,7 @@ and is reversed for better performence.")
  (add-hook 'cmake-mode-hook
            (lambda ()
              (yc/common-program-hook)
-             ;; (cmake-font-lock-activate)
+             (cmake-font-lock-activate)
              (let ((map (make-sparse-keymap)))
                (define-key map "\C-ch" 'cmake-help)
                (define-key map "\C-cl" 'cmake-help-list-commands)
