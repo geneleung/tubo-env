@@ -11,3 +11,6 @@ cpath="%{$fg[$path_color]%}%1d"
 end="%{$reset_color%}% > "
 
 PS1="$host $cpath $end"
+
+# Set title of terminal window.
+echo -en "\033]0;${USER}@${HOST}\a"

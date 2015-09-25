@@ -177,7 +177,11 @@
 
 (custom-set-variables
  '(magit-revert-buffers t)
- '(magit-push-always-verify nil))
+ '(magit-push-always-verify nil)
+ '(magit-revision-insert-related-refs t)
+ '(magit-revision-show-gravatars nil)
+ '(magit-revision-headers-format "Author:     %aN <%aE>\nDate: %ad\n")
+)
 
 (add-hook 'git-commit-mode-hook
           (lambda ()

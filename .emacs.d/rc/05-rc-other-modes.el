@@ -199,12 +199,12 @@
                                                      1 font-lock-function-name-face t)))
                       )
 
-                    (setq org-html-postamble nil
-                          ;; (lambda (x) "postamble"
-                          ;;           "<div style=\"margin-top: 15px; font-size: 13px;color: #cc0000;\"><p align=center><strong>
-                          ;;  <a href=\"http://tubocurarine.is-programmer.com\">.</a>，
-                          ;; </strong></div>")
-                          )
+                    ;; (setq org-html-postamble nil
+                    ;;       (lambda (x) "postamble"
+                    ;;                 "<div style=\"margin-top: 15px; font-size: 13px;color: #cc0000;\"><p align=center><strong>
+                    ;;        <a href=\"http://tubocurarine.is-programmer.com\">.</a>，
+                    ;;       </strong></div>")
+                    ;;       )
 
                     (defun yc/org-mode-hooks ()
                       "Functions will run when entering org-mode"

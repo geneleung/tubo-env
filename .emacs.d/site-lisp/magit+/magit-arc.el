@@ -71,7 +71,7 @@ It will be loaded from and store into `magit-arc-db'.")
 ;;XXX: test only
 (setq magit-arc-rev-alist nil)
 (setq-default magit-arc-db "/tmp/test-arc.db")
-(setq-default magit-arc-executable "echo")
+(setq-default magit-arc-executable (or (executable-find "arc") (executable-find "echo")))
 
 ;;; Utilities
 (defun magit-arc-run (&rest args)

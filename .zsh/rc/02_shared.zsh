@@ -71,4 +71,4 @@ alias tmux="tmux attach || tmux"
 alias ttop="top -u $UID"
 which xdg-open > /dev/null 2>&1 && alias open=xdg-open
 
-[ -e /opt/arcanist/resources/shell/bash-completion ] && source /opt/arcanist/resources/shell/bash-completion 
+[ -e /opt/arcanist/resources/shell/bash-completion ] && . /opt/arcanist/resources/shell/bash-completion
