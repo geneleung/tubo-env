@@ -134,7 +134,12 @@ variable `magit-process-buffer-name-format'."
               (?a "Amend & Close"   magit-arc-amend-close)
               (?s "Send Review"     magit-arc-send-review)))
 
-(defvar magit-arc-send-arguments nil "Nil.")
+;;TODO: update popup based on arguments.
+(defcustom magit-arc-send-arguments nil
+  "Default arguments used when sending review (arc diff)."
+  :group 'magit-arc
+  :type '(repeat (string :tag "Argument")))
+
 (defvar magit-arc--current-commit nil "Nil.")
 
 (cdsq magit-arc-send-popup
