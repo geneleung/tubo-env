@@ -181,6 +181,7 @@
  '(magit-revision-insert-related-refs t)
  '(magit-revision-show-gravatars nil)
  '(magit-revision-headers-format "Author:     %aN <%aE>\nDate: %ad\n")
+ '(git-commit-summary-max-length 72)
 )
 
 (add-hook 'git-commit-mode-hook

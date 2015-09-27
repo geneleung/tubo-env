@@ -36,7 +36,7 @@
 (require 'magit)
 
 
-;;; Options.
+;;; Options.
 
 (defgroup magit-arc nil
   "arc support for Magit."
@@ -73,7 +73,7 @@ It will be loaded from and store into `magit-arc-db'.")
 (setq-default magit-arc-db "/tmp/test-arc.db")
 (setq-default magit-arc-executable (or (executable-find "arc") (executable-find "echo")))
 
-;;; Utilities
+;;; Utilities
 (defun magit-arc-run (&rest args)
   "Call arc synchronously in a separate process, and refresh.
 
@@ -89,10 +89,44 @@ repository are reverted if `magit-revert-buffers' is non-nil.
 
 Process output goes into a new section in a buffer specified by
 variable `magit-process-buffer-name-format'."
+  (print args)
   (apply 'magit-call-process magit-arc-executable args)
   (magit-refresh))
 
-;;; Commands
+(defconst arc-commit-filename-regexp (rx "edit." (+ ascii) "new-commit" eol))
+
+(defun arc-commit-setup-check-buffer ()
+  (and buffer-file-name
+       (string-match-p arc-commit-filename-regexp buffer-file-name)
+       (arc-commit-setup)))
+
+(defun arc-commit-setup ()
+  (when magit-arc-mode
+    (funcall magit-arc-mode))
+  (setq with-editor-show-usage nil)
+  (with-editor-mode 1)
+  ;; (add-hook 'with-editor-finish-query-functions
+  ;;           'git-commit-finish-query-functions nil t)
+  ;; (add-hook 'with-editor-pre-finish-hook
+  ;;           'git-commit-save-message nil t)
+  ;; (add-hook 'with-editor-pre-cancel-hook
+  ;;           'git-commit-save-message nil t)
+  ;; (setq with-editor-cancel-message
+  ;;       'git-commit-cancel-message)
+  (make-local-variable 'log-edit-comment-ring-index)
+  ;; (arc-commit-edit-mode 1)
+  (git-commit-setup-font-lock)
+  (when (boundp 'save-place)
+    (setq save-place nil))
+  (save-excursion
+    (goto-char (point-min))
+    (when (= (line-beginning-position)
+             (line-end-position))
+      (open-line 1)))
+  (run-hooks 'git-commit-setup-hook)
+  (set-buffer-modified-p nil))
+
+;;; Commands
 
 (magit-define-popup magit-arc-popup
   "Popup console for arc commands."
@@ -103,8 +137,9 @@ variable `magit-process-buffer-name-format'."
               (?s "Send Review"     magit-arc-send-review)))
 
 (defvar magit-arc-send-arguments nil "Nil.")
+(defvar magit-arc--current-commit nil "Nil.")
 
-(defvar magit-arc-send-popup
+(cdsq magit-arc-send-popup
   '(:variable magit-arc-send-arguments
     ;; :switches ((?g "Show graph"              "--graph")
     ;;            (?c "Show graph in color"     "--color")
@@ -116,18 +151,10 @@ variable `magit-process-buffer-name-format'."
     ;;            (?f "Follow renames when showing single-file log" "--follow"))
     :options  ((?e "Set Encoding"          "--encoding" read-from-minibuffer)
                (?r "Set Reviewers"         "--reviewers="  read-from-minibuffer)
-               (?m "Force Update"          "--update="    read-from-minibuffer)
-               (?p "Search patches"          "-G"         read-from-minibuffer))
-    :actions  ((?l "Log current"             magit-log-current)
-               (?L "Log local branches"      magit-log-branches)
-               (?r "Reflog current"          magit-reflog-current)
-               (?o "Log other"               magit-log)
-               (?b "Log all branches"        magit-log-all-branches)
-               (?O "Reflog other"            magit-reflog)
-               (?h "Log HEAD"                magit-log-head)
-               (?a "Log all references"      magit-log-all)
-               (?H "Reflog HEAD"             magit-reflog-head))
-    :default-action magit-log-current
+               (?f "Force Update"          "--update="    read-from-minibuffer)
+               )
+    :actions  ((?s "Send review"             magit-arc-do-send-review))
+    :default-action magit-arc-do-send-review
     :max-action-columns 3))
 
 (defun magit-arc-commit-to-revision (commit)
@@ -165,6 +192,22 @@ Dump this mapping into database If WITHOUT-IO is not specified."
   (let ((commit (magit-commit-at-point)))
     (if commit (intern commit) nil)))
 
+(defun magit-arc-send-arguments (&optional refresh)
+  (cond ((memq magit-current-popup
+               '(magit-arc-send-popup))
+         (magit-popup-export-file-args magit-current-popup-args))
+        ((derived-mode-p 'magit-log-mode)
+         (list (nth 1 magit-refresh-args)
+               (nth 2 magit-refresh-args)))
+        (refresh
+         (list magit-log-section-arguments nil))
+        (t
+         (-if-let (buffer (magit-mode-get-buffer nil 'magit-log-mode))
+             (with-current-buffer buffer
+               (list (nth 1 magit-refresh-args)
+                     (nth 2 magit-refresh-args)))
+           (list (default-value 'magit-arc-send-arguments) nil)))))
+
 ;;;###autoload
 (defun magit-arc-amend-close (&optional args)
   "Amend and close commit message."
@@ -183,15 +226,46 @@ Dump this mapping into database If WITHOUT-IO is not specified."
 ;;;###autoload
 (defun magit-arc-send-review (&optional args)
   "Send a commit to review.."
-  (interactive)
+  (interactive "P")
   (let* ((commit (magit-arc-get-commit))
-         (revision (magit-arc-commit-to-revision commit)))
-    (if (not revision)
-        (error "Can't find revision for commit: %s" commit))
+         (revision (magit-arc-commit-to-revision commit))
+         (magit-arc-send-arguments
+          (-if-let (buffer (magit-mode-get-buffer nil 'magit-log-mode))
+              (with-current-buffer buffer
+                (magit-popup-import-file-args (nth 1 magit-refresh-args)
+                                              (nth 2 magit-refresh-args)))
+            (default-value 'magit-arc-send-arguments))))
+    (setq magit-arc--current-commit commit)
     ;; Show popup and send review, then return a revision id.
+    (magit-invoke-popup 'magit-arc-send-popup nil args)
 
     ;; TODO: (magit-arc-db-add-commit)
     (message "Send finished.")))
+
+;;;###autoload
+(defun magit-arc-do-send-review (&rest args)
+  "Invoke arc to send review.
+When `HEAD' is detached or with a prefix argument show log for
+one or more revs read from the minibuffer."
+  (interactive)
+  (let* ((send-args (magit-arc-send-arguments))
+         (cl (symbol-name magit-arc--current-commit))
+         (arc-args (list "--head" cl (concat cl "~"))))
+
+    (mapc (lambda (x)
+            (when x
+              (push x arc-args)))
+          (car send-args))
+
+    (mapc (lambda (x)
+            (when x
+              (push x arc-args)))
+          (cdr send-args))
+
+    (push "diff" arc-args)
+    (let ((find-file-hook (append find-file-hook '('with-editor-mode))))
+      (with-editor
+        (apply 'magit-start-process "arc" nil arc-args)))))
 
 (defvar magit-arc-mode-map
   (let ((map (make-sparse-keymap)))
@@ -206,20 +280,11 @@ Dump this mapping into database If WITHOUT-IO is not specified."
   :group 'magit-arc
   (unless (derived-mode-p 'magit-mode)
     (user-error "This mode only makes sense with Magit"))
-  ;; (cond
-  ;;  (magit-arc-mode
-  ;;   (magit-add-section-hook 'magit-status-sections-hook
-  ;;                           'magit-insert-svn-unpulled
-  ;;                           'magit-insert-unpulled-commits t t)
-  ;;   (magit-add-section-hook 'magit-status-sections-hook
-  ;;                           'magit-insert-svn-unpushed
-  ;;                           'magit-insert-unpushed-commits t t)
-  ;;   (magit-add-section-hook 'magit-status-headers-hook
-  ;;                           'magit-insert-svn-remote nil t t))
-  ;;  (t
-  ;;   (remove-hook 'magit-status-sections-hook 'magit-insert-svn-unpulled t)
-  ;;   (remove-hook 'magit-status-sections-hook 'magit-insert-svn-unpushed t)
-  ;;   (remove-hook 'magit-status-headers-hook  'magit-insert-svn-remote t)))
+  (cond
+   (magit-arc-mode
+    (add-hook  'find-file-hook 'arc-commit-setup-check-buffer))
+   (t
+    (remove-hook 'find-file-hook 'arc-commit-setup-check-buffer)))
   (define-key magit-mode-map (kbd "X") 'magit-arc-popup)
   (when (called-interactively-p 'any)
     (magit-refresh)))
