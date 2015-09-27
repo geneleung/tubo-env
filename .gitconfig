@@ -82,3 +82,6 @@
     keepTemporaries = false
     trustExitCode = false
     keepBackup = false
+
+[svn]
+	rmdir = true

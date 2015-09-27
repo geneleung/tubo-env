@@ -102,6 +102,34 @@ variable `magit-process-buffer-name-format'."
               (?a "Amend & Close"   magit-arc-amend-close)
               (?s "Send Review"     magit-arc-send-review)))
 
+(defvar magit-arc-send-arguments nil "Nil.")
+
+(defvar magit-arc-send-popup
+  '(:variable magit-arc-send-arguments
+    ;; :switches ((?g "Show graph"              "--graph")
+    ;;            (?c "Show graph in color"     "--color")
+    ;;            (?d "Show refnames"           "--decorate")
+    ;;            (?S "Show signatures"         "--show-signature")
+    ;;            (?u "Show diffs"              "--patch")
+    ;;            (?s "Show diffstats"          "--stat")
+    ;;            (?D "Simplify by decoration"  "--simplify-by-decoration")
+    ;;            (?f "Follow renames when showing single-file log" "--follow"))
+    :options  ((?e "Set Encoding"          "--encoding" read-from-minibuffer)
+               (?r "Set Reviewers"         "--reviewers="  read-from-minibuffer)
+               (?m "Force Update"          "--update="    read-from-minibuffer)
+               (?p "Search patches"          "-G"         read-from-minibuffer))
+    :actions  ((?l "Log current"             magit-log-current)
+               (?L "Log local branches"      magit-log-branches)
+               (?r "Reflog current"          magit-reflog-current)
+               (?o "Log other"               magit-log)
+               (?b "Log all branches"        magit-log-all-branches)
+               (?O "Reflog other"            magit-reflog)
+               (?h "Log HEAD"                magit-log-head)
+               (?a "Log all references"      magit-log-all)
+               (?H "Reflog HEAD"             magit-reflog-head))
+    :default-action magit-log-current
+    :max-action-columns 3))
+
 (defun magit-arc-commit-to-revision (commit)
   "Find proper revision based on COMMIT."
   (unless magit-arc-rev-alist
@@ -160,12 +188,10 @@ Dump this mapping into database If WITHOUT-IO is not specified."
          (revision (magit-arc-commit-to-revision commit)))
     (if (not revision)
         (error "Can't find revision for commit: %s" commit))
-    (magit-arc-run "amend" "--revision" revision)
-    (magit-arc-run "close-revision" revision)
+    ;; Show popup and send review, then return a revision id.
 
     ;; TODO: (magit-arc-db-add-commit)
-    (message "Send finished.")
-    ))
+    (message "Send finished.")))
 
 (defvar magit-arc-mode-map
   (let ((map (make-sparse-keymap)))

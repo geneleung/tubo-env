@@ -1127,7 +1127,7 @@ and is reversed for better performence.")
     (mapcar
      (lambda (dir)
        (when (file-exists-p dir)
-         (directory-files dir nil (rx (+? (or alnum "_" "+" "-")) (? (or ".h" ".hpp")) ))))
+         (directory-files dir nil (rx bol (+? (or alnum "_" "-")) (or (: "." (or "h" "hpp")) eol) ))))
      (if (and ede-object-project
               (ede-system-include-path ede-object-project))
          (progn
