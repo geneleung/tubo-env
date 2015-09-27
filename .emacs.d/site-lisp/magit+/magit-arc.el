@@ -101,8 +101,6 @@ variable `magit-process-buffer-name-format'."
        (arc-commit-setup)))
 
 (defun arc-commit-setup ()
-  (when magit-arc-mode
-    (funcall magit-arc-mode))
   (setq with-editor-show-usage nil)
   (with-editor-mode 1)
   ;; (add-hook 'with-editor-finish-query-functions
@@ -273,8 +271,8 @@ one or more revs read from the minibuffer."
     map))
 
 ;;;###autoload
-(define-derived-mode magit-arc-mode magit-mode
-  "Git-Svn support for Magit."
+(define-minor-mode magit-arc-mode
+  "Arc support for Magit."
   ;; :lighter magit-arc-mode-lighter
   ;; :keymap  magit-arc-mode-map
   :group 'magit-arc
