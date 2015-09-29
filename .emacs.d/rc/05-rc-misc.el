@@ -164,6 +164,7 @@
 (yc/autoload 'magit-status "magit")
 (yc/autoload 'magit-blame-mode "magit-blame"t)
 (yc/autoload 'magit-find-file "magit")
+(yc/autoload 'magit-arc) ;; "arc/phabricator" plugin for magit.
 
 (define-key ctl-x-map "gs"  'magit-status)
 (define-key ctl-x-map "F"   'magit-find-file)
