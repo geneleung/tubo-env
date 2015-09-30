@@ -17,26 +17,37 @@
 ;;;; Function and macro to add an regular expression string formed by (rx)
 ;;;; macro into specified face.
 (defun yc/show-prog-keywords ()
-  ;; highlight additional keywords
+  "Highlight additional keywords."
   (let ((yc/r-match-warning
          (rx (group (or bow "@" ) (or "todo" "fixme" "yyc" "bug" "XXX" "Fixme" "FixMe"
                                       "TODO" "FIXME" "YYC" "BUG" "TODOLIST" "note" "NOTE")
                     (?? ":")) eow))
         (yc/r-match-builtin
-         (rx bow (group (or "PDEBUG" "NEW")) (or (zero-or-one ":") eow)))
-        (yc/r-match-builtin-2
+         (rx bow (group (or "PDEBUG")) eow ))
+        (yc/r-match-macros ;; upper case macros.
          (rx bow (group (+ (or upper "_"))) (* blank) "("))
+        (yc/r-match-keyword-type
+         (rx bow (group (or "NEW")) (+ blank) (group (+ (or alnum "_"))) eow (* blank)
+             (? (:"[" (+ alnum) "]")) (* blank)";"))
         (yc/r-match-longline
          (rx (repeat 120 not-newline) (group (+? not-newline)) eol)))
     (yc/add-keyword yc/r-match-warning 'font-lock-warning-face)
     (yc/add-keyword yc/r-match-builtin 'font-lock-builtin-face)
-    (yc/add-keyword yc/r-match-builtin-2 'font-lock-builtin-face)
+    (yc/add-keyword yc/r-match-macros 'font-lock-builtin-face)
+
+    (font-lock-add-keywords
+     nil
+     '(("\\<\\(\\(?:NEW\\)\\)[[:blank:]]+\\(\\(?:[[:alnum:]]\\|_\\)+\\)\\>[[:blank:]]*\\(?:\\[[[:alnum:]]+]\\)?[[:blank:]]*;"
+        1 font-lock-keyword-face
+        2 font-lock-type-face
+        t)))
     (yc/add-keyword yc/r-match-longline 'font-lock-warning-face)))
 
 
 (yc/autoload 'semantic-mode)
 
 (defun yc/common-program-hook ()
+  "My program hooks."
   (semantic-mode 1)
   (which-function-mode 1)
   (autopair-mode t)
