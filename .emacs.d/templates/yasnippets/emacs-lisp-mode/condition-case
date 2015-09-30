@@ -1,5 +1,5 @@
 #name: condition-case
-#key: ccase
+#key: cc
 # --
 (condition-case ${1:var}
 ${2:(progn$>

@@ -136,28 +136,67 @@
 ;; (require 'cogre-loaddefs)
 ;; (yc/eval-after-load "cogre-uml" (cogre-uml-enable-unicode))
 
- ;;; Eassist
+ ;;; Projectile
+(yc/autoload 'helm-projectile-find-other-file "helm-projectile")
 
-(autoload 'eassist-switch-h-cpp "eassist"
-  "Switch header and body file according to `eassist-header-switches' var." t nil)
+(defun eassist-string-without-last (string n)
+  "This function truncates from the STRING last N characters."
+  (substring string 0 (max 0(- (length string) n))))
 
-(autoload 'eassist-list-methods "eassist"
-  "Show method/function list of current buffer in a newly created buffer." t nil)
+(defun eassist-string-ends-with (string end)
+  "Check whether STRING ends with END substring."
+  (string= end (substring string (- (length end)))))
 
-(autoload 'eassist-header-switches "eassist")
+;; ================================== CPP-H switch ===========================
+;;;###autoload
+(defvar eassist-header-switches '(("h" . ("cpp" "cc" "c"))
+                                  ("hpp" . ("cpp" "cc"))
+                                  ("cpp" . ("h" "hpp"))
+                                  ("c" . ("h"))
+                                  ("C" . ("H"))
+                                  ("H" . ("C" "CPP" "CC"))
+                                  ("cc" . ("h" "hpp")))
+  "This variable defines possible switches for `eassist-switch-h-cpp' function.
+Its format is list of (from . (to1 to2 to3...)) elements.  From and toN are
+strings which are extentions of the files.")
 
-(yc/eval-after-load
- "eassist"
- (setq eassist-header-switches '(("h" . ("cpp" "cc" "c" "m" "mm"))
-                                 ("hpp" . ("cpp" "cc"))
-                                 ("cpp" . ("h" "hpp"))
-                                 ("c" . ("h"))
-                                 ("C" . ("H"))
-                                 ("H" . ("C" "CPP" "CC" "m" "mm"))
-                                 ("cc" . ("h" "hpp"))
-                                 ("m" . ("h"))
-                                 ("mm" . ("h")))))
+;;;###autoload
+(defun eassist-switch-h-cpp ()
+  "Switch header and body file according to `eassist-header-switches' var.
+The current buffer's file name extention is searched in
+`eassist-header-switches' variable to find out extention for file's counterpart,
+for example *.hpp <--> *.cpp."
+  (interactive)
+  (let* ((ext (file-name-extension (buffer-file-name)))
+         (base-name (eassist-string-without-last (buffer-name) (length ext)))
+         (base-path (eassist-string-without-last (buffer-file-name) (length ext)))
+         (count-ext (cdr (find-if (lambda (i) (string= (car i) ext)) eassist-header-switches))))
+    (cond
+     (count-ext
+      (unless
+          (or
+           (loop for b in (mapcar (lambda (i) (concat base-name i)) count-ext)
+                 when (bufferp (get-buffer b)) return
+                 (if (get-buffer-window b)
+                     (switch-to-buffer-other-window b)
+                   (if (get-buffer-window b t)
+                       (switch-to-buffer-other-frame b)
+                     (switch-to-buffer b))))
+           (loop for c in (mapcar (lambda (count-ext) (concat base-path count-ext)) count-ext)
+                 when (file-exists-p c) return (find-file c)))
+        (error "There is no corresponding pair (header or body) file.")))
+     (t
+      (error "It is not a header or body file! See eassist-header-switches
+variable.")))))
 
+;; ================================== CPP-H switch end =========================
+
+(defun yc/swith-h-cpp ()
+  "Switch between headers and source files."
+  (interactive)
+  (condition-case error
+      (eassist-switch-h-cpp)
+    (error (helm-projectile-find-other-file))))
 
 (defun yc/print-cur-tag ( )
   "Print current tag."
@@ -983,7 +1022,7 @@ and is reversed for better performence.")
                  (hide-ifdef-use-define-alist 'kernel)))
              (local-set-key "\C-csD" 'uml/struct-to-UML)
              (local-set-key "\C-csd" 'uml/struct-to-UML-full)
-             (local-set-key "\C-c\C-h" 'eassist-switch-h-cpp)
+             (local-set-key "\C-c\C-h" 'yc/swith-h-cpp)
              (local-set-key "\M-:" 'yc/enable-disable-c-block)
              ;; (setq semantic-dependency-include-path 'yc/system-include-dirs)
              (add-hook 'before-save-hook 'hide-ifdefs nil t)

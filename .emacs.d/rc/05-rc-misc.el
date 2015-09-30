@@ -210,9 +210,15 @@
             (call-interactively 'magit-svn-mode))))))
 (add-hook
  'magit-status-mode-hook
-  'yc/update-magit-svn-mode)
+ (lambda ()
+   (when (executable-find "arc")
+     (require 'magit-arc)
+     (magit-arc-mode))
+   (yc/update-magit-svn-mode)))
 
 (advice-add 'magit-refresh :after #'yc/update-magit-svn-mode)
+
+
 
  ;; **************************** RFCs ******************************
 
