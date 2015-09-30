@@ -149,11 +149,12 @@
   ))
 
 ;; ************************** highlight utils ****************************
-(autoload 'highlight-symbol-at-point "highlight-utility"  "" t)
-(autoload 'highlight-symbol-next "highlight-utility"  "" t)
-(autoload 'highlight-symbol-prev "highlight-utility"  "" t)
-(autoload 'highlight-symbol-remove-all "highlight-utility"  "" t)
-(autoload 'highlight-symbol-query-replace "highlight-utility"  "" t)
+(autoload 'highlight-symbol-at-point "highlight-symbol"  "" t)
+(autoload 'highlight-symbol-next "highlight-symbol"  "" t)
+(autoload 'highlight-symbol-prev "highlight-symbol"  "" t)
+(autoload 'highlight-symbol-remove-all "highlight-symbol"  "" t)
+(autoload 'highlight-symbol-query-replace "highlight-symbol"  "" t)
+
 (global-set-key [(control f3)] 'highlight-symbol-at-point)
 (global-set-key [f3] 'highlight-symbol-next)
 (global-set-key [(shift f3)] 'highlight-symbol-remove-all)
@@ -717,6 +718,9 @@ which is options for `diff'."
 
 (yc/autoload 'ztree-diff)
 (yc/autoload 'ztree-dir)
+
+
+(yc/autoload 'yc/list-non-ascii "charset-util")
 
 
 (provide '05-rc-misc)

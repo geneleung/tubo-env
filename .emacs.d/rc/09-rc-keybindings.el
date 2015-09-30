@@ -8,7 +8,6 @@
 ;;     Woman for other modes.
 
 (require 'artist)
-(require 'highlight-utility)
 (autoload 'smerge-mode "smerge-mode" nil t)
 
 (defun kill-current-buffer ()
@@ -55,17 +54,12 @@
   (cons (kbd "<S-f5>") 'ansi-term)
   (cons (kbd "<C-f5>") 'eshell)
   (cons (kbd "<f2>") 'auto-rename-buffer)
-  (cons (kbd "<f3>") 'highlight-symbol-next)
   (cons (kbd "C-,") 'backward-page)
   (cons (kbd "C-.") 'forward-page)
   (cons (kbd "C->") 'end-of-buffer)
   (cons (kbd "C-<") 'beginning-of-buffer)
   (cons (kbd "C-w") 'kill-region)
-  (cons [(control f3)] 'highlight-symbol-at-point)
-  (cons [(control meta f3)] 'highlight-symbol-query-replace)
   (cons [(meta ?/)] 'hippie-expand)
-  (cons [(meta f3)] 'highlight-symbol-prev)
-  (cons [(shift f3)] 'highlight-symbol-remove-all)
   (cons (kbd "<M-return>") 'kill-current-buffer)
   (cons [f4] 'goto-line)
   (cons [f5] 'yc/open-eshell)

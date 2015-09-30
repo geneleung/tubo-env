@@ -819,7 +819,6 @@ inserts comment at the end of the line."
 
 (yc/setup-display)
 
-
 (defcustom trailing-whitespace-autoremove nil
   "Auto remove trailing whitespaces or not."
   :group 'user
@@ -1117,6 +1116,7 @@ args should be a list, but to make caller's life easier, it can accept one atom 
           (match-end 0)
           'face (list :background (yc/expand-color (match-string-no-properties 0))))))))
   (font-lock-fontify-buffer))
+
  ;; Advice
 
 ;; Auto indent regions for prog/sgml based modes.
