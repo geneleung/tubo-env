@@ -89,7 +89,6 @@ repository are reverted if `magit-revert-buffers' is non-nil.
 
 Process output goes into a new section in a buffer specified by
 variable `magit-process-buffer-name-format'."
-  (print args)
   (apply 'magit-call-process magit-arc-executable args)
   (magit-refresh))
 
@@ -152,7 +151,7 @@ variable `magit-process-buffer-name-format'."
     ;;            (?s "Show diffstats"          "--stat")
     ;;            (?D "Simplify by decoration"  "--simplify-by-decoration")
     ;;            (?f "Follow renames when showing single-file log" "--follow"))
-    :options  ((?e "Set Encoding"          "--encoding" read-from-minibuffer)
+    :options  ((?e "Set Encoding"          "--encoding=" read-from-minibuffer)
                (?r "Set Reviewers"         "--reviewers="  read-from-minibuffer)
                (?f "Force Update"          "--update="    read-from-minibuffer)
                )
@@ -217,7 +216,6 @@ Dump this mapping into database If WITHOUT-IO is not specified."
   (interactive)
   (let* ((commit (magit-arc-get-commit))
          (revision (magit-arc-commit-to-revision commit)))
-    (print (cons "A" revision))
     (if (not revision)
         (error "Can't find revision for commit: %s" commit))
     (magit-arc-run "amend" "--revision" revision)
@@ -231,13 +229,7 @@ Dump this mapping into database If WITHOUT-IO is not specified."
   "Send a commit to review.."
   (interactive "P")
   (let* ((commit (magit-arc-get-commit))
-         (revision (magit-arc-commit-to-revision commit))
-         (magit-arc-send-arguments
-          (-if-let (buffer (magit-mode-get-buffer nil 'magit-log-mode))
-              (with-current-buffer buffer
-                (magit-popup-import-file-args (nth 1 magit-refresh-args)
-                                              (nth 2 magit-refresh-args)))
-            (default-value 'magit-arc-send-arguments))))
+         (revision (magit-arc-commit-to-revision commit)))
     (setq magit-arc--current-commit commit)
     ;; Show popup and send review, then return a revision id.
     (magit-invoke-popup 'magit-arc-send-popup nil args)
