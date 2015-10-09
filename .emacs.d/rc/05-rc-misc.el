@@ -190,6 +190,13 @@
           (lambda ()
             (turn-on-flyspell)))
 
+;; Guess proper encoding for files.
+(add-hook 'magit-find-file-hook
+          (lambda ()
+            (setq buffer-read-only nil)
+            (recode-region (point-min) (point-max) 'undecided 'utf-8)
+            (setq buffer-read-only t)))
+
 (defun yc/update-magit-svn-mode ()
   "Enable or disable magit-svn-mode."
   (interactive)

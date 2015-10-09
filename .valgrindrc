@@ -1,0 +1,5 @@
+--show-reachable=yes
+--show-leak-kinds=all
+--leak-check=full
+--log-fd=1
+--log-file=valgrind_%p.log

@@ -23,11 +23,11 @@
                                       "TODO" "FIXME" "YYC" "BUG" "TODOLIST" "note" "NOTE")
                     (?? ":")) eow))
         (yc/r-match-builtin
-         (rx bow (group (or "PDEBUG")) eow ))
+         (rx bow (group (or "PDEBUG" "NEW")) eow ))
         (yc/r-match-macros ;; upper case macros.
          (rx bow (group (+ (or upper "_"))) (* blank) "("))
         (yc/r-match-keyword-type
-         (rx bow (group (or "NEW")) (+ blank) (group (+ (or alnum "_"))) eow (* blank)
+         (rx bow (group (or "NEW" "DELETE")) (+ blank) (group (+ (or alnum "_"))) eow (* blank)
              (? (:"[" (+ alnum) "]")) (* blank)";"))
         (yc/r-match-longline
          (rx (repeat 120 not-newline) (group (+? not-newline)) eol)))
@@ -665,8 +665,8 @@ and is reversed for better performence.")
   helm-xgtags-mode-map))
 
 (define-key global-map [remap find-tag] 'yc/find-tag-dwim)
-(yc/set-keys '(("M-." . 'yc/goto-with-xgtags)
-               ("M-*" 'yc/return-func)))
+;; (yc/set-keys '(("M-." . 'yc/goto-with-xgtags)
+;;                ("M-*" 'yc/return-func)))
 
  ;; *************************** Python Settings ****************************
 
