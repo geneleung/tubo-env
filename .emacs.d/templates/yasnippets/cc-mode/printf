@@ -1,5 +1,6 @@
 # -*- mode: snippet -*-
-# name : prn
+# name : printf
+# key: prn
 # --
 printf ("${1:%s}\\n"${1:$(if (string-match "%" yas-text) ", " "\);")
 }$2${1:$(if (string-match "%" yas-text) "\);" "")}
