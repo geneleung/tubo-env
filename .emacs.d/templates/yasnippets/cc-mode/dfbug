@@ -3,10 +3,9 @@
 # -*- mode: snippet -*-
 # --
 #if !defined (PDEBUG)
-#define PDEBUG(fmt, ...)                                                \
-do {                                                                  \\$>
-fprintf(stderr, "${1:app}: - %s:%d -- %s: ",                        \\$>
-__FILE__, __LINE__,__FUNCTION__);                           \\$>
-fprintf(stderr, fmt, ##  __VA_ARGS__);                              \\$>
-} while(0)$>
+#define PDEBUG(fmt, ...)  \\$>
+do {\\$>
+fprintf(stderr, "app: - %s:%d -- %s: " fmt, \\$>
+__FILE__, __LINE__,__FUNCTION__, ##  __VA_ARGS__);  \\$>
+} while(0)\$>
 #endif  /*End of if PDEBUG*/

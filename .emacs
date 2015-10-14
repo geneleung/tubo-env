@@ -98,6 +98,7 @@ If CLICK is t, calculate time cost."
   ;; be tweaked in 100-private.
 
   (yc/setup-display)
+  (helm-mode)
 
   ;; Report package statistics.
 

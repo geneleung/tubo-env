@@ -95,7 +95,8 @@
            global-semanticdb-minor-mode
            global-semantic-idle-summary-mode
            global-semantic-mru-bookmark-mode)))
- '(semantic-idle-scheduler-idle-time 1))
+ '(semantic-idle-scheduler-idle-time 1)
+ '(semantic-idle-scheduler-max-buffer-size 102400))
 
 ;; (semantic-load-enable-code-helpers)
 

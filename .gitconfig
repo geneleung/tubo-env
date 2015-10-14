@@ -49,6 +49,8 @@
   # Show files ignored by git:
   ign = ls-files -o -i --exclude-standard
 
+  mg = merge -s recursive -X ignore-all-space
+
 # Need to specify file attribute to use following diff tools. such as:
 # *.doc diff=word
 # *.png diff=exif
@@ -68,6 +70,7 @@
 [merge]
     keepBackup = false;
     tool = p4merge
+	ff = false
 [mergetool]
     prompt = false
 [mergetool "p4merge"]
