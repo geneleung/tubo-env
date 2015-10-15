@@ -5,7 +5,7 @@
 ;; Author: Yang Yingchao <yangyingchao@gmail.com>
 ;; Maintainer: Yang Yingchao <yangyingchao@gmail.com>
 ;; URL: https://github.com/yangyingchao/helm-xgtags
-;; Version: 1.1
+;; Version: 1.2
 ;; Created: 2015-05-20
 ;; Date: 2015-07-19
 ;; Package-Requires: ((helm "1.5.6") (cl-lib "0.5"))
@@ -831,19 +831,6 @@ a list with those."
       (push "-T" options))
     options))
 
-(defun helm-xgtags--complete (type string predicate code)
-  (let* ((options (helm-xgtags--construct-options type t))
-         (args (reverse (cons string options)))
-         candidates)
-    (with-temp-buffer
-      (apply 'process-file "global" nil t nil args)
-      (goto-char (point-min))
-      (while (re-search-forward "^\\(.+\\)$" nil t)
-        (push (match-string-no-properties 1) candidates)))
-    (if (not code)
-        (try-completion string candidates predicate)
-      (all-completions string candidates predicate))))
-
 (defun helm-xgtags--format-complete-cmd (type)
   "Format complete command for TYPE."
   (let* ((options (reverse (helm-xgtags--construct-options type t))))
@@ -856,7 +843,8 @@ a list with those."
            :header-name (lambda (name)
                           (concat name "(C-c ? Help)"))
            :candidates-process 'helm-xgtags--collect-candidates
-           :filter-one-by-one 'helm-xgtags--filter-one-by-one
+           ;; :filter-one-by-one 'helm-xgtags--filter-one-by-one
+           :filtered-candidate-transformer 'helm-xgtags--filtered-candidate-transformer
            :nohighlight t
            :candidate-number-limit 9999
            :help-message 'helm-xgtags--help-message
@@ -1340,6 +1328,14 @@ If ESCAPE is t, try to escape special characters."
     (if (not pattern) arg
       (if (string-match pattern arg)
           arg nil))))
+
+(defun helm-xgtags--filtered-candidate-transformer (lst src)
+  "Filter candidates.."
+  (let ((pattern (cdr helm-xgtags--complete-pfx)))
+    (if (not pattern) lst
+      (remove-if
+       (lambda (x)
+         (not (string-match pattern x))) lst))))
 
 (defun helm-xgtags--help-message ()
   "description")
