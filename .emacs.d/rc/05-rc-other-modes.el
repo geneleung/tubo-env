@@ -205,12 +205,12 @@
                                                      1 font-lock-function-name-face t)))
                       )
 
-                    ;; (setq org-html-postamble nil
-                    ;;       (lambda (x) "postamble"
-                    ;;                 "<div style=\"margin-top: 15px; font-size: 13px;color: #cc0000;\"><p align=center><strong>
-                    ;;        <a href=\"http://tubocurarine.is-programmer.com\">.</a>，
-                    ;;       </strong></div>")
-                    ;;       )
+                    (setq org-html-postamble nil
+                          (lambda (x) "postamble"
+                                    "<div style=\"margin-top: 15px; font-size:
+                                    13px;color: #cc0000;\"><p
+                                    align=center><strong></strong></div>")
+                          )
 
                     (defun yc/org-mode-hooks ()
                       "Functions will run when entering org-mode"
@@ -277,35 +277,35 @@ unwanted space when exporting org-mode to html."
                           "* %?\nEntered on %U\n  %i\n  %a")
                          ))))
 
-;; (yc/eval-after-load "ox-html"
-;;                     (setq org-html-head-extra
-;;                           "
-;; <style type=\"text/css\">
-;; div.org-src-container {
-;;     font-size: 85%;
-;;     font-family: monospace;
-;;   }
-;;   pre.src {
-;;     background-color:#2e3436;
-;;     color:#fefffe;
-;;   }
-;; body {
-;;   font-family: Arial, sans-serif, 'Helvetica Neue', Helvetica;
-;; }
-;; code, pre {
-;;     border-radius: 5px;
-;; 	border: 1px solid #e5e5e5;
-;; }
-;; *:not(pre)>code{
-;;     color: #c03;
-;;     background-color: #f8f8f8;
-;;     font-size: 85%;
-;;     white-space: normal;/*overcome bootstrap nowrap*/
-;;     padding: 3px 4px 0px 4px;/*overcome bootstrap padding*/
-;; }
-;; p {font-size: 15px}
-;; li {font-size: 15px}
-;; </style>"))
+(yc/eval-after-load "ox-html"
+                    (setq org-html-head-extra
+                          "
+<style type=\"text/css\">
+div.org-src-container {
+    font-size: 85%;
+    font-family: monospace;
+  }
+  pre.src {
+    background-color:#2e3436;
+    color:#fefffe;
+  }
+body {
+  font-family: Arial, sans-serif, 'Helvetica Neue', Helvetica;
+}
+code, pre {
+    border-radius: 5px;
+	border: 1px solid #e5e5e5;
+}
+*:not(pre)>code{
+    color: #c03;
+    background-color: #f8f8f8;
+    font-size: 85%;
+    white-space: normal;/*overcome bootstrap nowrap*/
+    padding: 3px 4px 0px 4px;/*overcome bootstrap padding*/
+}
+p {font-size: 15px}
+li {font-size: 15px}
+</style>"))
 
 
 (defun open-mylist ()

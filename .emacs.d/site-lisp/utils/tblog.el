@@ -202,8 +202,9 @@ TOLOWER: if specified, turn fields into lower case."
          (cons "tags" (yc/fetch-fields (yc/mkfield "#+KEYWORDS:") nil t)))
 
         ;; Contents.
-        (with-current-buffer (org-export-to-buffer 'html "*Org HTML Export*"
-                               nil nil t t)
+        (with-current-buffer (let ((org-html-head-extra nil))
+                               (org-export-to-buffer 'html "*Org HTML Export*"
+                                 nil nil t t))
           (let ((buf-str
                  (yc/replace-media-object-location
                   (buffer-substring-no-properties
