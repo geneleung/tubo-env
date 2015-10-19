@@ -2,4 +2,4 @@
 # name: list_append
 # key: la
 # --
-LIST(APPEND ${1:LIST} ${2:var}$0)
+list(APPEND ${1:LIST} ${2:var}$0)

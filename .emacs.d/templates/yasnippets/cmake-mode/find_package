@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: find_package
 # --
-FIND_PACKAGE($0)
+find_package($0)

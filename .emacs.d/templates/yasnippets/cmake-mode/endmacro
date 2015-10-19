@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: endmacro
 # --
-ENDMACRO($0)
+endmacro($0)

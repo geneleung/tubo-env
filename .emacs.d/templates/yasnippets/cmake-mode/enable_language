@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: enable_language
 # --
-ENABLE_LANGUAGE($0)
+enable_language($0)

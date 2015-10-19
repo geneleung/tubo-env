@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: find_library
 # --
-FIND_LIBRARY($0)
+find_library($0)

@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
 # name: macro
 # --
-MACRO(${1:name}${2: args})
+macro(${1:name}${2: args})
 endmacro()

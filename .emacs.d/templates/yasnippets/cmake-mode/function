@@ -2,6 +2,6 @@
 # name: function
 # key: function
 # --
-FUNCTION(${1:name} ${2:var})
+function (${1:name} ${2:var})
 $0$>
 endfunction()

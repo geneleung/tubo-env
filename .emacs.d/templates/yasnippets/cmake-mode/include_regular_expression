@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: include_regular_expression
 # --
-INCLUDE_REGULAR_EXPRESSION($0)
+include_regular_expression($0)

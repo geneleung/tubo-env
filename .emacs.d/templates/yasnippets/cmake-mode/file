@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: file
 # --
-FILE(${1:GLOB}${2:_RECURSE} ${VAR}$0)
+file(${1:GLOB}${2:_RECURSE} ${VAR}$0)

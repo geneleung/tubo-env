@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: get_test_property
 # --
-GET_TEST_PROPERTY($0)
+get_test_property($0)

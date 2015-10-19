@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: if
 # --
-IF(${1:cond})
+if (${1:cond})
 $0$>
-ENDIF($1)
+endif ($1)

@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: find_program
 # --
-FIND_PROGRAM($0)
+find_program($0)

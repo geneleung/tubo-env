@@ -3,11 +3,11 @@
 # key: lib
 # key: al
 # --
-ADD_LIBRARY(${1:name} ${2:SH}${2:$(if (string-match "^SH" yas-text)
-"ARED"
+add_library(${1:name} ${2:SH}${2:$(if (string-match "^SH" yas-text)
+"ARED"$>
 (if (string-match "^ST" yas-text)$>
-"ATIC"
+"ATIC"$>
 (if (string-match "^M" yas-text)$>
-"ODULE"
-""
+"ODULE"$>
+""$>
 )))} ${3:sources})$>

@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: math
 # --
-MATH($0)
+math($0)

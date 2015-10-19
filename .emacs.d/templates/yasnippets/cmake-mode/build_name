@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: build_name
 # --
-BUILD_NAME($0)
+build_name($0)

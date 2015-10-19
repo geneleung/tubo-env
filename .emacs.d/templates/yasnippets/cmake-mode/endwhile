@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: endwhile
 # --
-ENDWHILE($0)
+endwhile($0)

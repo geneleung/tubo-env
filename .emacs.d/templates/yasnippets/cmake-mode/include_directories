@@ -2,4 +2,4 @@
 # name: include_directories
 # key: headers
 # --
-INCLUDE_DIRECTORIES($0)
+include_directories($0)

@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: set
 # --
-SET(${1:var} ${2:value})
+set(${1:var} ${2:value})

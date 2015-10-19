@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: conf
 # --
-CONFIGURE_FILE(${1:input} ${2:output})
+configure_file(${1:input} ${2:output})

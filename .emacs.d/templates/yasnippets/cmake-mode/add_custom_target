@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: add_custom_target
 # --
-ADD_CUSTOM_TARGET($0)
+add_custom_target($0)

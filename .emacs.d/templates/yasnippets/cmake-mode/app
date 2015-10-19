@@ -1,8 +1,8 @@
 # -*- mode: snippet -*-
 # name: app
 # --
-PROJECT(${1:name})
-CMAKE_MINIMUM_REQUIRED(VERSION 2.8)
+project (${1:name})
+cmake_minimum_required(VERSION 2.8)
 # uninstall target$>
 configure_file(
 "\${CMAKE_CURRENT_SOURCE_DIR}/cmake_uninstall.cmake.in"$>

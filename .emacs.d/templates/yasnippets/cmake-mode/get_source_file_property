@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: get_source_file_property
 # --
-GET_SOURCE_FILE_PROPERTY($0)
+get_source_file_property($0)

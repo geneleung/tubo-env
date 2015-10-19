@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: get_directory_property
 # --
-GET_DIRECTORY_PROPERTY($0)
+get_directory_property($0)

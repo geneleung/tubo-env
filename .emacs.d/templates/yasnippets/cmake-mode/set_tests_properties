@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: set_tests_properties
 # --
-SET_TESTS_PROPERTIES($0)
+set_tests_properties($0)

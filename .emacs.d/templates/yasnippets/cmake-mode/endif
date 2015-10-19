@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: endif
 # --
-ENDIF($0)
+endif($0)

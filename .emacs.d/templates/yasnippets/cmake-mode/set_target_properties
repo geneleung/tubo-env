@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: set_target_properties
 # --
-SET_TARGET_PROPERTIES($0)
+set_target_properties($0)

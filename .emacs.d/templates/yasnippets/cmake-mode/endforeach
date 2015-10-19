@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: endforeach
 # --
-ENDFOREACH($0)
+endforeach($0)

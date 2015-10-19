@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: string
 # --
-STRING($0)
+string($0)

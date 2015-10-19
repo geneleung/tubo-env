@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: add_definitions
 # --
-ADD_DEFINITIONS($0)
+add_definitions($0)

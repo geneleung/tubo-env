@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: link_directories
 # --
-LINK_DIRECTORIES($0)
+link_directories($0)

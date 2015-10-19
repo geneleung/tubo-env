@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: qt_wrap_cpp
 # --
-QT_WRAP_CPP($0)
+qt_wrap_cpp($0)

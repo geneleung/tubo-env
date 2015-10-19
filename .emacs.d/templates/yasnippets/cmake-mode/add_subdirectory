@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: add_subdirectory
 # --
-ADD_SUBDIRECTORY($0)
+add_subdirectory($0)

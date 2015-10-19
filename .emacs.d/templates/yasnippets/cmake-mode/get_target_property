@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: get_target_property
 # --
-GET_TARGET_PROPERTY($0)
+get_target_property($0)

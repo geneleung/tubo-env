@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: subdirs
 # --
-SUBDIRS($0)
+subdirs($0)

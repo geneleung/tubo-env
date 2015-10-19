@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: mark_as_advanced
 # --
-MARK_AS_ADVANCED($0)
+mark_as_advanced($0)
