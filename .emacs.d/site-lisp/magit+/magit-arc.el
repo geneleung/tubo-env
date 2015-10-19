@@ -258,6 +258,9 @@ one or more revs read from the minibuffer."
           (cdr send-args))
 
     (push "diff" arc-args)
+    ;; TODO: get process buffer, save point-max, then process arc commands, and parse
+    ;;       result between previous (point-max) and current point-max, find URL and
+    ;;       save it into db.
     (let ((find-file-hook (append find-file-hook '('with-editor-mode))))
       (with-editor
         (apply 'magit-start-process "arc" nil arc-args)))))
