@@ -1,6 +1,5 @@
 #contributor: Xah Lee (XahLee.org)
 #name: directory-files
-#key: directory-files
-#key: df
+#key: dirf
 # --
-(directory-files $0 &optional FULL MATCH NOSORT)
+(directory-files ${1:DIR} ${2:FULL:t} ${3:MATCH:nil}$0)
