@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: qt_wrap_ui
 # --
-qt_wrap_ui($0)
+QT_WRAP_UI($0)

@@ -2,4 +2,4 @@
 # name: add_dependencies
 # key: dep
 # --
-add_dependencies(${1:TARGET} ${2:deps})
+ADD_DEPENDENCIES(${1:TARGET} ${2:deps})

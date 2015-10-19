@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: install_files
 # --
-install_files($0)
+INSTALL_FILES($0)

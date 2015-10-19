@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: cmake_minimum_required
 # --
-cmake_minimum_required(VERSION ${1:2.6})
+CMAKE_MINIMUM_REQUIRED(VERSION ${1:2.6})

@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: create_test_sourcelist
 # --
-create_test_sourcelist($0)
+CREATE_TEST_SOURCELIST($0)

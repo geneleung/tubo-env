@@ -2,8 +2,8 @@
 # name: ifelse
 # key: ife
 # --
-if(${1:cond})
+IF(${1:cond})
 $2$>
-else(${3:cond})
+ELSE(${3:cond})
 $0$>
 endif()

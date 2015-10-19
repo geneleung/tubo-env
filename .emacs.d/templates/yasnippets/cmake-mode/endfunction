@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: endfunction
 # --
-endfunction($0)
+ENDFUNCTION($0)

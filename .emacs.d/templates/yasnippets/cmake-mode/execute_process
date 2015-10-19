@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: execute_process
 # --
-execute_process($0)
+EXECUTE_PROCESS($0)

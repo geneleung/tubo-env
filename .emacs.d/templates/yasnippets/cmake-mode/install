@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: install
 # --
-install($0)
+INSTALL($0)

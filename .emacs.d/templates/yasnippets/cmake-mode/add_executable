@@ -2,4 +2,4 @@
 # name: add_executable
 # key: ae
 # --
-add_executable(${1:name} $0)
+ADD_EXECUTABLE(${1:name} $0)

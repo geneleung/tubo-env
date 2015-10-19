@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: output_required_files
 # --
-output_required_files($0)
+OUTPUT_REQUIRED_FILES($0)

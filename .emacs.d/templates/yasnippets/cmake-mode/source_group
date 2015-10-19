@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: source_group
 # --
-source_group($0)
+SOURCE_GROUP($0)

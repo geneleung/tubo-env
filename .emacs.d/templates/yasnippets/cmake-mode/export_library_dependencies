@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: export_library_dependencies
 # --
-export_library_dependencies($0)
+EXPORT_LIBRARY_DEPENDENCIES($0)

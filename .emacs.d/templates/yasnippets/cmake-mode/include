@@ -1,4 +1,4 @@
 # type: command
 # name: include
 # --
-include ($0)
+INCLUDE($0)

@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: remove
 # --
-remove($0)
+REMOVE($0)

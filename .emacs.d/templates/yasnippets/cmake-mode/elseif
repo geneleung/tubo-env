@@ -1,4 +1,5 @@
 # -*- mode: snippet -*-
 # name: elseif
+# key: elif
 # --
-elseif ($0)
+ELSEIF($0)

@@ -1,4 +1,4 @@
 # -*- mode: snippet -*-
 # name: enable_testing
 # --
-enable_testing($0)
+ENABLE_TESTING($0)
