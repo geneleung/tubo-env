@@ -295,7 +295,7 @@
   (irony-mode 1)
   (yc/eval-after-load
    "company"
-   (yc/add-company-backends-with-yasnippet company-irony)))
+   (yc/add-company-backends-with-yasnippet company-irony company-gtags)))
 (add-hook 'c-mode-common-hook 'yc/irony-c-mode-hook)
 
 ;; replace the `completion-at-point' and `complete-symbol' bindings in
