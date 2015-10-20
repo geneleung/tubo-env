@@ -98,10 +98,8 @@ If CLICK is t, calculate time cost."
   ;; be tweaked in 100-private.
 
   (yc/setup-display)
-  (helm-mode)
 
   ;; Report package statistics.
-
   (message "\n\nShowing package initialization statistics:\n%s"
            (mapconcat (lambda (x)
                         (format "package %s cost %.2f seconds, accumulated: %.2f seconds"

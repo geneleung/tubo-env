@@ -173,7 +173,9 @@
                      '(org-confirm-babel-evaluate nil)
                      '(org-startup-indented t)
                      '(org-directory (convert-standard-filename "~/Work/Orgs"))
-                     '(org-default-notes-file (expand-file-name "~/Work/Orgs/notes.org"))
+                     '(org-default-notes-file (expand-file-name
+                                               "~/Work/Orgs/notes.org"))
+                     '(org-html-postamble nil)
                      '(org-src-lang-modes '(("ocaml" . tuareg)
                                             ("elisp" . emacs-lisp)
                                             ("ditaa" . artist)
@@ -204,13 +206,6 @@
                       (font-lock-add-keywords nil '(("\\<\\(DOING \\):"
                                                      1 font-lock-function-name-face t)))
                       )
-
-                    (setq org-html-postamble nil
-                          (lambda (x) "postamble"
-                                    "<div style=\"margin-top: 15px; font-size:
-                                    13px;color: #cc0000;\"><p
-                                    align=center><strong></strong></div>")
-                          )
 
                     (defun yc/org-mode-hooks ()
                       "Functions will run when entering org-mode"
