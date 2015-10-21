@@ -254,6 +254,12 @@
  '(company-minimum-prefix-length 2)
  '(company-idle-delay 0.2))
 
+(dolist (hk '(git-commit-mode-hook mail-mode-hook mediawiki-mode-hook org-mode-hook))
+  (add-hook hk (lambda ()
+                 (set (make-local-variable 'company-backends)
+                      '((company-files company-ispell company-dabbrev company-abbrev
+                                      :with company-yasnippet))))))
+
 (defmacro yc/add-company-backends-with-yasnippet (&rest backends)
   `(set (make-local-variable 'company-backends)
         (push ',(append backends '(:with company-yasnippet)) company-backends)))
