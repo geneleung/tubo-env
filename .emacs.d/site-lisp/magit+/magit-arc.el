@@ -216,13 +216,15 @@ Dump this mapping into database If WITHOUT-IO is not specified."
   (interactive)
   (let* ((commit (magit-arc-get-commit))
          (revision (magit-arc-commit-to-revision commit)))
+    (unless revision
+      (setq revision (completing-read "Input revision number: " nil)))
+
     (if (not revision)
-        (error "Can't find revision for commit: %s" commit))
+      (error "Can't find revision for commit: %s" commit))
     (magit-arc-run "amend" "--revision" revision)
     (magit-arc-run "close-revision" revision)
     (magit-arc-db-remove-commit commit)
-    (message "Amend finished.")
-    ))
+    (message "Amend finished.")))
 
 ;;;###autoload
 (defun magit-arc-send-review (&optional args)
