@@ -1587,14 +1587,53 @@ and is reversed for better performence.")
 (autoload 'cmake-font-lock-activate "cmake-font-lock" nil t)
 (yc/set-mode 'cmake-mode (rx (or "CMakeList.txt" "CMakeLists.txt" ".cmake")))
 
+
 (yc/eval-after-load
  "cmake-mode"
+
+
+ (defun helm-cmake-help ()
+   "Queries for any of the four available help topics and prints out the approriate page."
+   (interactive)
+   (let* ((default-entry (cmake-symbol-at-point))
+          (command-list (cmake-get-list "command"))
+          (variable-list (cmake-get-list "variable"))
+          (module-list (cmake-get-list "module"))
+          (property-list (cmake-get-list "property"))
+          (all-words (append command-list variable-list module-list property-list))
+          (h-source
+           (helm-build-sync-source "Helm-Cmake"
+             :init nil
+             :candidates 'all-words
+             :fuzzy-match nil
+             :action 'helm-cmake--show-help)))
+
+     (defun helm-cmake--show-help (cand)
+       "description"
+       (if (string= cand "")
+           (error "No argument given")
+         (if (member cand command-list)
+             (cmake-command-run "--help-command" cand "*CMake Help*")
+           (if (member cand variable-list)
+               (cmake-command-run "--help-variable" cand "*CMake Help*")
+             (if (member cand module-list)
+                 (cmake-command-run "--help-module" cand "*CMake Help*")
+               (if (member cand property-list)
+                   (cmake-command-run "--help-property" cand "*CMake Help*")
+                 (error "Not a know help topic.") ; this really should not happen
+                 ))))))
+
+          (helm :sources 'h-source
+                :buffer "*helm helm-xgtags*"
+                :preselect default-entry
+                )))
+
  (add-hook 'cmake-mode-hook
            (lambda ()
              (yc/common-program-hook)
              (cmake-font-lock-activate)
              (let ((map (make-sparse-keymap)))
-               (define-key map "\C-ch" 'cmake-help)
+               (define-key map "\C-ch" 'helm-cmake-help)
                (define-key map "\C-cl" 'cmake-help-list-commands)
                (define-key map "\C-cu" 'unscreamify-cmake-buffer)
                (use-local-map map))))
@@ -1609,6 +1648,8 @@ and is reversed for better performence.")
 
  (define-abbrev-table 'cmake-mode-abbrev-table
    '(("inc" "inc" skeleton-cmake-include 1))))
+
+
 
 
 ;; ;; (try-require 'jde)
