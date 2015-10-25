@@ -70,7 +70,7 @@
 [merge]
     keepBackup = false;
     tool = p4merge
-	ff = false
+	ff = true
 [mergetool]
     prompt = false
 [mergetool "p4merge"]
