@@ -67,3 +67,19 @@ function emacs_eidt ()
         emacsclient -a emacs -n "+$ln" $fn
     fi
 }
+
+
+# function to call valgrind and show output...
+function tval ()
+{
+    if [ $# -lt 1 ]; then
+        cat <<EOF
+Usage: tval EXECUTABLE [args]
+EOF
+        return 0
+    fi
+    tmpfile=$(mktemp --suffix=".log" valgrind_XXXXXXXX)
+    valgrind --show-reachable=yes --show-leak-kinds=all --leak-check=full \
+             --log-fd=1 --log-file=$tmpfile "$@" &
+    tail -f $tmpfile
+}

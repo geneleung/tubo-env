@@ -1,0 +1,30 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: deftrace
+# key: dftr
+# --
+
+#include <sstream>
+#include <execinfo.h>
+
+#define PTRACE(fmt, ...) \\$>
+do { \\$>
+void* buffer[100]; \\$>
+int nptrs = backtrace(buffer, 64); \\$>
+std::stringstream ss; \\$>
+if (nptrs > 0) { \\$>
+char** strings = NULL; \\$>
+strings = backtrace_symbols(buffer, nptrs); \\$>
+if (strings == NULL) { \\$>
+ss << "backtrace_symbols failed\n"; \\$>
+} else { \\$>
+for (int j = 0; j < nptrs; j++) { \\$>
+char buf[16]; \\$>
+sprintf(buf, "[%02d]: ", j); \\$>
+ss << buf << strings[j] << "\n"; \\$>
+} \\$>
+free(strings); \\$>
+} \\$>
+} \\$>
+fprintf(stderr, "%lX: - %s:%d -- %s: " fmt ":\n%s\n", pthread_self(), __FILE__, \\$>
+__LINE__, __FUNCTION__, ##__VA_ARGS__, ss.str().c_str()); \\$>
+} while (0)
