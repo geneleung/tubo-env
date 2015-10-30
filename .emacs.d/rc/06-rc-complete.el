@@ -250,7 +250,7 @@
  (define-key company-active-map (kbd "TAB") 'company-complete))
 
 (custom-set-variables
- '(company-backends '((company-files company-dabbrev company-abbrev :with company-yasnippet)))
+ '(company-backends '((company-files company-dabbrev company-abbrev)))
  '(company-minimum-prefix-length 2)
  '(company-idle-delay 0.2))
 
@@ -273,6 +273,11 @@
             (yc/add-company-backends
              company-gtags
              company-keywords company-dabbrev-code company-capf)))
+
+(add-hook 'gud-mode-hook
+          (lambda ()
+            (set (make-local-variable 'company-backends)
+                 '((company-files)))))
 
 ;; (yc/add-company-backends-with-yasnippet
 ;;              company-semantic company-gtags )
@@ -299,9 +304,7 @@
 (defun yc/irony-c-mode-hook ()
   "Hook to run to enable irony mode for c-based modes"
   (irony-mode 1)
-  (yc/eval-after-load
-   "company"
-   (yc/add-company-backends-with-yasnippet company-irony company-gtags)))
+  (yc/add-company-backends-with-yasnippet company-irony company-gtags))
 (add-hook 'c-mode-common-hook 'yc/irony-c-mode-hook)
 
 ;; replace the `completion-at-point' and `complete-symbol' bindings in

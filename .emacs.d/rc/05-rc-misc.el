@@ -202,11 +202,7 @@
   (interactive)
   (when (and (fboundp 'magit-svn-mode)
              (boundp 'magit-svn-mode))
-    (if (and (file-exists-p ".git/svn/.metadata")
-             (string-match ".*/svn"
-                           (with-temp-buffer
-                             (insert-file-contents ".git/HEAD")
-                             (buffer-substring-no-properties (point-min) (point-max)))))
+    (if (file-exists-p ".git/svn/.metadata")
         (progn
           (unless (fboundp 'magit-svn-mode)
             (load "magit-svn"))
@@ -224,7 +220,6 @@
    (yc/update-magit-svn-mode)))
 
 (advice-add 'magit-refresh :after #'yc/update-magit-svn-mode)
-
 
 
  ;; **************************** RFCs ******************************
