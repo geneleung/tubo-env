@@ -1461,6 +1461,9 @@ and is reversed for better performence.")
   (custom-set-variables
    '(gdb-many-windows t)
    '(gdb-non-stop-setting nil)
+   '(gdb-show-threads-by-default t)
+   '(gdb-switch-when-another-stopped nil)
+   '(gdb-speedbar-auto-raise t)
    )
 
   (advice-add
