@@ -299,6 +299,15 @@
             (yc/add-company-backends-with-yasnippet company-cmake)))
 
 
+(advice-add
+ 'company--should-begin :around
+ (lambda (func &rest args)
+   (if     (and (> (point) (point-min))
+                (looking-back (rx (>= 2 (or alnum "_"))) 2))
+       (apply func args)
+     nil)))
+
+
  ;; Irony mode
 
 (defun yc/irony-c-mode-hook ()

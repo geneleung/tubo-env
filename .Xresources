@@ -84,3 +84,4 @@ URxvt.color6: #0b939b
 URxvt.color7: #d3d7cf
 URxvt.color8: #555753
 URxvt.color9: #ef2929
+URxvt.perl-ext-common: default,tabbed
