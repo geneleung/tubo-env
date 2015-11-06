@@ -1,0 +1,7 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: rm
+# key: rm
+# --
+rm:#${1:} ${2:Brief}
+
+$0

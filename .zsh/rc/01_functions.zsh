@@ -62,9 +62,9 @@ function emacs_eidt ()
     ln=`expr "$1" :  '[^:]*:\(.*\)'` # line_info
 
     if [ -z $ln ]; then
-        emacsclient -a emacs -n $fn
+        run-emacs $fn || emacsclient -n $fn
     else
-        emacsclient -a emacs -n "+$ln" $fn
+        run-emacs "+$ln" $fn || emacsclient -n "+$ln" $fn
     fi
 }
 

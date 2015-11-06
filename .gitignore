@@ -282,3 +282,6 @@ tmp/
 .dropbox/
 /.elementary/
 /.debug/
+/.PlayOnLinux/
+/.emacs.d/viper
+/PlayOnLinux's virtual drives
