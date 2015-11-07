@@ -715,6 +715,8 @@ and is reversed for better performence.")
    (completing-read
     "Import File:" (yc/get-python-modules)))
 
+ (autoload 'highlight-indentation-mode "highlight-indentation" t nil)
+
  (add-hook
   'python-mode-hook
   (lambda ()

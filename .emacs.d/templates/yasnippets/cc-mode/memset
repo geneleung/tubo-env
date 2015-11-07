@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
-# name memset
-# key mms
+# name: memset
+# key: mms
 # --
 memset(${1:var}, ${2:0}, ${3:size});

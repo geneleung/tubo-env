@@ -22,6 +22,17 @@
   (while (re-search-forward r-match-leading-spaces nil t)
     (replace-match "\\1$>" nil nil)))
 
+(defun process-name-key ()
+  (let ((r-match-name (rx bol (* space) "#" (* space) "name"))
+        (r-match-key (rx bol (* space) "#" (* space) "key"))
+        (r-match-semicolon (rx (* space) ":")))
+    (dolist (rr (list r-match-name r-match-key))
+      (save-excursion
+        (when (search-forward-regexp rr nil t)
+          (unless (looking-at r-match-semicolon)
+            (message "oops")
+            (insert ":")))))))
+
 (dolist (dir (directory-files "." t (rx alnum)))
   (when (file-directory-p dir)
     (message "\nProcessing files in directory %s" dir)
@@ -31,10 +42,11 @@
           (message "Processing file: %s" item)
           (find-file item)
           (goto-char (point-min))
-          (process-indentation)
+          ;; (process-mode-marker)
+          ;; (process-indentation)
+          (process-name-key)
           (save-buffer)
-          (kill-buffer))))
-    ))
+          (kill-buffer))))))
 
 
 
