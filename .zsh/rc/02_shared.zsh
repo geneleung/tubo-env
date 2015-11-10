@@ -48,6 +48,7 @@ alias l="ls -ail"
 alias cl="clear"
 
 which dircolors >> /dev/null && alias ls="ls --color" || alias ls="ls -G"
+alias gst="git status"
 alias gpush="git push"
 alias gpull="git pull"
 alias gco="git checkout"
