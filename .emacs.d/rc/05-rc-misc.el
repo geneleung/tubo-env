@@ -184,7 +184,7 @@
  '(magit-revision-show-gravatars nil)
  '(magit-revision-headers-format "Author:     %aN <%aE>\nDate: %ad\n")
  '(git-commit-summary-max-length 72)
- '(magit-log-arguments '("-n256" "--graph" "--decorate"))
+ '(magit-log-arguments '("-n256" "--graph" "--decorate" "--color"))
 )
 
 (add-hook 'git-commit-mode-hook
