@@ -4,7 +4,7 @@ export HISTFILE=~/.zhistory
 export WORDCHARS='*?_-.[]~&;!#$%^(){}<>'
 export ARCH=`uname -m`"-"`uname -s | tr '[:upper:]' '[:lower:]'`
 export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=lcd'
-export PATH="/opt/bin:$PATH:/sbin:/usr/sbin/"
+export PATH="/opt/bin:/opt/usr/bin:/opt/usr/sbin:$PATH:/sbin:/usr/sbin/"
 
 export EIX_LIMIT=0
 
