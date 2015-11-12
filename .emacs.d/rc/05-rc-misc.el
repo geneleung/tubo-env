@@ -730,12 +730,10 @@ which is options for `diff'."
 
 
 (yc/autoload 'yc/list-non-ascii "charset-util")
-(yc/autoload 'x86-lookup)
-(custom-set-variables
- '(x86-lookup-pdf "~/Documents/TechBooks/64-ia-32-architectures-software-developer-manual.pdf")
- )
+
+(yc/autoload 'x86-help)
 
-(global-set-key (kbd "C-h x") #'x86-lookup)
+(global-set-key (kbd "C-h x") #'x86-help)
 
 
 
