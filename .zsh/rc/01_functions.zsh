@@ -83,3 +83,8 @@ EOF
              --log-fd=1 --log-file=$tmpfile "$@" &
     tail -f $tmpfile
 }
+
+function tperf-record()
+{
+    sudo perf record -o "perf_`date +'%m_%d_%H:%M:%S'`.data" $*
+}
