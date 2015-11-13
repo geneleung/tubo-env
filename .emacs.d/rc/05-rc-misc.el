@@ -735,6 +735,7 @@ which is options for `diff'."
 (yc/autoload 'yc/list-non-ascii "charset-util")
 
 (yc/autoload 'x86-help)
+(yc/autoload 'x86-help-new-ref "x86-help")
 
 (global-set-key (kbd "C-h x") #'x86-help)
 
