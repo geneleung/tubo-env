@@ -3,7 +3,7 @@
 ;; Author: YangYingchao <yangyingchao@gmail.com>
 
 ;;; Commentary:
-;; http://www.felixcloutier.com/x86/
+
 ;;; Code:
 (require 'helm-source)
 (yc/autoload 'eww)
