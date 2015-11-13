@@ -198,29 +198,30 @@
             (recode-region (point-min) (point-max) 'undecided 'utf-8)
             (setq buffer-read-only t)))
 
-(defun yc/update-magit-svn-mode ()
-  "Enable or disable magit-svn-mode."
-  (interactive)
-  (when (and (fboundp 'magit-svn-mode)
-             (boundp 'magit-svn-mode))
-    (if (file-exists-p ".git/svn/.metadata")
-        (progn
-          (unless (fboundp 'magit-svn-mode)
-            (load "magit-svn"))
-          (unless magit-svn-mode
-            (call-interactively 'magit-svn-mode)))
-      (when (fboundp 'magit-svn-mode)
-        (if magit-svn-mode
-            (call-interactively 'magit-svn-mode))))))
+;; (defun yc/update-magit-svn-mode ()
+;;   "Enable or disable magit-svn-mode."
+;;   (interactive)
+;;   (when (and (fboundp 'magit-svn-mode)
+;;              (boundp 'magit-svn-mode))
+;;     (if (file-exists-p ".git/svn/.metadata")
+;;         (progn
+;;           (unless (fboundp 'magit-svn-mode)
+;;             (load "magit-svn"))
+;;           (unless magit-svn-mode
+;;             (call-interactively 'magit-svn-mode)))
+;;       (when (fboundp 'magit-svn-mode)
+;;         (if magit-svn-mode
+;;             (call-interactively 'magit-svn-mode))))))
 (add-hook
  'magit-status-mode-hook
  (lambda ()
    (when (executable-find "arc")
      (require 'magit-arc)
      (magit-arc-mode))
-   (yc/update-magit-svn-mode)))
+   ;; (yc/update-magit-svn-mode)
+   ))
 
-(advice-add 'magit-refresh :after #'yc/update-magit-svn-mode)
+;; (advice-add 'magit-refresh :after #'yc/update-magit-svn-mode)
 
 
  ;; **************************** RFCs ******************************
