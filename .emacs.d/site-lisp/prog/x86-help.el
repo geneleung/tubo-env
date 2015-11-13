@@ -5,6 +5,7 @@
 ;;; Commentary:
 ;; http://www.felixcloutier.com/x86/
 ;;; Code:
+(require 'helm-source)
 (yc/autoload 'eww)
 
 (defcustom x86-help-reference-dir "~/Documents/TechBooks/x86-help/"
