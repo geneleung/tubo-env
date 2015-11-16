@@ -302,7 +302,7 @@
  'company--should-begin :around
  (lambda (func &rest args)
    (if     (and (> (point) (point-min))
-                (looking-back (rx (>= 2 (or alnum "_"))) 2)
+                (looking-back (rx (>= 2 (or alnum "_"))) (- (point) 2) nil)
                 (looking-at (rx (or eow eol))))
        (apply func args)
      nil)))
