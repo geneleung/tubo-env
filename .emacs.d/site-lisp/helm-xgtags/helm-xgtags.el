@@ -497,7 +497,9 @@ find one."
           (setq found (search-forward-regexp match end t))))
       (setq lines (1+ lines)))
     (when found
-      (goto-char (match-beginning 0)))))
+      (goto-char (match-beginning 0))
+      (recenter)
+      )))
 
 (defun helm-xgtags--map-tags (func)
   "Maps over all tags in the *xgtags* buffer, jumps to the tag and
