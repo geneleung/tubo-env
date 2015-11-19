@@ -78,8 +78,10 @@ Usage: tval EXECUTABLE [args]
 EOF
         return 0
     fi
-    tmpfile=$(mktemp --suffix=".log" valgrind_XXXXXXXX)
-    valgrind --show-reachable=yes --show-leak-kinds=all --leak-check=full \
+
+    app=`basename $1`
+    tmpfile=$(mktemp --suffix=".log" valgrind_"$app"_XXXXXXXX)
+    valgrind  --leak-check=full --undef-value-errors=no \
              --log-fd=1 --log-file=$tmpfile "$@" &
     tail -f $tmpfile
 }
