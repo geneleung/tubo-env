@@ -3,7 +3,7 @@
 # key: dot
 # --
 #+BEGIN_SRC dot :file ${1:..}${1:$(if (string-match "^\.\." yas-text)
-"/assets/img"$>
+"/assets/img"
 (if (string-match "^i" yas-text)
 "mages" ""
 ))}/${2:name}.png :cmdline -Kdot -Tpng$>
