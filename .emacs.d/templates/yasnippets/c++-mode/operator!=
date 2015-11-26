@@ -2,6 +2,4 @@
 # name: operator!=
 # key: op!=
 # --
-bool ${1:MyClass}::operator!=(const $1 &other) const {
-return !(*this == other);$>
-}
+bool operator!=(const $1& other) const$0

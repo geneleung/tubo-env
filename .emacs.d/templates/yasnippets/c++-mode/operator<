@@ -1,0 +1,5 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: operator<
+# key: op<
+# --
+bool operator<(const $1& rhs) const$0
