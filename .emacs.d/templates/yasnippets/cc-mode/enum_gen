@@ -1,0 +1,18 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: enum_gen
+# key: engen
+# --
+#define FOREACH_${1:NAME}(FUNC)\\$>
+FUNC(${4:VAR})\\$>
+$0
+
+#define GEN_$1_ENUM(ENUM) ${2:PRE_}${2:$(when (string-match (rx (+ (or alnum "_"))) yas-text) "##")}ENUM,$>
+#define GEN_$1_DOC(ENUM) #ENUM,
+
+typedef enum _${3:$1} {$>
+FOREACH_$1(GEN_$1_ENUM)$>
+} $3;$>
+
+static const char* $3_Desc[] = {$>
+FOREACH_$1(GEN_$1_DOC)$>
+};
