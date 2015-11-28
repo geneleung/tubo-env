@@ -6,13 +6,13 @@
 FUNC(${4:VAR})\\$>
 $0
 
-#define GEN_$1_ENUM(ENUM) ${2:PRE_}${2:$(when (string-match (rx (+ (or alnum "_"))) yas-text) "##")}ENUM,$>
-#define GEN_$1_DOC(ENUM) #ENUM,
+#define GEN_$1_ENUM(ENUM) ${2:PFX}${2:$(when (string-match (rx (+ alnum)) yas-text) "_##")}ENUM,$>
 
 typedef enum _${3:$1} {$>
 FOREACH_$1(GEN_$1_ENUM)$>
 } $3;$>
 
+#define GEN_$1_DESC(ENUM) #ENUM,
 static const char* $3_Desc[] = {$>
-FOREACH_$1(GEN_$1_DOC)$>
+FOREACH_$1(GEN_$1_DESC)$>
 };
