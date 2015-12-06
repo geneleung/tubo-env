@@ -35,13 +35,18 @@
    ;; name. You could use a similar approach to insert name and date into
    ;; your file.
    (interactive)
-   (save-excursion
-     (goto-char (point-min))
-     (while (search-forward "@@@" nil t)
-       (save-restriction
-         ;; (narrow-to-region (match-beginning 0) (match-end 0))
-         (replace-match (upcase (file-name-nondirectory buffer-file-name)))
-         (subst-char-in-region (point-min) (point-max) ?. ?_)))))
+   (let* ((cmps (split-string buffer-file-name "/"))
+          (l (1- (length cmps)))
+          (header-guard
+           (subst-char-in-string
+            ?. ?_
+            (upcase (if (> l 0)
+                        (concat (nth (1- l) cmps) "_" (nth l cmps))
+                      (nth l cmps))))))
+     (save-excursion
+       (goto-char (point-min))
+       (while (search-forward "@@@" nil t)
+         (replace-match header-guard)))))
 
  (defun insert-today ()
    "Insert today's date into buffer"

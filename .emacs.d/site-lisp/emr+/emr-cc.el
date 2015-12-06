@@ -68,6 +68,11 @@ detailed descriptions."
   (interactive "rp")
   (clang-format-region start end (emr-cc-get-style)))
 
+(defun emr-cc-fill-region (start end)
+  "Fill region (START/END)."
+  (interactive "rp")
+  (fill-region start end))
+
 (defun emr-cc-format-buffer ()
   "Format region (START/END) using clang."
   (interactive)
@@ -88,6 +93,14 @@ detailed descriptions."
   :predicate (lambda ()
                (and mark-active (not (equal (mark) (point)))
                     (executable-find "clang-format"))))
+
+(emr-declare-command 'emr-cc-fill-region
+  :title "fill region"
+  :description ""
+  :modes '(c-mode c++-mode)
+  :predicate (lambda ()
+               mark-active (not (equal (mark) (point)))))
+
 (emr-declare-command 'emr-cc-format-buffer
   :title "format buffer"
   :description "with clang"
