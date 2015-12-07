@@ -3,9 +3,18 @@
 # key: tptr
 # --
 typedef ${1:s}${1:$(cond
-        ((string-match "^st" yas-text) "d::shared_ptr<")
+        ((string-match "^std::s" yas-text) "hared_ptr<")
+        ((string-match "^std::a" yas-text) "uto_ptr<")
         ((string-match "^sh" yas-text) "ared_ptr<")
+        ((string-match "^a" yas-text) "uto_ptr<")
         ((string-match "^t" yas-text) "r1:shared_ptr<")
         ((string-match "^b" yas-text) "oost::shared_ptr<")
         (t "hared_ptr<")
-)}${2:T}> $2Ptr;
+)}${2:T}> $2${1:$(cond
+        ((string-match "^a" yas-text) "A")
+        ((string-match "^std::a" yas-text) "A")
+        ((string-match "^b" yas-text) "S")
+        ((string-match "^sh" yas-text) "S")
+        ((string-match "^std::s" yas-text) "S")
+        (t "")
+)}Ptr;
