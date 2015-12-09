@@ -409,11 +409,11 @@
 (defun yc/list-attentions ()
   "List lines that need attentions, such as lines which include XXX or FIXME et.al."
   (interactive)
-  (eshell-command
-   (concat "egrep -i "
-           (rx (? "@") (or "FIXME" "TODO" "DEBUG" "BUG" "YYC:" "XXX" "HACK" "fixme" "todo" "bug")
-               (not alnum))  " . -rI"))
-  )
+  (let ((command (concat "grep -i '"
+                  (rx bow (or "FIXME" "TODO" "BUG" "YYC" "XXX" "HACK") eow)
+                  "' . -rI "))  )
+    (message command)
+    (eshell-command command)))
 
 (custom-set-variables
  '(eshell-buffer-shorthand t)
@@ -739,8 +739,17 @@ which is options for `diff'."
 
 (global-set-key (kbd "C-h x") #'x86-help)
 
+;; ws-butler-mode
 
+(require 'ws-butler)
+(ws-butler-global-mode 1)
 
+(custom-set-faces
+ '(sp-pair-overlay-face ((t nil))))
+
+(require 'dtrt-indent)
+(dtrt-indent-mode 1)
+(setq dtrt-indent-verbosity 0)
 
 
 (provide '05-rc-misc)
