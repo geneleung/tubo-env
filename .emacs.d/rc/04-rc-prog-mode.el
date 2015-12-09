@@ -6,22 +6,8 @@
 
 ;;; Code:
 
-;;;; Common Program settings
-
-(require 'smartparens-config)
-(smartparens-global-strict-mode 1)
-(show-smartparens-global-mode 1)
-
-(yc/eval-after-load
- "smartparens"
- (sp-with-modes '(cmode c++-mode)
-   (sp-local-pair "{" nil :post-handlers '(("||\n[i]" "RET")))
-   (sp-local-pair "/*" "*/" :post-handlers
-                  '((" | "  "SPC")
-                    ("* ||\n[i]" "RET")))))
-
-
 (autoload 'which-function-mode "which-func" "" t)
+(autoload 'autopair-mode "autopair" ""  t)
 (autoload 'srecode-minor-mode "mode.el" ""  t)
 (autoload 'flyspell-prog-mode "flyspell" ""  t)
 (autoload 'highlight-parentheses-mode "highlight-parentheses"  "" t)
@@ -63,18 +49,25 @@
   "My program hooks."
   (semantic-mode 1)
   (which-function-mode 1)
+  (autopair-mode t)
   (srecode-minor-mode t)
   (flyspell-prog-mode)
   (highlight-parentheses-mode)
   (yc/show-prog-keywords)
   (yc/basic-prog-keybinding)
   (setup-program-keybindings)
+  (autopair-mode 1)
   (flycheck-mode 1))
 
 (yc/eval-after-load
  "prog-mode"
  (add-hook 'prog-mode-hook 'yc/common-program-hook))
 
+ ;; autopair-mode
+(autoload 'autopair-global-mode "autopair" ""  t)
+(autopair-global-mode 1)
+(custom-set-variables
+ '(autopair-pair-criteria 'always))
 
  ;;;; CEDET Settings
 ;; http://lists.gnu.org/archive/html/help-gnu-emacs/2012-04/msg00430.html
@@ -1369,7 +1362,9 @@ and is reversed for better performence.")
   (set (make-local-variable 'header-field-list)
         '(lisp_desc blank copyright blank author blank n_emacs gpl
                     blank e_comment blank))
-  (setq fill-column 86))
+  (make-local-variable 'autopair-skip-whitespace)
+  (setq autopair-skip-whitespace 'chmop
+        fill-column 86))
 
 (define-abbrev-table 'emacs-lisp-mode-abbrev-table
   '(
@@ -1398,6 +1393,7 @@ and is reversed for better performence.")
                           zsh-file)
                  (setq sh-shell-file zsh-file)
                  (sh-set-shell (file-name-nondirectory zsh-file))))
+             ;; remap some keybinding to nil. those keys are handled by autopair!
              (define-key sh-mode-map "<" nil)
              (define-key sh-mode-map "(" nil)
              (define-key sh-mode-map "{" nil)
@@ -1467,7 +1463,6 @@ and is reversed for better performence.")
 
   (custom-set-variables
    '(gdb-many-windows t)
-   '(gdb-show-main t)
    '(gdb-non-stop-setting nil)
    '(gdb-show-threads-by-default t)
    '(gdb-switch-when-another-stopped nil)
