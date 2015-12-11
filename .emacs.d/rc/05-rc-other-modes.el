@@ -441,7 +441,8 @@ li {font-size: 15px}
                                             "cnf"))
                       (: "fvwm/" (+? ascii))
                       ".globalrc"
-                      ".gitmodules")
+                      ".gitmodules"
+                      "conf\.d/")
                   eol)
               'conf-mode))
 

@@ -90,3 +90,10 @@ function tperf-record()
 {
     sudo perf record -o "perf_`date +'%m_%d_%H:%M:%S'`.data" $*
 }
+
+
+#mkdir and cd
+function mcd ()
+{
+    mkdir $1 && cd $1
+}

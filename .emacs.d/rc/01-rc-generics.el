@@ -189,7 +189,7 @@
 
 ;; Remove vc-hooks, I don't use it.
 (setq vc-handled-backends nil)
-(eval-after-load "vc" '(remove-hook 'find-file-hooks 'vc-find-file-hook))
+;; (eval-after-load "vc" '(remove-hook 'find-file-hooks 'vc-find-file-hook))
 
 (eval-after-load
  "custom"
