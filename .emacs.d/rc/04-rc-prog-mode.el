@@ -668,8 +668,8 @@ and is reversed for better performence.")
 ;;                ("M-*" 'yc/return-func)))
 
  ;; *************************** Python Settings ****************************
-
-(add-to-list 'auto-mode-alist '("\\.py\\'" . python-mode))
+(yc/set-mode 'python-mode
+             "\.py\\'")
 (add-to-list 'interpreter-mode-alist '("python" . python-mode))
 (autoload 'python-mode "python" ""  t)
 
@@ -796,13 +796,14 @@ and is reversed for better performence.")
 (autoload 'c++-mode "cc-mode" "" t)
 (autoload 'objc-mode "cc-mode"  "" t)
 
-(add-to-list 'auto-mode-alist
-             (cons (rx "." (or "H" "cc" "hh" "c" "h" "moc"
-                               (: "include/" alnum )) eow) 'c++-mode))
-(add-to-list 'auto-mode-alist
-             (cons (rx "." (or "C" "c") eow) 'c-mode))
-(add-to-list 'auto-mode-alist
-             (cons (rx "." (or "mm" "m") eow) 'objc-mode))
+(yc/set-mode 'c++-mode
+             (rx "." (or "H" "cc" "hh" "c" "h" "moc"
+                         (: "include/" alnum )) eow))
+
+(yc/set-mode 'c-mode (rx "." (or "C" "c" "ic") eow))
+
+(yc/set-mode 'objc-mode
+             (rx "." (or "mm" "m") eow))
 
 (yc/eval-after-load
  "cc-mode"
@@ -1374,15 +1375,14 @@ and is reversed for better performence.")
 (defalias 'elisp-mode 'eamcs-lisp-mode)
 (add-hook 'emacs-lisp-mode-hook 'my-lisp-hook)
 (add-hook 'lisp-mode-hook 'my-lisp-hook)
-(add-to-list 'auto-mode-alist (cons (rx "."
-                                        (or "el"
-                                            "sexp") eol)  'emacs-lisp-mode))
+(yc/set-mode 'emacs-lisp-mode (rx "." (or "el" "sexp") eol))
 
 ;; ***************** sh-mode *****************
 (autoload 'sh-mode "sh-script.el" t)
-(add-to-list 'auto-mode-alist (cons (rx (or (: "/etc/init.d/" (+ ascii))
-                                            (: (+? ascii) ".zsh")
-                                            ) eol)  'sh-mode))
+(yc/set-mode 'sh-mode
+             (rx (or (: "/etc/init.d/" (+ ascii))
+                     (: (+? ascii) ".zsh")
+                     ) eol))
 
 (yc/eval-after-load
  "sh-script"
@@ -1433,12 +1433,9 @@ and is reversed for better performence.")
 (setenv "cc" yc/c-compiler)
 
 
-
-;; ***************** flymake *****************
-
 
-(add-to-list 'auto-mode-alist '("\\.ebuild$" . shell-script-mode))
-
+(yc/set-mode 'shell-script-mode
+             "\\.ebuild$")
 
  ;;;;;;;; configurations  about gdb;
 
@@ -1503,8 +1500,8 @@ and is reversed for better performence.")
 
 ;;;;;;;; configurations of powershell-mode ;;;;;;;;
 (autoload 'powershell-mode "powershell-mode" ""  t)
-(add-to-list 'auto-mode-alist '("\\.ps1\\'" .
-                                powershell-mode))
+(yc/set-mode 'powershell-mode
+             "\\.ps1\\'")
 
 (yc/eval-after-load "powershell-mode"
                     (defun yc/pws-find-tag (function)
@@ -1567,8 +1564,8 @@ and is reversed for better performence.")
 
  ;; windows batch-mode for bat files.
 (autoload 'batch-mode "batch-mode" ""  t)
-(add-to-list 'auto-mode-alist
-             (cons (rx "." (or "bat" "cmd")) 'batch-mode))
+(yc/set-mode 'batch-mode
+             (rx "." (or "bat" "cmd")))
 
  ;;;;;;;;;;;;;;;; lua-mode ;;;;;;;;;;;;;;;;;;;;;
 
@@ -1577,9 +1574,9 @@ and is reversed for better performence.")
 ;; (setq lua-default-application "/usr/bin/lua")
 (autoload 'makefile-mode "make-mode" nil t)
 
-(add-to-list 'auto-mode-alist
-             (cons (rx (or (: (or "Makefile" "makefile") "." (+ alnum))
-                           (: (+ alnum) ".mk"))) 'makefile-mode))
+(yc/set-mode 'makefile-mode
+             (rx (or (: (or "Makefile" "makefile") "." (+ alnum))
+                     (: (+ alnum) ".mk"))))
 
 
 (autoload 'cmake-mode "cmake-mode" ""  t)
@@ -1662,7 +1659,9 @@ and is reversed for better performence.")
 
 ;; Kconfig-mode
 (autoload 'kconfig-mode "kconfig-mode.el")
-(add-to-list 'auto-mode-alist '("Kconfig" . kconfig-mode))
+(yc/set-mode 'kconfig-mode
+             "Kconfig")
+
 
 
 
@@ -1742,9 +1741,9 @@ and is reversed for better performence.")
      (py-indent-offset . 4)))))
 
 (autoload 'gjs-mode "gjs-mode" ""  t)
-(add-to-list 'auto-mode-alist
-             (cons (rx "." "gjs" eow)
-                   'gjs-mode))
+(yc/set-mode 'gjs-mode
+             (rx "." "gjs" eow))
+
 
 (defun yc/show-project-include-path ()
   (interactive)
@@ -1950,7 +1949,9 @@ Major mode for editing PHP code.
 
 \(fn)" t nil)
 
-(dolist (pattern '("\\.php[s345t]?\\'" "\\.phtml\\'" "Amkfile" "\\.amk$")) (add-to-list 'auto-mode-alist `(,pattern . php-mode) t))
+(yc/set-mode 'php-mode
+             (rx "." (or (: "php" (+ (or "s" "t" digit)))
+                         "phtml" "Amkfile" "amk")))
 
 
 
