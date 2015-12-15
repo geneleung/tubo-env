@@ -96,6 +96,11 @@
  '(semantic-idle-scheduler-idle-time 1)
  '(semantic-idle-scheduler-max-buffer-size 102400))
 
+(yc/eval-after-load
+ "lex"
+ (setq semantic-lex-maximum-depth 20))
+
+
 ;; (semantic-load-enable-code-helpers)
 
 

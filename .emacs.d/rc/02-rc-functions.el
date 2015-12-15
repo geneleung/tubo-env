@@ -147,7 +147,8 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
   (interactive)
   (setq YC-DEBUG (not YC-DEBUG))
   (setq debug-on-error YC-DEBUG
-        helm-debug YC-DEBUG))
+        helm-debug YC-DEBUG
+        debug-on-quit YC-DEBUG))
 
 (defun yc/debug-log (msg)
   "Out put debug message based on YC-DEBUG"

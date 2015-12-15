@@ -40,6 +40,12 @@ if [ -d /opt/texlive/bin/$ARCH ]; then
     export PATH="$PATH:/opt/texlive/bin/$ARCH"
 fi
 
+
+if [ -d $HOME/tools ]; then
+    export PATH="$HOME/tools/bin:$PATH"
+    export LD_LIBRARY_PATH="$HOME/tools/lib:$HOME/tools/lib64:$LD_LIBRARY_PATH"
+fi
+
 # Utilities.
 alias ll="ls -lah"
 alias rm="rm -i"
@@ -71,5 +77,6 @@ alias edit=emacs_eidt
 alias tmux="tmux attach || tmux"
 alias ttop="top -u $UID"
 which xdg-open > /dev/null 2>&1 && alias open=xdg-open
+which htop > /dev/null 2>&1 && alias top=htop
 
 alias time="/usr/bin/time -p"
