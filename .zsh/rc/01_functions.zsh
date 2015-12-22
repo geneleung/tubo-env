@@ -81,8 +81,11 @@ EOF
 
     app=`basename $1`
     tmpfile=$(mktemp --suffix=".log" valgrind_"$app"_XXXXXXXX)
+    echo "Will write to file: $tmpfile"
+
     valgrind  --leak-check=full --undef-value-errors=no \
              --log-fd=1 --log-file=$tmpfile "$@" &
+
     tail -f $tmpfile
 }
 

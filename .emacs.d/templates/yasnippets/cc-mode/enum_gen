@@ -19,7 +19,7 @@ static const char* $3_Desc[] = {$>
 FOREACH_$1(GEN_$1_DESC)$>
 };$>
 
-const char* Get$3Desc($3 t);$>
+const char* Get$3Desc($3 t)$>
 {$>
 return $3_Desc[t];$>
 }$>

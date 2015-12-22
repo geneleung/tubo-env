@@ -1,4 +1,5 @@
 # -*- mode: snippet -*-
+# key: cas
 # --
 case ${1:value}: {$>
 $0$>
