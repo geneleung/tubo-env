@@ -285,3 +285,4 @@ tmp/
 /.PlayOnLinux/
 /.emacs.d/viper
 /PlayOnLinux's virtual drives
+/.gemrc
