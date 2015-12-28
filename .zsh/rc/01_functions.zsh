@@ -100,3 +100,14 @@ function mcd ()
 {
     mkdir $1 && cd $1
 }
+
+
+function svnedit ()
+{
+    if [ $# -lt 2 ]; then
+        echo "Usage: svnedit revision URL"
+        return
+    fi
+
+    svn propedit -r $1 --revprop svn:log $2
+}
