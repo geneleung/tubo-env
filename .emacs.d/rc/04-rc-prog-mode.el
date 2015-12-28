@@ -855,38 +855,35 @@ and is reversed for better performence.")
          (c-font-lock-doc-comments "///.*$" limit
            tbdoc-font-lock-doc-comments)))))
 
- ;; This is a sample, real c-doc-comment-style will be set in "10-emacs-custome.el"
- ;; Add kernel style
+ ;;;; This is a sample, real c-doc-comment-style will be set in "10-emacs-custome.el"
+ ;; Base style, added my own doc-style.
  (c-add-style
-  "kernel-coding"
-  '( "linux kernel"
-     (c-basic-offset . 8)
-     (indent-tabs-mode . t)
-     (tab-width . 8)
-     (c-comment-only-line-offset . 0)
-     (c-hanging-braces-alist
-      (brace-list-open)
-      (brace-entry-open)
-      (substatement-open after)
-      (block-close . c-snug-do-while)
-      (arglist-cont-nonempty))
-     (c-cleanup-list brace-else-brace)
-     (c-offsets-alist
-      (statement-block-intro . +)
-      (knr-argdecl-intro . 0)
-      (substatement-open . 0)
-      (substatement-label . 0)
-      (label . 0)
-      (statement-cont . +))))
-
- ;; "Based on Google C/C++ Programming Style"
- (c-add-style
-  "tubo"
-  `("Based on Google C/C++ Programming Style"
+  "t-base"
+  `("bsd"
     (c-recognize-knr-p . nil)
     (c-basic-offset . 4)
+    (tab-width . 4)
     (indent-tabs-mode . nil)
-    (c-comment-only-line-offset . 0)
+    (comment-column . 48)
+
+    (c-doc-comment-style . ((c-mode . tbdoc)
+                            (c++-mode . tbdoc)
+                            (objc-mode . tbdoc)
+                            (java-mode . tbdoc)
+                            (awk-mode . autodoc)
+                            (other . tbdoc)))))
+
+ (c-add-style
+  "kernel"
+  `("linux"
+    (tab-width . 8)
+    (indent-tabs-mode . t)))
+
+ ;; "Based on Google C/C++ Programming Style"
+ "Based on Google C/C++ Programming Style"
+ (c-add-style
+  "tubo"
+  `("t-base"
     (c-hanging-braces-alist . ((defun-open after)
                                (defun-close before after)
                                (class-open after)
@@ -937,81 +934,18 @@ and is reversed for better performence.")
                         (access-label . -)
                         (inextern-lang . 0)
                         (innamespace . 0)))
-    (c-doc-comment-style . ((c-mode . tbdoc)
-                            (c++-mode . tbdoc)
-                            (objc-mode . tbdoc)
-                            (java-mode . tbdoc)
-                            (awk-mode . autodoc)
-                            (other . tbdoc)))))
+    ))
 
  ;; style for express engine of mysql
  (c-add-style
   "express-engine"
-  `("Style for express engine of mysql"
-    (c-recognize-knr-p . nil)
-    (c-basic-offset . 4)
-    (indent-tabs-mode . t)
-    (c-comment-only-line-offset . 0)
-    (c-hanging-braces-alist . ((defun-open after)
-                               (defun-close before after)
-                               (class-open after)
-                               (class-close before after)
-                               (namespace-open after)
-                               (inline-open after)
-                               (inline-close before after)
-                               (block-open after)
-                               (block-close . c-snug-do-while)
-                               (extern-lang-open after)
-                               (extern-lang-close after)
-                               (statement-case-open after)
-                               (substatement-open after)))
-    (c-hanging-colons-alist . ((case-label)
-                               (label after)
-                               (access-label after)
-                               (member-init-intro before)
-                               (inher-intro)))
-    (c-hanging-semi&comma-criteria
-     . (c-semi&comma-no-newlines-for-oneline-inliners
-        c-semi&comma-inside-parenlist
-        c-semi&comma-no-newlines-before-nonblanks))
-    (c-indent-comments-syntactically-p . nil)
-    (comment-column . 48)
-    (c-cleanup-list . (brace-else-brace
-                       brace-elseif-brace
-                       brace-catch-brace
-                       empty-defun-braces
-                       defun-close-semi
-                       list-close-comma
-                       scope-operator))
-    (c-offsets-alist . ((func-decl-cont . ++)
-                        (member-init-intro . +)
-                        (member-init-cont  . c-lineup-multi-inher)
-                        (inher-intro . ++)
-                        (comment-intro . 0)
-                        (arglist-close . c-lineup-arglist)
-                        (topmost-intro . 0)
-                        (block-open . 0)
-                        (inline-open . 0)
-                        (substatement-open . 0)
-                        (statement-cont
-                         . c-lineup-assignments)
-                        (label . /)
-                        (case-label . 0)
-                        (statement-case-open . 0)
-                        (statement-case-intro . +) ; case w/o {
-                        (access-label . -)
-                        (inextern-lang . 0)
-                        (innamespace . 0)))
-    (c-doc-comment-style . ((c-mode . tbdoc)
-                            (c++-mode . tbdoc)
-                            (objc-mode . tbdoc)
-                            (java-mode . tbdoc)
-                            (awk-mode . autodoc)
-                            (other . tbdoc)))))
+  `("tubo"
+    (indent-tabs-mode . t)))
 
+;; Coding style for MySql
  (c-add-style
   "mysql"
-  '("Coding style for MySql"
+  '("t-base"
     (c-basic-offset . 2)
     (indent-tabs-mode . nil)
     (c-comment-only-line-offset . 0)
@@ -1030,9 +964,9 @@ and is reversed for better performence.")
     ))
 
  (defvar yc/c-file-mode-mapping
-   (list (cons (rx (or "linux-" "kernel" "driver" "samba")) "kernel-coding")
+   (list (cons (rx (or "linux-" "kernel" "driver" "samba")) "kernel")
          (cons (rx (or "curl" "emacs" "gnome")) "gnu")
-         (cons "storage/express/" "express")
+         (cons "storage/express/" "express-engine")
          (cons (rx (or "mysql" "gbase" ) (*? ascii) "/") "mysql"))
    "List of possible coding styles")
 

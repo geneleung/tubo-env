@@ -108,7 +108,7 @@ detailed descriptions."
     (kill-region start end)
     (let ((s (point))
           pos e)
-      (insert (format "#if %s\n" var))
+      (insert (format "#ifdef %s\n" var))
       (yank)
       (insert (format "\n#endif /*%s*/" var))
       (setq pos (point))
