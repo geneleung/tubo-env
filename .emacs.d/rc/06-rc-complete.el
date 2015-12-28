@@ -262,7 +262,8 @@
 (dolist (hk '(git-commit-mode-hook mail-mode-hook mediawiki-mode-hook org-mode-hook))
   (add-hook hk (lambda ()
                  (set (make-local-variable 'company-backends)
-                      '((company-files company-ispell company-dabbrev company-abbrev
+                      '((company-files ;; company-ispell
+                                       company-dabbrev company-abbrev
                                       :with company-yasnippet))))))
 
 (defmacro yc/add-company-backends-with-yasnippet (&rest backends)
