@@ -73,6 +73,7 @@
    '(border ((t (:background "gold" :foreground "black" ))))
    '(buffer-menu-buffer ((t (:bold t :weight bold))))
    '(button ((t (:underline t :foreground "#00ffff" :weight bold))))
+   '(widget-button ((t (:underline t :foreground "#00ffff" :weight bold))))
    '(calendar-today-face ((t (:underline t :bold t :foreground "cornsilk"))))
    '(change-log-acknowledgement-face ((t (:italic t :slant oblique :foreground "AntiqueWhite3"))))
    '(change-log-conditionals-face ((t (:foreground "Aquamarine"))))

@@ -1255,6 +1255,19 @@ and is reversed for better performence.")
     (srecode-insert "file:empty")
     (delete-trailing-whitespace)))
 
+ ;; Irony mode
+(yc/autoload 'irony-mode "irony")
+(add-hook 'c-mode-common-hook
+          (lambda ()
+            (irony-mode 1)))
+
+;; replace the `completion-at-point' and `complete-symbol' bindings in
+;; irony-mode's buffers by irony-mode's function
+(add-hook 'irony-mode-hook
+          (lambda ()
+            (irony-cdb-autosetup-compile-options)
+            (define-key irony-mode-map [remap complete-symbol]
+              'irony-completion-at-point-async)))
 
 
 ;;;; Common Program settings
@@ -1740,8 +1753,6 @@ and is reversed for better performence.")
 
  ;; Javascript mode
 (yc/autoload 'js2-mode)
-(yc/autoload 'js2-imenu-extras-mode)
-
 
 (yc/set-mode 'js2-mode (rx (or (: bow "manifest")
                                ".json"
@@ -1760,9 +1771,7 @@ and is reversed for better performence.")
  (define-key js2-mode-map "\C-c\C-x" 'executable-interpret)
  (add-hook 'js2-mode-hook
            (lambda ()
-             (yc/common-program-hook)
-             (js2-imenu-extras-mode)
-             )))
+             (yc/common-program-hook))))
 
 (custom-set-variables
  '(safe-local-variable-values
@@ -1987,8 +1996,9 @@ Major mode for editing PHP code.
 (defun yc/asm-add-offset ()
   "Add offset to current file."
   (interactive)
-  (let ((r-match-func (rx bol  (+ alnum) (+ space) "<" (+ (or "_" alnum)) ">:" eol))
-        (r-match-addr (rx (+ space) (group (+ alnum)) ":" space))
+  (let ((r-match-func  (rx bol  (+ alnum) (+ space) "<" (+ (or "_" alnum)) ">:" eol))
+        (r-match-addr  (rx (+ space) (group (+ alnum)) ":" space))
+        (r-match-codes (rx ":" (+ space) (* (repeat 2 alnum) space ) (* space)))
         pos )
 
     (defun get-address ()
@@ -1998,7 +2008,13 @@ Major mode for editing PHP code.
                  (addr-str (buffer-substring-no-properties (nth 2 m-data) (nth 3 m-data))))
             (string-to-number addr-str 16))))
 
-    ;; first, calculate offset for instruction addresses.
+    ;; first, add a space around "+"
+    (save-excursion
+      (while (search-forward-regexp "\\+" nil t)
+        (replace-match "+ "))
+      )
+
+    ;; then, calculate offset for instruction addresses.
     (save-excursion
       (while (setq pos (search-forward-regexp r-match-func nil t))
         (let* ((pos (1+ pos))
@@ -2008,19 +2024,27 @@ Major mode for editing PHP code.
           (setq end (point-at-eol -1)) ;; update end position, we'll go back here later.
           (goto-char pos)
           (aif (get-address)
-              (while (< pos end)
+              (while (<= pos end)
                 (goto-char pos)
                 (unless (looking-at-p (rx (or (: bol eol)
                                               (: (* space)";" ))))
                   (let* ((addr (get-address))
-                         (off-string (format "0x%x" (- addr it))))
+                         (tmp-string (format "0x%x" (- addr it)))
+                         (off-string (format "%s%s" tmp-string
+                                             (make-string
+                                              (- 5 (length tmp-string)) ? ))))
                     (insert off-string)
                     (setq end (+ end (length off-string)))))
                 (setq pos (point-at-bol 2))))
           (goto-char end)
           (forward-line -1))))
 
-
+    ;; last, remove instruction codes...
+    (save-excursion
+      (while (search-forward-regexp r-match-codes nil t)
+        (replace-match ":	")
+        )
+      )
     ))
 
 

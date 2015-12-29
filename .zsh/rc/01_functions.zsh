@@ -91,7 +91,13 @@ EOF
 
 function tperf-record()
 {
-    sudo perf record -o "perf_`date +'%m_%d_%H:%M:%S'`.data" $*
+    if [ -e perf.data ]; then
+        sudo mv perf.data "perf_`date +'%m_%d_%H:%M:%S'`.data"
+    fi
+
+    sudo perf record \
+         -e cycles,instructions,branch-misses,cache-misses \
+         $*
 }
 
 

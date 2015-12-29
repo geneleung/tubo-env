@@ -312,21 +312,12 @@
 
 
  ;; Irony mode
-(yc/autoload 'irony-mode "irony")
 (yc/autoload 'company-irony)
 
 (add-hook 'c-mode-common-hook
           (lambda ()
             (irony-mode 1)
             (yc/add-company-backends-with-yasnippet company-irony :sorted company-gtags)))
-
-;; replace the `completion-at-point' and `complete-symbol' bindings in
-;; irony-mode's buffers by irony-mode's function
-(add-hook 'irony-mode-hook
-          (lambda ()
-            (define-key irony-mode-map [remap complete-symbol]
-              'irony-completion-at-point-async)))
-(add-hook 'irony-mode-hook 'irony-cdb-autosetup-compile-options)
 
 (provide '06-rc-complete)
 
