@@ -864,7 +864,7 @@ and is reversed for better performence.")
     (c-basic-offset . 4)
     (tab-width . 4)
     (indent-tabs-mode . nil)
-    (comment-column . 48)
+    (comment-column . 40)
 
     (c-doc-comment-style . ((c-mode . tbdoc)
                             (c++-mode . tbdoc)
@@ -907,7 +907,6 @@ and is reversed for better performence.")
         c-semi&comma-inside-parenlist
         c-semi&comma-no-newlines-before-nonblanks))
     (c-indent-comments-syntactically-p . nil)
-    (comment-column . 48)
     (c-cleanup-list . (brace-else-brace
                        brace-elseif-brace
                        brace-catch-brace
@@ -949,7 +948,6 @@ and is reversed for better performence.")
     (c-basic-offset . 2)
     (indent-tabs-mode . nil)
     (c-comment-only-line-offset . 0)
-    (comment-column . 48)
     (c-offsets-alist . ((statement-block-intro . +)
                         (knr-argdecl-intro . 0)
                         (substatement-open . 0)
