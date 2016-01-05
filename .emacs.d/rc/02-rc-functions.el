@@ -1118,6 +1118,50 @@ args should be a list, but to make caller's life easier, it can accept one atom 
           'face (list :background (yc/expand-color (match-string-no-properties 0))))))))
   (font-lock-fontify-buffer))
 
+(defun uniq-stack ()
+  "Make stacks unique."
+  (interactive)
+
+  (let ((r-match-thread (rx bol "Thread" (* space) (group (+ digit)) (* space)
+                            "(Thread" (+? ascii) ":" eol))
+        (htable-stack (make-hash-table :test 'equal :size 2048))
+        (htable-threads (make-hash-table :test 'equal :size 2048))
+        ordered-numbers)
+    (save-excursion
+      (goto-char (point-min))
+      (while (search-forward-regexp r-match-thread nil t)
+        (forward-char)
+        (let* ((pos (point))
+               (end (cond
+                     ((search-forward-regexp r-match-thread nil t) (point-at-bol))
+                     (t (point-max))))
+               (stack (buffer-substring-no-properties pos end))
+               (num (gethash stack htable-stack 0)))
+          (puthash stack (1+ num) htable-stack)
+          (goto-char end))))
+
+    ;; Sort tacks based on number of threads.
+    (maphash (lambda (stack repeated)
+               (let ((lst (gethash repeated htable-threads nil)))
+                 (puthash repeated (cons stack lst) htable-threads))
+               (add-to-ordered-list 'ordered-numbers repeated (- 2048 repeated))
+               ) htable-stack)
+
+    (with-current-buffer (get-buffer-create (format "Uniq-Stack of: %s" (buffer-name)))
+      (read-only-mode -1)
+      (erase-buffer)
+      (insert "Unique Stacks:\n\n")
+      (dolist (number ordered-numbers)
+        (let ((stack-list (gethash number htable-threads)))
+          (dolist (stack stack-list)
+            (insert (format "Number of Threads: %d\n%s\n"
+                            number stack)))))
+
+      (read-only-mode 1)
+      (goto-char (point-min))
+      (display-buffer (current-buffer))
+      )))
+
  ;; Advice
 
 ;; Auto indent regions for prog/sgml based modes.

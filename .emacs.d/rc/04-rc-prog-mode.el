@@ -1997,6 +1997,7 @@ Major mode for editing PHP code.
   (let ((r-match-func  (rx bol  (+ alnum) (+ space) "<" (+ (or "_" alnum)) ">:" eol))
         (r-match-addr  (rx (+ space) (group (+ alnum)) ":" space))
         (r-match-codes (rx ":" (+ space) (* (repeat 2 alnum) space ) (* space)))
+        (r-match-offset (rx "+" "0x" (group (+ alnum))  ">"))
         pos )
 
     (defun get-address ()
@@ -2008,8 +2009,8 @@ Major mode for editing PHP code.
 
     ;; first, add a space around "+"
     (save-excursion
-      (while (search-forward-regexp "\\+" nil t)
-        (replace-match "+ "))
+      (while (search-forward-regexp r-match-offset nil t)
+        (replace-match "+ \\1 >"))
       )
 
     ;; then, calculate offset for instruction addresses.
