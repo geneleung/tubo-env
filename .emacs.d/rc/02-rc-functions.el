@@ -1118,15 +1118,71 @@ args should be a list, but to make caller's life easier, it can accept one atom 
           'face (list :background (yc/expand-color (match-string-no-properties 0))))))))
   (font-lock-fontify-buffer))
 
+(defun yc/asm-add-offset ()
+  "Add offset to current file."
+  (interactive)
+  (let ((r-match-func  (rx bol  (+ alnum) (+ space) "<" (+ (or "_" alnum)) ">:" eol))
+        (r-match-addr  (rx (+ space) (group (+ alnum)) ":" space))
+        (r-match-codes (rx ":" (+ space) (* (repeat 2 alnum) space ) (* space)))
+        (r-match-offset (rx "+" "0x" (group (+ alnum))  ">"))
+        pos )
+
+    (defun get-address ()
+      "Get address"
+      (if (looking-at r-match-addr)
+          (let* ((m-data (match-data 1))
+                 (addr-str (buffer-substring-no-properties (nth 2 m-data) (nth 3 m-data))))
+            (string-to-number addr-str 16))))
+
+    ;; first, add a space around "+"
+    (save-excursion
+      (while (search-forward-regexp r-match-offset nil t)
+        (replace-match "+ \\1 >"))
+      )
+
+    ;; then, calculate offset for instruction addresses.
+    (save-excursion
+      (while (setq pos (search-forward-regexp r-match-func nil t))
+        (let* ((pos (1+ pos))
+               (end (or (search-forward-regexp r-match-func nil t)
+                        (point-max))))
+          (goto-char end)
+          (setq end (point-at-eol -1)) ;; update end position, we'll go back here later.
+          (goto-char pos)
+          (aif (get-address)
+              (while (<= pos end)
+                (goto-char pos)
+                (unless (looking-at-p (rx (or (: bol eol)
+                                              (: (* space)";" ))))
+                  (let* ((addr (get-address))
+                         (tmp-string (format "0x%x" (- addr it)))
+                         (off-string (format "%s%s" tmp-string
+                                             (make-string
+                                              (- 5 (length tmp-string)) ? ))))
+                    (insert off-string)
+                    (setq end (+ end (length off-string)))))
+                (setq pos (point-at-bol 2))))
+          (goto-char end)
+          (forward-line -1))))
+
+    ;; last, remove instruction codes...
+    (save-excursion
+      (while (search-forward-regexp r-match-codes nil t)
+        (replace-match ":	")))))
+
 (defun uniq-stack ()
   "Make stacks unique."
   (interactive)
-
   (let ((r-match-thread (rx bol "Thread" (* space) (group (+ digit)) (* space)
                             "(Thread" (+? ascii) ":" eol))
+        (r-match-suspicious (rx (+? ascii)
+                                (or "segfault" "segment fault" "signal handler called"
+                                    "abort" "raise" "__assert_fail")
+                                (? space) (? "()")
+                                (+? ascii)))
         (htable-stack (make-hash-table :test 'equal :size 2048))
         (htable-threads (make-hash-table :test 'equal :size 2048))
-        ordered-numbers)
+        ordered-numbers suspects)
     (save-excursion
       (goto-char (point-min))
       (while (search-forward-regexp r-match-thread nil t)
@@ -1144,23 +1200,42 @@ args should be a list, but to make caller's life easier, it can accept one atom 
     (maphash (lambda (stack repeated)
                (let ((lst (gethash repeated htable-threads nil)))
                  (puthash repeated (cons stack lst) htable-threads))
-               (add-to-ordered-list 'ordered-numbers repeated (- 2048 repeated))
+               (add-to-list 'ordered-numbers repeated)
                ) htable-stack)
+    (sort ordered-numbers '>)
 
+    ;; Now insert stacks and highlight suspicious ones.
     (with-current-buffer (get-buffer-create (format "Uniq-Stack of: %s" (buffer-name)))
       (read-only-mode -1)
       (erase-buffer)
-      (insert "Unique Stacks:\n\n")
       (dolist (number ordered-numbers)
         (let ((stack-list (gethash number htable-threads)))
           (dolist (stack stack-list)
-            (insert (format "Number of Threads: %d\n%s\n"
-                            number stack)))))
+            (insert (format "\nNumber of Threads: %d" number))
+            (let (added-to-list)
+              (dolist (str (string-split stack "\n"))
+                (insert (format "\n%s" str))
+                (when (string-match r-match-suspicious str)
+                  (unless added-to-list
+                    (setq added-to-list t
+                          suspects (cons (1+ (line-number-at-pos)) suspects)))
+                  (overlay-put (make-overlay (point-at-bol) (point-at-eol))
+                               'face `(:underline (:style wave :color "Red1")))))))))
+      (goto-char (point-min))
+      (insert (format "Unique Stacks: %d, suspicious lines: " (length ordered-numbers)))
+      (if suspects
+          (progn
+            (setq suspects (nreverse suspects))
+            (insert (format "%d" (pop suspects)))
+            (while suspects
+              (insert (format ", %d" (pop suspects)))))
+        (insert "none"))
+      (insert ".\n")
 
+      ;; show this buffer.
       (read-only-mode 1)
       (goto-char (point-min))
-      (display-buffer (current-buffer))
-      )))
+      (display-buffer (current-buffer)))))
 
  ;; Advice
 

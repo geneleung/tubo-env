@@ -1991,61 +1991,6 @@ Major mode for editing PHP code.
              (rx "." (or (: "php" (+ (or "s" "t" digit)))
                          "phtml" "Amkfile" "amk")))
 
-(defun yc/asm-add-offset ()
-  "Add offset to current file."
-  (interactive)
-  (let ((r-match-func  (rx bol  (+ alnum) (+ space) "<" (+ (or "_" alnum)) ">:" eol))
-        (r-match-addr  (rx (+ space) (group (+ alnum)) ":" space))
-        (r-match-codes (rx ":" (+ space) (* (repeat 2 alnum) space ) (* space)))
-        (r-match-offset (rx "+" "0x" (group (+ alnum))  ">"))
-        pos )
-
-    (defun get-address ()
-      "Get address"
-      (if (looking-at r-match-addr)
-          (let* ((m-data (match-data 1))
-                 (addr-str (buffer-substring-no-properties (nth 2 m-data) (nth 3 m-data))))
-            (string-to-number addr-str 16))))
-
-    ;; first, add a space around "+"
-    (save-excursion
-      (while (search-forward-regexp r-match-offset nil t)
-        (replace-match "+ \\1 >"))
-      )
-
-    ;; then, calculate offset for instruction addresses.
-    (save-excursion
-      (while (setq pos (search-forward-regexp r-match-func nil t))
-        (let* ((pos (1+ pos))
-               (end (or (search-forward-regexp r-match-func nil t)
-                        (point-max))))
-          (goto-char end)
-          (setq end (point-at-eol -1)) ;; update end position, we'll go back here later.
-          (goto-char pos)
-          (aif (get-address)
-              (while (<= pos end)
-                (goto-char pos)
-                (unless (looking-at-p (rx (or (: bol eol)
-                                              (: (* space)";" ))))
-                  (let* ((addr (get-address))
-                         (tmp-string (format "0x%x" (- addr it)))
-                         (off-string (format "%s%s" tmp-string
-                                             (make-string
-                                              (- 5 (length tmp-string)) ? ))))
-                    (insert off-string)
-                    (setq end (+ end (length off-string)))))
-                (setq pos (point-at-bol 2))))
-          (goto-char end)
-          (forward-line -1))))
-
-    ;; last, remove instruction codes...
-    (save-excursion
-      (while (search-forward-regexp r-match-codes nil t)
-        (replace-match ":	")
-        )
-      )
-    ))
-
 
 (provide '04-rc-prog-mode)
 
