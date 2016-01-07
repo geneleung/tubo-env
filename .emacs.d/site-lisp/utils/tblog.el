@@ -253,7 +253,7 @@ layout : post
 
     (if (and (fboundp 'magit-status)
              (not skip))
-        (magit-status dir))))
+        (magit-status-internal dir))))
 
 (provide 'tblog)
 
