@@ -48,6 +48,7 @@
   (set-default 'ispell-skip-html t)
   (custom-set-variables
    '(ispell-dictionary "english")
+   '(ispell-skip-html t)
    '(ispell-local-dictionary "english")))
 
 (defun turn-on-flyspell ()
@@ -243,7 +244,7 @@
             auto-mode-alist))
 
  ;; ********************* tramp *******************************
-(define-or-set tramp-ssh-controlmaster-options
+(cdsq tramp-ssh-controlmaster-options
   "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no")
 
 (yc/eval-after-load
@@ -459,7 +460,7 @@
  ;;Dired
 
 ;; Ugly, just to ensure "ls" is loaded from "ls-lisp"
-(define-or-set ls-lisp-use-insert-directory-program nil)
+(cdsq ls-lisp-use-insert-directory-program nil)
 (load-library "ls-lisp")
 (setq ls-lisp-dirs-first t)
 

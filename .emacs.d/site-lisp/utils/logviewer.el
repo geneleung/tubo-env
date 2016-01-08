@@ -43,15 +43,21 @@
 (defcustom logviewer-tmp-dir "/tmp/emacs-logviewer/"
   "Temporary directory to hold splited files."
   :type 'string
-  :group 'group
+  :group 'logviewer
   )
 
 (defcustom  logviewer-split-line 50000
   "Lines when trying to split files."
   :type 'integer
-  :group 'group
+  :group 'logviewer
   )
 
+(defcustom logviewer-fold-long-lines 1024
+  "Fold a line if it is too long."
+  :type '(radio (const :tag "Show all lines." nil)
+                (integer :tag "Fold if longer than:" ))
+  :group 'logviewer
+  )
 
 ;; default mode map, really simple
 (defvar logviewer-mode-map
@@ -66,55 +72,36 @@
         (logviewer-next-part nil (or arg 1))))
     (define-key keymap "R" 'logviewer-reload-file)
     (define-key keymap "F" 'logviewer-set-filter)
+    (define-key keymap "L" 'logviewer-toggle-long-lines)
     keymap)
   "Keymap for logviewer mode.")
 
 (defvar logviewer-font-lock-keywords
   `(
     ;; Date & time.
-    (,(rx symbol-start
-          (group (or "ERROR" "FATAL" "error" "fatal" "WARNING" "warning")) ":"
-          (group (+ (*? not-newline))) line-end)
+    (,(rx bol (** 0 256 not-newline) symbol-start
+          (group (or "ERROR" "FATAL" "error" "fatal" "WARNING" "warning")) (or ":" "]")
+          (group (** 0 256 not-newline)))
      (1 font-lock-warning-face) (2 font-lock-comment-face))
     (,(rx line-start
-          (*? not-newline) (+ digit) ":" (+ digit) ":" (+ digit)
+          (*? (or space alnum)) (+ digit) ":" (+ digit) ":" (+ digit)
           (? "." (+ digit)))
      . font-lock-builtin-face)
-    (,(rx symbol-start
-          (group (*? not-newline) (+ digit) ":" (+ digit) ":" (+ digit) (? (or "." "-") (+ digit)))
+    (,(rx bol (** 0 256 not-newline) symbol-start
+          (group (** 0 256 not-newline) (+ digit) ":" (+ digit) ":" (+ digit) (? (or "." "-") (+ digit)))
           (1+ space) (group (+? (or alnum "-" "_"  blank))) (? "["(* digit) "]")":")
      (1 font-lock-builtin-face) (2 font-lock-variable-name-face))
 
-    (,(rx symbol-start
+    (,(rx bol (** 0 256 not-newline) symbol-start
           (group (or "info" "INFO" )) ":"
-          (group (+ (*? not-newline))) line-end)
+          (group (+ (*? not-newline))))
      (1 font-lock-function-name-face))
-    (,(rx symbol-start
+    (,(rx bol (** 0 256 not-newline) symbol-start
           (group (or "DEBUG" "debug" )) ":"
-          (group (+ (*? not-newline))) line-end)
+          (group (+ (*? not-newline))))
      (1 font-lock-keyword-face) (2 font-lock-doc-face))
-    ))
-
-;; (defvar logviewer-mode-syntax-table (make-syntax-table)
-;;   "Syntax table for Logviewer mode")
-;; (modify-syntax-entry ?# "<" logviewer-mode-syntax-table)
-;; (modify-syntax-entry ?' "\"" logviewer-mode-syntax-table)
-;; (modify-syntax-entry ?- "w" logviewer-mode-syntax-table)
-;; (modify-syntax-entry ?.  "_" logviewer-mode-syntax-table)
-;; (modify-syntax-entry ?:  "_" logviewer-mode-syntax-table)
-;; (modify-syntax-entry ?\\ "_" logviewer-mode-syntax-table)
-;; (modify-syntax-entry ?\n ">" logviewer-mode-syntax-table)
-;; (modify-syntax-entry ?_  "w" logviewer-mode-syntax-table)
-;; (modify-syntax-entry ?` "\\" logviewer-mode-syntax-table)
-;; (modify-syntax-entry ?{ "(}" logviewer-mode-syntax-table)
-;; (modify-syntax-entry ?} "){" logviewer-mode-syntax-table)
-;; (modify-syntax-entry ?[ "(]" logviewer-mode-syntax-table)
-;;                      (modify-syntax-entry ?] ")["
-;;                      logviewer-mode-syntax-table)
-;; (modify-syntax-entry ?( "()" logviewer-mode-syntax-table)
-;;                      (modify-syntax-entry ?) ")("
-;;                      logviewer-mode-syntax-table)
-
+    )
+  "")
 
 (defvar logviewer-current-file nil
   "Log file viewed by logviewer")
@@ -146,6 +133,7 @@
   (unless (car (file-attributes logviewer-tmp-dir))
     (error "Temporary directory (%s) is not a DIR!" logviewer-tmp-dir))
 
+  (make-local-variable 'logviewer-slice-hash)
   (set (make-local-variable 'logviewer-current-file) filename)
   (let* ((bname (file-name-sans-extension (file-name-nondirectory filename)))
          (first-slice (format "%s/%s_%04d" logviewer-tmp-dir bname 0))
@@ -239,6 +227,9 @@ NUM: prefix."
 
 (defvar logviewer-filter-level 9 "nil")
 
+(defvar logviewer--overlays nil "Folded overlays.")
+
+
 (defun get-lvl-str (num)
   "description"
   (let ((x (/ num 2))
@@ -325,12 +316,22 @@ NUM: prefix."
                 (while (< i len)
                   (setq frange (nth i logviewer-filter-list))
                   (outline-flag-region (car frange) (1+ (cdr frange)) nil)
-                  (setq i (1+ i))
-                  ))
-            )
-          )))
-    )
-  )
+                  (setq i (1+ i))))))))))
+
+(defvar logviewer--long-line-hidden t "Nil.")
+(add-to-invisibility-spec '(invs . t))
+
+(defun logviewer-toggle-long-lines ()
+  "Hide or show long lines."
+  (interactive)
+  (unless logviewer--overlays
+    (error "No lines are folded."))
+  (mapc (lambda (ov)
+          (overlay-put ov 'invisible
+                       (if logviewer--long-line-hidden
+                           nil 'invs)))
+        logviewer--overlays)
+  (setq logviewer--long-line-hidden (not logviewer--long-line-hidden)))
 
 
 ;;;###autoload
@@ -341,11 +342,29 @@ Key definitions:
                                         ; Setup font-lock mode.
   (set (make-local-variable 'font-lock-defaults) '(logviewer-font-lock-keywords))
   ;; (set-syntax-table logviewer-mode-syntax-table)
-  (setq buffer-read-only t)
   (unless logviewer-current-file
-    (setq logviewer-current-file (buffer-file-name))
-    )
-    (run-hooks 'logviewer-mode-hook))
+    (setq logviewer-current-file (buffer-file-name)))
+
+  (when logviewer-fold-long-lines
+    (make-local-variable 'logviewer--overlays)
+    (set (make-local-variable 'logviewer--long-line-hidden) t)
+    (unless (numberp logviewer-fold-long-lines)
+      (setq logviewer-fold-long-lines 1024))
+    (save-excursion
+      (let ((pos (point-min))
+            marker epos)
+        (while (< pos (point-max))
+          (goto-char pos)
+          (setq marker (+ (point-at-bol) logviewer-fold-long-lines)
+                epos (point-at-eol))
+          (when (< marker epos) ;; this line is too long...
+            (setq logviewer--overlays (cons (make-overlay marker epos) logviewer--overlays))
+            (overlay-put (car logviewer--overlays) 'invisible 'invs))
+          (setq pos (1+ epos))))))
+
+  (setq buffer-read-only t)
+
+  (run-hooks 'logviewer-mode-hook))
 
 (add-to-list 'auto-mode-alist '("\\.log\\'" .
                                 logviewer-mode))

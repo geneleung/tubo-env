@@ -25,7 +25,7 @@
 
 (yc/eval-after-load
  "helm-ring"
- (define-or-set helm-source-kill-ring
+ (cdsq helm-source-kill-ring
    (helm-build-sync-source "Kill Ring"
      :init (lambda () (helm-attrset 'last-command last-command))
      :candidates #'helm-kill-ring-candidates

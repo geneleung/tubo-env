@@ -12,35 +12,32 @@
 
  ;; Macros
 
-(defmacro yc/customize-variable (sym val)
-  `(custom-set-variables '( ,sym ,val)))
-
-(defmacro check-symbol-and-set (sym &optional val)
+(defmacro sif (sym &optional val)
+  "Set SYM to VAL if SYM exists."
   `(when (boundp ',sym)
      (setq ,sym ,val)))
 
-(defmacro define-or-set (sym val &optional doc)
-  "Define or set value of SYM to VAL."
-  `(if (boundp ',sym)
-       (setq ,sym ,val)
-     (defvar ,sym ,val ,doc)))
-
 (defmacro csq (sym val)
-  "Define or set/customize value of SYM to VAL."
+  "Customize or Set value of SYM to VAL."
   `(funcall (or (get ',sym 'custom-set)
                 'set-default)
             ',sym ,val))
 
 (defmacro cdsq (sym val &optional doc)
-  "Define or set/customize value of SYM to VAL."
+  "Customize, Define or Set value of SYM to VAL, with DOC as document."
   `(if (boundp ',sym)
        (csq ,sym ,val)
+     (defvar ,sym ,val ,doc)))
+
+(defmacro dsq (sym val &optional doc)
+  "Define or Set value of  value of SYM to VAL, with DOC as document."
+  `(if (boundp ',sym)
+       (setq ,sym ,val)
      (defvar ,sym ,val ,doc)))
 
 (defmacro check-symbol (sym)
   "Return value or nil"
   `(if (boundp ',sym) ,sym nil))
-
 
 (defmacro aif (test-form then-form &rest else-forms)
   "Like `if' but set the result of TEST-FORM in a temprary variable called `it'.

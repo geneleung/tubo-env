@@ -359,7 +359,6 @@ li {font-size: 15px}
                       (local-set-key "\C-c/" 'nxml-finish-element)
                       (auto-fill-mode)
                       (rng-validate-mode)
-                      (yc/customize-variable ispell-skip-html t)
                       (hs-minor-mode 1)
                       (yc/basic-prog-keybinding)
                       )

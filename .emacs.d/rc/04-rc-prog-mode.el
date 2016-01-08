@@ -323,11 +323,10 @@ and is reversed for better performence.")
   "Add common includes"
   (setq yc/system-include-dirs
         (reverse (append (semantic-gcc-get-include-paths "c++") '("./"))))
-  (check-symbol-and-set semantic-c-dependency-system-include-path
+  (sif semantic-c-dependency-system-include-path
                         yc/system-include-dirs)
-  (check-symbol-and-set semantic-dependency-system-include-path
+  (sif semantic-dependency-system-include-path
                         yc/system-include-dirs)
-  ;; (check-symbol-and-set semantic-default-objc-path yc/system-include-dirs)
   (mapc (lambda (dir)
           (semantic-add-system-include dir 'c-mode)
           (semantic-add-system-include dir 'c++-mode))
@@ -681,7 +680,7 @@ and is reversed for better performence.")
 
 (yc/eval-after-load
  "python"
- (define-or-set yc/r-match-pyfile
+ (cdsq yc/r-match-pyfile
    (rx (group (+? ascii)) ".py" (? (or "c" "o"))))
 
  (defvar yc/system-py-modules nil "Python modules installed in system directory")
@@ -821,7 +820,7 @@ and is reversed for better performence.")
  (yc/add-common-includes)
 
  ;; Customized doc-font
- (define-or-set tbdoc-font-lock-doc-comments
+ (cdsq tbdoc-font-lock-doc-comments
    (let ((symbol "[a-zA-Z0-9_]+")
          (header "^ \\* "))
      `((,(concat header "\\("     symbol "\\):[ \t]*$")
@@ -836,11 +835,11 @@ and is reversed for better performence.")
         0 ,c-doc-markup-face-name prepend nil)
        )))
 
- (define-or-set tbdoc-font-lock-doc-protection
+ (cdsq tbdoc-font-lock-doc-protection
    `(("< \\(public\\|private\\|protected\\) >"
       1 ,c-doc-markup-face-name prepend nil)))
 
- (define-or-set tbdoc-font-lock-keywords
+ (cdsq tbdoc-font-lock-keywords
    `((,(lambda (limit)
          (c-font-lock-doc-comments "/\\*\\*.*$" limit
            tbdoc-font-lock-doc-comments)
@@ -1277,12 +1276,12 @@ and is reversed for better performence.")
   ;; (local-set-key  [(tab)] 'indent-or-complete)
   )
 
-(define-or-set if-0-start
+(cdsq if-0-start
   "// TODO: Remove this ifdef!
 #if 0
 ")
 
-(define-or-set if-0-end
+(cdsq if-0-end
   "
 #endif // End of #if 0
 ")
@@ -1376,10 +1375,11 @@ and is reversed for better performence.")
 
  ;; Lisp mode.
 
-(defvar yc/lisp-keywords
+(dsq yc/lisp-keywords
       (rx bow (group (or "add-to-list" "try-require" "add-hook" "autoload"
                          "yc/eval-after-load" "try-require-autoloads"
-                         "fboundp" "boundp" "featurep" "define-or-set"
+                         "fboundp" "boundp" "featurep" "cdsq"
+                         "cds" "dsq" "sif" "aif"
                          "csq" "cdsq" "yc/autoload" "yc/set-auto-mode" "defun*" "defmacro*")) eow)
       "My Lisp keywords")
 
