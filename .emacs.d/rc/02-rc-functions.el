@@ -1134,7 +1134,7 @@ args should be a list, but to make caller's life easier, it can accept one atom 
     ;; first, add a space around "+"
     (save-excursion
       (while (search-forward-regexp r-match-offset nil t)
-        (replace-match "+ \\1 >"))
+        (replace-match "+ 0x\\1 >"))
       )
 
     ;; then, calculate offset for instruction addresses.
