@@ -1137,7 +1137,12 @@ args should be a list, but to make caller's life easier, it can accept one atom 
         (replace-match "+ 0x\\1 >"))
       )
 
-    ;; then, calculate offset for instruction addresses.
+    ;; then, remove instruction codes...
+    (save-excursion
+      (while (search-forward-regexp r-match-codes nil t)
+        (replace-match ":	")))
+
+    ;; last, calculate offset for instruction addresses.
     (save-excursion
       (while (setq pos (search-forward-regexp r-match-func nil t))
         (let* ((pos (1+ pos))
@@ -1155,17 +1160,12 @@ args should be a list, but to make caller's life easier, it can accept one atom 
                          (tmp-string (format "0x%x" (- addr it)))
                          (off-string (format "%s%s" tmp-string
                                              (make-string
-                                              (- 5 (length tmp-string)) ? ))))
+                                              (- 7 (length tmp-string)) ? ))))
                     (insert off-string)
                     (setq end (+ end (length off-string)))))
                 (setq pos (point-at-bol 2))))
           (goto-char end)
-          (forward-line -1))))
-
-    ;; last, remove instruction codes...
-    (save-excursion
-      (while (search-forward-regexp r-match-codes nil t)
-        (replace-match ":	")))))
+          (forward-line -1))))))
 
 (defun uniq-stack ()
   "Make stacks unique."
