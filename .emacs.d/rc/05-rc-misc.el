@@ -7,10 +7,15 @@
 (if (string= system-type "darwin")
     (setq Info-default-directory-list
           (append Info-default-directory-list
-                  (list "/opt/usr/share/info"
-                        "/opt/usr/share/gcc-data/x86_64-apple-darwin12/4.2.1/info"
-                        (format "/opt/usr/share/info/emacs-%s"
-                                emacs-major-version)))))
+                  (let ((lst (remove-if-not 'file-exists-p
+                                            `("/opt/usr/share/info"
+                                              ,(format "/opt/usr/share/info/emacs-%s"
+                                                       emacs-major-version))))
+                        (gcc-data-dirs ))
+                    (dolist (dir (directory-files "/opt/usr/share/gcc-data" t))
+                      (dolist (version (directory-files dir t))
+                        (if (file-exists-p (concat version "/info"))
+                            (setq lst (cons (concat version "/info") lst)))))))))
 
 (yc/eval-after-load
  "helm-info"
