@@ -99,11 +99,69 @@ variable `magit-process-buffer-name-format'."
        (string-match-p arc-commit-filename-regexp buffer-file-name)
        (arc-commit-setup)))
 
+(defcustom magit-arc-desc-keywords nil
+  "Keywords to check for descriptions."
+  :type '(repeat :tag "Keywords to check"
+                 (regexp :tag "Keyword"))
+  :group 'magit-arc)
+
+(defun magit-arc--check-keywords ()
+  "Check if user specified keywords are included in descritpion."
+  (message "enter")
+  (let ((r-match-brief (rx (group (+ anything)) "
+Summary:"))
+        (valid t)
+        brief missing)
+    (save-excursion
+      (goto-char (point-min))
+      (when (search-forward-regexp r-match-brief)
+        (setq brief (match-string 1))
+        (dolist (item magit-arc-desc-keywords)
+          (unless (string-match (regexp-opt (list item)) brief)
+            (setq valid nil
+                  missing (cons item missing))))))
+    (unless valid
+      (message "Some fields are missing: %s, please fix them." (concat missing)))
+    valid))
+
+(defun magit-arc--check-test-plan ()
+  "Check if test plan is set or not.
+If it is not set, it will ask whether it is allowed to set plan to `None'.
+If it is not allowed, it will return nil so user can continue input correct test plan."
+  (save-excursion
+    (goto-char (point-min))
+    ;; (re-search-forward (git-commit-summary-regexp) nil t)
+    ;; (if (equal (match-string 1) "")
+    ;;     t ; Just try; we don't know whether --allow-empty-message was used.
+    ;;   (and (or (equal (match-string 2) "")
+    ;;            (y-or-n-p "Summary line is too long.  Commit anyway? "))
+    ;;        (or (equal (match-string 3) "")
+    ;;            (y-or-n-p "Second line is not empty.  Commit anyway? "))))
+    ))
+
+(defcustom magit-arc-finish-query-functions
+  '(magit-arc--check-test-plan
+    magit-arc--check-keywords)
+  "List of functions called to query before performing commit.
+
+The commit message buffer is current while the functions are
+called.  If any of them returns nil, then the commit is not
+performed and the buffer is not killed.  The user should then
+fix the issue and try again.
+
+The functions are called with one argument.  If it is non-nil
+then that indicates that the user used a prefix argument to
+force finishing the session despite issues.  Functions should
+usually honor this wish and return non-nil."
+  :options '(magit-arc--check-test-plan)
+  :type 'hook
+  :group 'magit-arc)
+
 (defun arc-commit-setup ()
   (setq with-editor-show-usage nil)
   (with-editor-mode 1)
-  ;; (add-hook 'with-editor-finish-query-functions
-  ;;           'git-commit-finish-query-functions nil t)
+  (add-hook 'with-editor-finish-query-functions
+            'magit-arc-finish-query-functions nil t)
   ;; (add-hook 'with-editor-pre-finish-hook
   ;;           'git-commit-save-message nil t)
   ;; (add-hook 'with-editor-pre-cancel-hook
