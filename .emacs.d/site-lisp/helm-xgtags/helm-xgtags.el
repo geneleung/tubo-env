@@ -202,6 +202,13 @@ Always update if value of this variable is nil."
                  (boolean :tag "Update every time" nil))
   :group 'helm-xgtags)
 
+(defcustom helm-xgtags-verbose nil
+  "Verbose output or not."
+  :type 'boolean
+  :group 'helm-xgtags
+  )
+
+
 
 (defconst helm-xgtags--symbol-regexp "[A-Za-z_][A-Za-z_0-9]*"
   "Regexp matching tag name.")
@@ -490,7 +497,9 @@ find one."
           (setq found (search-forward-regexp match end t))))
       (setq lines (1+ lines)))
     (when found
-      (goto-char (match-beginning 0)))))
+      (goto-char (match-beginning 0))
+      (recenter)
+      )))
 
 (defun helm-xgtags--map-tags (func)
   "Maps over all tags in the *xgtags* buffer, jumps to the tag and
@@ -745,39 +754,41 @@ a list with those."
 
 (defun helm-xgtags--goto-tag (tagname &optional option)
   "Go find and goto tag (TAGNAME) with OPTION."
-  (let* ((window (selected-window))
-         (file-name (buffer-file-name))
-         (buffer-dir (and file-name (file-name-directory file-name)))
-         (tags (helm-xgtags--call-global buffer-dir option tagname))
-         (num-tags (length tags))
-         (type (if helm-xgtags--stack (helm-xgtags--context-type (car helm-xgtags--stack)) nil)))
-    (if (= num-tags 0)
-        (error (helm-xgtags--option-error-msg option) tagname)
-      (helm-xgtags--push-context tagname option)
-      (helm-xgtags--update-minor-mode-text)
-      (with-xgtags-buffer (:save-excursion t :read-only nil)
-        (setq helm-xgtags--tags tags)
-        (helm-xgtags--insert-tags tags))
+  (if tagname
+      (let* ((window (selected-window))
+             (file-name (buffer-file-name))
+             (buffer-dir (and file-name (file-name-directory file-name)))
+             (tags (helm-xgtags--call-global buffer-dir option tagname))
+             (num-tags (length tags))
+             (type (if helm-xgtags--stack (helm-xgtags--context-type (car helm-xgtags--stack)) nil)))
+        (if (= num-tags 0)
+            (error (helm-xgtags--option-error-msg option) tagname)
+          (helm-xgtags--push-context tagname option)
+          (helm-xgtags--update-minor-mode-text)
+          (with-xgtags-buffer (:save-excursion t :read-only nil)
+            (setq helm-xgtags--tags tags)
+            (helm-xgtags--insert-tags tags))
 
-      (when (eq type 'file) ;; update selected-tag if needed.
-        (if (and helm-xgtags--selected-tag
-                 (string= (helm-xgtags--tag-abs-file helm-xgtags--selected-tag)
-                          (helm-xgtags--tag-abs-file (first tags))))
-            (let ((old-file (helm-xgtags--tag-abs-file helm-xgtags--selected-tag)))
-              (catch 'BREAK
-                (dolist (tag tags)
-                  (when (and (string= old-file
-                                      (helm-xgtags--tag-abs-file tag))
-                             (string= (helm-xgtags--tag-query helm-xgtags--selected-tag)
-                                      (helm-xgtags--tag-query tag)))
-                    (helm-xgtags--select-tag tag)
-                    (throw 'BREAK t)))))))
+          (when (eq type 'file) ;; update selected-tag if needed.
+            (if (and helm-xgtags--selected-tag
+                     (string= (helm-xgtags--tag-abs-file helm-xgtags--selected-tag)
+                              (helm-xgtags--tag-abs-file (first tags))))
+                (let ((old-file (helm-xgtags--tag-abs-file helm-xgtags--selected-tag)))
+                  (catch 'BREAK
+                    (dolist (tag tags)
+                      (when (and (string= old-file
+                                          (helm-xgtags--tag-abs-file tag))
+                                 (string= (helm-xgtags--tag-query helm-xgtags--selected-tag)
+                                          (helm-xgtags--tag-query tag)))
+                        (helm-xgtags--select-tag tag)
+                        (throw 'BREAK t)))))))
 
-      (if (= num-tags 1)
-          (helm-xgtags--select-and-follow-tag (first tags))
-        ;; (unless (eq type 'file)
-        ;;   (helm-xgtags--select-and-follow-tag (first tags)))
-        (helm-xgtags--activate (buffer-name))))))
+          (if (= num-tags 1)
+              (helm-xgtags--select-and-follow-tag (first tags))
+            ;; (unless (eq type 'file)
+            ;;   (helm-xgtags--select-and-follow-tag (first tags)))
+            (helm-xgtags--activate (buffer-name)))))
+    (message "No tag provided...")))
 
 (defun helm-xgtags-select-tag-near-point ()
   "Select the tag near point and follow it."

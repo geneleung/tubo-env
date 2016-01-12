@@ -1,4 +1,4 @@
-;;; 05-rc-complete.el -- complete
+;;; 06-rc-complete.el -- complete
 ;;; Commentary:
 ;;; Code:
 
@@ -35,13 +35,18 @@
    ;; name. You could use a similar approach to insert name and date into
    ;; your file.
    (interactive)
-   (save-excursion
-     (goto-char (point-min))
-     (while (search-forward "@@@" nil t)
-       (save-restriction
-         ;; (narrow-to-region (match-beginning 0) (match-end 0))
-         (replace-match (upcase (file-name-nondirectory buffer-file-name)))
-         (subst-char-in-region (point-min) (point-max) ?. ?_)))))
+   (let* ((cmps (split-string buffer-file-name "/"))
+          (l (1- (length cmps)))
+          (header-guard
+           (subst-char-in-string
+            ?. ?_
+            (upcase (if (> l 0)
+                        (concat (nth (1- l) cmps) "_" (nth l cmps))
+                      (nth l cmps))))))
+     (save-excursion
+       (goto-char (point-min))
+       (while (search-forward "@@@" nil t)
+         (replace-match header-guard)))))
 
  (defun insert-today ()
    "Insert today's date into buffer"
@@ -159,7 +164,7 @@
 (autoload 'yas-global-mode "yasnippet" "yas-global-mode" t)
 
 (defmacro yas-with-comment (str)
-  "description"
+  "Insert string STR."
   `(let (surrounded)
      (save-excursion
        (beginning-of-line)
@@ -171,8 +176,7 @@
          (insert (format "%s%s%s" ,comment-start ,str ,comment-end)))
 
        (auto-update-defaults)
-       (buffer-substring-no-properties (point-min) (point-max)))
-))
+       (buffer-substring-no-properties (point-min) (point-max)))))
 
 (yc/eval-after-load "yasnippet"
   (custom-set-variables
@@ -239,89 +243,82 @@
 
 ;; (global-set-key (kbd "<C-tab>") 'yas/expand)
 
-
-;; *********************** Autocomplete ***********************
-(require 'auto-complete-config)
+ ;; company mode..
+(require 'company)
+(global-company-mode)
+
+(yc/autoload 'company-yasnippet)
+
+(yc/eval-after-load
+ "company"
+ (define-key company-active-map [tab] 'company-complete)
+ (define-key company-active-map (kbd "TAB") 'company-complete))
 
 (custom-set-variables
- '(ac-auto-start 2)
- '(ac-dwim t)
- '(ac-auto-show-menu 0.8)
- '(ac-quick-help-delay 0.8)
- '(ac-ignore-case nil)
- '(ac-use-menu-map t)
- '(ac-candidate-limit 20)
- '(ac-comphist-file (yc/make-cache-path "ac-comphist.dat"))
- '(ac-modes (quote (cmake-mode protobuf-mode antlr-mode objc-mode flyspell-mode
-   sawfish-mode nxml-mode powershell-mode graphviz-dot-mode eshell-mode text-mode
-   org-mode literate-haskell-mode latex-mode emms-tag-editor-mode html-mode conf-mode
-   asm-mode emacs-lisp-mode lisp-mode lisp-interaction-mode slime-repl-mode c-mode
-   cc-mode c++-mode go-mode java-mode malabar-mode clojure-mode clojurescript-mode
-   scala-mode scheme-mode ocaml-mode tuareg-mode coq-mode haskell-mode agda-mode
-   agda2-mode perl-mode cperl-mode python-mode ruby-mode lua-mode tcl-mode
-   ecmascript-mode javascript-mode js-mode js2-mode php-mode css-mode scss-mode
-   less-css-mode makefile-mode sh-mode fortran-mode f90-mode ada-mode xml-mode
-   sgml-mode web-mode ts-mode sclang-mode verilog-mode qml-mode mediawiki-mode))))
+ '(company-backends '((company-files company-dabbrev company-abbrev)))
+ '(company-minimum-prefix-length 2)
+ '(company-idle-delay 0.2))
 
+(dolist (hk '(git-commit-mode-hook mail-mode-hook mediawiki-mode-hook org-mode-hook))
+  (add-hook hk (lambda ()
+                 (set (make-local-variable 'company-backends)
+                      '((company-files ;; company-ispell
+                                       company-dabbrev company-abbrev
+                                      :with company-yasnippet))))))
 
-(setq-default ac-sources
-              '(ac-source-yasnippet ac-source-abbrev ac-source-dictionary
-                                    ac-source-words-in-same-mode-buffers))
+(defmacro yc/add-company-backends-with-yasnippet (&rest backends)
+  `(set (make-local-variable 'company-backends)
+        (push ',(append backends '(:with company-yasnippet)) company-backends)))
 
-(defun yc/add-ac-sources (&rest sources)
-  "Add sources.."
-  (setq ac-sources (append sources ac-sources)))
+(defmacro yc/add-company-backends (&rest backends)
+  `(set (make-local-variable 'company-backends)
+        (push ',backends company-backends)))
 
 (add-hook 'prog-mode-hook
           (lambda ()
-            (yc/add-ac-sources
-             ;; ac-source-semantic
-             ac-source-gtags)))
+            (yc/add-company-backends
+             company-gtags
+             company-keywords company-dabbrev-code company-capf)))
 
-(add-hook 'emacs-lisp-mode-hook
+(add-hook 'gud-mode-hook
           (lambda ()
-            (yc/add-ac-sources ac-source-features ac-source-functions
-                               ac-source-variables ac-source-symbols)))
+            (set (make-local-variable 'company-backends)
+                 '((company-files)))))
+
+(add-hook 'java-mode-hook
+          (lambda ()
+            (yc/add-company-backends-with-yasnippet company-eclim)))
+
+(add-hook 'nxml-mode-hook
+          (lambda ()
+            (yc/add-company-backends-with-yasnippet company-nxml)))
 
 (add-hook 'css-mode-hook
           (lambda ()
-            (yc/add-ac-sources ac-source-css-property)))
+            (yc/add-company-backends-with-yasnippet company-css)))
 
-;; only try to start complete after meaningful characters.
-(advice-add
- 'ac-handle-post-command :around
- (lambda (func &rest args)
-   (if (and (> (point) (point-min))
-            (looking-back (rx (>= 2 (or alnum "_"))) 2))
-     (apply func args))))
-
-(ac-flyspell-workaround)
-
-(add-to-list 'ac-dictionary-directories "~/.emacs.d/templates/ac-dict")
-
-(global-auto-complete-mode t)
-
-;; Autofill Keybinding.
-(define-key ac-complete-mode-map (kbd "<C-tab>") 'ac-expand)
-(define-key ac-complete-mode-map "\M-\r" 'ac-complete)
-(define-key ac-complete-mode-map [(tab)] 'ac-complete)
-(define-key ac-complete-mode-map "\M-n" 'ac-next)
-(define-key ac-complete-mode-map "\M-p" 'ac-previous)
-(define-key global-map "\C-\\" 'auto-complete)
-(global-set-key (kbd "<S-iso-lefttab>") 'ac-complete-semantic-raw)
-
-(yc/autoload 'ac-ispell-setup "ac-ispell")
-(custom-set-variables
- '(ac-ispell-requires 4)
- '(ac-ispell-fuzzy-limit 4))
-
-(dolist (hk '(git-commit-mode-hook mail-mode-hook mediawiki-mode-hook org-mode-hook))
-  (add-hook hk
+(add-hook 'cmake-mode-hook
             (lambda ()
-              (ac-ispell-setup)
-              (ac-ispell-ac-setup))))
+            (yc/add-company-backends-with-yasnippet company-cmake)))
 
-;
+(advice-add
+ 'company--should-begin :around
+ (lambda (func &rest args)
+   (if     (and (> (point) (point-min))
+                (looking-back (rx (>= 2 (or alnum "_"))) (- (point) 2) nil)
+                (looking-at (rx (or eow eol))))
+       (apply func args)
+     nil)))
+
+
+ ;; Irony mode
+(yc/autoload 'company-irony)
+
+(add-hook 'c-mode-common-hook
+          (lambda ()
+            (irony-mode 1)
+            (yc/add-company-backends-with-yasnippet company-irony :sorted company-gtags)))
+
 (provide '06-rc-complete)
 
 ;; Local Variables:
@@ -329,4 +326,4 @@
 ;; indent-tabs-mode: nil
 ;; End:
 
-;;; 05-rc-complete.el ends here
+;;; 06-rc-complete.el ends here

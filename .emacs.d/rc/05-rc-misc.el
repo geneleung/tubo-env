@@ -7,19 +7,26 @@
 (if (string= system-type "darwin")
     (setq Info-default-directory-list
           (append Info-default-directory-list
-                  (list "/opt/usr/share/info"
-                        "/opt/usr/share/gcc-data/x86_64-apple-darwin12/4.2.1/info"
-                        (format "/opt/usr/share/info/emacs-%s"
-                                emacs-major-version)))))
+                  (let ((lst (remove-if-not 'file-exists-p
+                                            `("/opt/usr/share/info"
+                                              ,(format "/opt/usr/share/info/emacs-%s"
+                                                       emacs-major-version))))
+                        (gcc-data-dirs ))
+                    (dolist (dir (directory-files "/opt/usr/share/gcc-data" t))
+                      (dolist (version (directory-files dir t))
+                        (if (file-exists-p (concat version "/info"))
+                            (setq lst (cons (concat version "/info") lst)))))))))
 
 (yc/eval-after-load
  "helm-info"
  (let* ((r-match-info (rx (group (+ ascii)) ".info" (* ascii)))
         (info-path (yc/get-env "INFOPATH"))
         res)
+   (print info-path)
    (dolist (dir (or (and (stringp info-path)
                          (split-string  info-path ":"))
                     Info-default-directory-list))
+     (print dir)
      (when (file-directory-p dir)
        (setq res (append (mapcar (lambda (file)
                                    (when (string-match r-match-info file)
@@ -46,6 +53,7 @@
   (set-default 'ispell-skip-html t)
   (custom-set-variables
    '(ispell-dictionary "english")
+   '(ispell-skip-html t)
    '(ispell-local-dictionary "english")))
 
 (defun turn-on-flyspell ()
@@ -104,7 +112,7 @@
         "\\)"))
   (custom-set-variables
    ;; '(ediff-custom-diff-options "-c")
-   '(ediff-diff-options "-w")
+   ;; '(ediff-diff-options "-w")
    '(ediff-split-window-function 'split-window-horizontally)
    '(ediff-window-setup-function 'ediff-setup-windows-plain))
   )
@@ -184,6 +192,7 @@
  '(magit-revision-show-gravatars nil)
  '(magit-revision-headers-format "Author:     %aN <%aE>\nDate: %ad\n")
  '(git-commit-summary-max-length 72)
+ '(magit-log-arguments '("-n256" "--graph" "--decorate" "--color"))
 )
 
 (add-hook 'git-commit-mode-hook
@@ -197,34 +206,30 @@
             (recode-region (point-min) (point-max) 'undecided 'utf-8)
             (setq buffer-read-only t)))
 
-(defun yc/update-magit-svn-mode ()
-  "Enable or disable magit-svn-mode."
-  (interactive)
-  (when (and (fboundp 'magit-svn-mode)
-             (boundp 'magit-svn-mode))
-    (if (and (file-exists-p ".git/svn/.metadata")
-             (string-match ".*/svn"
-                           (with-temp-buffer
-                             (insert-file-contents ".git/HEAD")
-                             (buffer-substring-no-properties (point-min) (point-max)))))
-        (progn
-          (unless (fboundp 'magit-svn-mode)
-            (load "magit-svn"))
-          (unless magit-svn-mode
-            (call-interactively 'magit-svn-mode)))
-      (when (fboundp 'magit-svn-mode)
-        (if magit-svn-mode
-            (call-interactively 'magit-svn-mode))))))
+;; (defun yc/update-magit-svn-mode ()
+;;   "Enable or disable magit-svn-mode."
+;;   (interactive)
+;;   (when (and (fboundp 'magit-svn-mode)
+;;              (boundp 'magit-svn-mode))
+;;     (if (file-exists-p ".git/svn/.metadata")
+;;         (progn
+;;           (unless (fboundp 'magit-svn-mode)
+;;             (load "magit-svn"))
+;;           (unless magit-svn-mode
+;;             (call-interactively 'magit-svn-mode)))
+;;       (when (fboundp 'magit-svn-mode)
+;;         (if magit-svn-mode
+;;             (call-interactively 'magit-svn-mode))))))
 (add-hook
  'magit-status-mode-hook
  (lambda ()
    (when (executable-find "arc")
      (require 'magit-arc)
      (magit-arc-mode))
-   (yc/update-magit-svn-mode)))
+   ;; (yc/update-magit-svn-mode)
+   ))
 
-(advice-add 'magit-refresh :after #'yc/update-magit-svn-mode)
-
+;; (advice-add 'magit-refresh :after #'yc/update-magit-svn-mode)
 
 
  ;; **************************** RFCs ******************************
@@ -244,7 +249,7 @@
             auto-mode-alist))
 
  ;; ********************* tramp *******************************
-(define-or-set tramp-ssh-controlmaster-options
+(cdsq tramp-ssh-controlmaster-options
   "-o ControlMaster=auto -o ControlPath='tramp.%%C' -o ControlPersist=no")
 
 (yc/eval-after-load
@@ -410,11 +415,11 @@
 (defun yc/list-attentions ()
   "List lines that need attentions, such as lines which include XXX or FIXME et.al."
   (interactive)
-  (eshell-command
-   (concat "egrep -i "
-           (rx (? "@") (or "FIXME" "TODO" "DEBUG" "BUG" "YYC:" "XXX" "HACK" "fixme" "todo" "bug")
-               (not alnum))  " . -rI"))
-  )
+  (let ((command (concat "grep -i '"
+                  (rx bow (or "FIXME" "TODO" "BUG" "YYC" "XXX" "HACK") eow)
+                  "' . -rI "))  )
+    (message command)
+    (eshell-command command)))
 
 (custom-set-variables
  '(eshell-buffer-shorthand t)
@@ -460,7 +465,7 @@
  ;;Dired
 
 ;; Ugly, just to ensure "ls" is loaded from "ls-lisp"
-(define-or-set ls-lisp-use-insert-directory-program nil)
+(cdsq ls-lisp-use-insert-directory-program nil)
 (load-library "ls-lisp")
 (setq ls-lisp-dirs-first t)
 
@@ -734,6 +739,23 @@ which is options for `diff'."
 
 
 (yc/autoload 'yc/list-non-ascii "charset-util")
+
+(yc/autoload 'x86-help)
+(yc/autoload 'x86-help-new-ref "x86-help")
+
+(global-set-key (kbd "C-h x") #'x86-help)
+
+;; ws-butler-mode
+
+(require 'ws-butler)
+(ws-butler-global-mode 1)
+
+(custom-set-faces
+ '(sp-pair-overlay-face ((t nil))))
+
+(require 'dtrt-indent)
+(dtrt-indent-mode 1)
+(setq dtrt-indent-verbosity 0)
 
 
 (provide '05-rc-misc)

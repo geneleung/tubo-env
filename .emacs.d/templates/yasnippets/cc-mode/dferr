@@ -1,4 +1,11 @@
 # -*- mode: snippet -*-
+# key: dfe
 # --
-#define handle_error(msg) \
-do { perror(msg); exit(EXIT_FAILURE); } while (0)$>
+#define handle_error(fmt,...)            \\$>
+do {                                     \\$>
+    char* buf = NULL;                    \\$>
+    vasprintf(&buf, fmt, ## __VA_ARGS__);\\$>
+    perror(buf);                         \\$>
+    free(buf);                           \\$>
+    exit(EXIT_FAILURE);                  \\$>
+} while (0)

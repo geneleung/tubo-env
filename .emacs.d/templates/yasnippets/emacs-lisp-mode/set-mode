@@ -1,6 +1,6 @@
 # -*- mode: snippet; require-final-newline: nil -*-
-# name: -if-let
-# key: il
+# name: yc/set-mode
+# key: ysm
 # --
-(-if-let (${2:VAR} ${1:VAL})
+(yc/set-mode '${1:xxx}-mode$>
 $0)$>

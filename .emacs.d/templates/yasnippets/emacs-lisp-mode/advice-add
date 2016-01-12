@@ -2,10 +2,14 @@
 # name: advice-add
 # key: adva
 # --
-(advice-add
-'${1:ORIG_FUNC} :${2:b}${2:$(cond
+
+(defun yc/$1 (${2:$(if (string-match "^a" yas-text) "func ")}&rest args)$>
+""$>
+$0$>
+)$>
+
+(advice-add '${1:ORIG_FUNC} :${2:b}${2:$(cond
 ((string-match "^b" yas-text) "efore")
 ((string-match "^a" yas-text) "round")
 ((string-match "^af" yas-text) "ter")
-(t ""))}$>
-#'$0)$>
+(t ""))} #'yc/$1)$>

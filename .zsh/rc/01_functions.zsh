@@ -62,8 +62,58 @@ function emacs_eidt ()
     ln=`expr "$1" :  '[^:]*:\(.*\)'` # line_info
 
     if [ -z $ln ]; then
-        emacsclient -a emacs -n $fn
+        run-emacs $fn || emacsclient -n $fn
     else
-        emacsclient -a emacs -n "+$ln" $fn
+        run-emacs "+$ln" $fn || emacsclient -n "+$ln" $fn
     fi
+}
+
+
+# function to call valgrind and show output...
+function tval ()
+{
+    if [ $# -lt 1 ]; then
+        cat <<EOF
+Usage: tval EXECUTABLE [args]
+EOF
+        return 0
+    fi
+
+    app=`basename $1`
+    tmpfile=$(mktemp --suffix=".log" valgrind_"$app"_XXXXXXXX)
+    echo "Will write to file: $tmpfile"
+
+    valgrind  --leak-check=full --undef-value-errors=no \
+             --log-fd=1 --log-file=$tmpfile "$@" &
+
+    tail -f $tmpfile
+}
+
+function tperf-record()
+{
+    if [ -e perf.data ]; then
+        sudo mv perf.data "perf_`date +'%m_%d_%H:%M:%S'`.data"
+    fi
+
+    sudo perf record \
+         -e cycles,instructions,branch-misses,cache-misses \
+         $*
+}
+
+
+#mkdir and cd
+function mcd ()
+{
+    mkdir $1 && cd $1
+}
+
+
+function svnedit ()
+{
+    if [ $# -lt 2 ]; then
+        echo "Usage: svnedit revision URL"
+        return
+    fi
+
+    svn propedit -r $1 --revprop svn:log $2
 }

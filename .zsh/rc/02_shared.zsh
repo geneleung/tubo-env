@@ -4,7 +4,7 @@ export HISTFILE=~/.zhistory
 export WORDCHARS='*?_-.[]~&;!#$%^(){}<>'
 export ARCH=`uname -m`"-"`uname -s | tr '[:upper:]' '[:lower:]'`
 export _JAVA_OPTIONS='-Dawt.useSystemAAFontSettings=lcd'
-export PATH="/opt/bin:$PATH:/sbin:/usr/sbin/"
+export PATH="/opt/bin:/opt/usr/bin:/opt/usr/sbin:$PATH:/sbin:/usr/sbin/"
 
 export EIX_LIMIT=0
 
@@ -40,6 +40,12 @@ if [ -d /opt/texlive/bin/$ARCH ]; then
     export PATH="$PATH:/opt/texlive/bin/$ARCH"
 fi
 
+
+if [ -d $HOME/tools ]; then
+    export PATH="$HOME/tools/bin:$PATH"
+    export LD_LIBRARY_PATH="$HOME/tools/lib:$HOME/tools/lib64:$LD_LIBRARY_PATH"
+fi
+
 # Utilities.
 alias ll="ls -lah"
 alias rm="rm -i"
@@ -48,6 +54,7 @@ alias l="ls -ail"
 alias cl="clear"
 
 which dircolors >> /dev/null && alias ls="ls --color" || alias ls="ls -G"
+alias gst="git status"
 alias gpush="git push"
 alias gpull="git pull"
 alias gco="git checkout"
@@ -70,5 +77,6 @@ alias edit=emacs_eidt
 alias tmux="tmux attach || tmux"
 alias ttop="top -u $UID"
 which xdg-open > /dev/null 2>&1 && alias open=xdg-open
+which htop > /dev/null 2>&1 && alias top=htop
 
-[ -e /opt/arcanist/resources/shell/bash-completion ] && . /opt/arcanist/resources/shell/bash-completion
+alias time="/usr/bin/time -p"

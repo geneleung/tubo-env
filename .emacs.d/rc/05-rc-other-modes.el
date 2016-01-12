@@ -139,7 +139,6 @@
                              (local-set-key (kbd "C-c i") 'yc/insert-b64-img)
                              (local-set-key (kbd "C-c s") 'yc/small-font)
                              (yc/basic-prog-keybinding)
-                             (auto-complete-mode)
                              (html-autoview-mode nil)
                              (setq html-autoview-mode nil)
                              (remove-hook 'after-save-hook 'browse-url-of-buffer t)
@@ -360,7 +359,6 @@ li {font-size: 15px}
                       (local-set-key "\C-c/" 'nxml-finish-element)
                       (auto-fill-mode)
                       (rng-validate-mode)
-                      (yc/customize-variable ispell-skip-html t)
                       (hs-minor-mode 1)
                       (yc/basic-prog-keybinding)
                       )
@@ -442,7 +440,8 @@ li {font-size: 15px}
                                             "cnf"))
                       (: "fvwm/" (+? ascii))
                       ".globalrc"
-                      ".gitmodules")
+                      ".gitmodules"
+                      "conf\.d/")
                   eol)
               'conf-mode))
 

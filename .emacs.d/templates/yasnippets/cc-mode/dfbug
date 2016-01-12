@@ -3,9 +3,14 @@
 # -*- mode: snippet -*-
 # --
 #if !defined (PDEBUG)
-#define PDEBUG(fmt, ...)  \\$>
+#define PDEBUG(fmt, ...) \\$>
 do {\\$>
-fprintf(stderr, "app: - %s:%d -- %s: " fmt, \\$>
-__FILE__, __LINE__,__FUNCTION__, ##  __VA_ARGS__);  \\$>
-} while(0)\$>
+const char *file = __FILE__, *ptr; \\$>
+const char* end = file + strlen(file);\\$>
+while ((ptr = strchr(file, '/')) && ++ptr < end) {\\$>
+file = ptr;\\$>
+}\\$>
+fprintf(stderr, "%lX: %s:%04d -- %s: " fmt, pthread_self(), file, __LINE__,\\$>
+__FUNCTION__, ##__VA_ARGS__);\\$>
+} while (0)
 #endif  /*End of if PDEBUG*/

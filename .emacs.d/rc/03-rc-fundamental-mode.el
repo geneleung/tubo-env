@@ -20,11 +20,12 @@
   helm-grep-in-recurse t)
  (custom-set-variables
   '(helm-grep-default-recurse-command "grep --color=never -d recurse %e -n%cH -e %p %f")
-  '(helm-grep-default-command helm-grep-default-recurse-command)))
+  '(helm-grep-default-command helm-grep-default-recurse-command)
+  '(helm-ff-auto-update-initial-value t)))
 
 (yc/eval-after-load
  "helm-ring"
- (define-or-set helm-source-kill-ring
+ (cdsq helm-source-kill-ring
    (helm-build-sync-source "Kill Ring"
      :init (lambda () (helm-attrset 'last-command last-command))
      :candidates #'helm-kill-ring-candidates

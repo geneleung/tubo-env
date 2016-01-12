@@ -88,6 +88,7 @@ detailed descriptions."
   :predicate (lambda ()
                (and mark-active (not (equal (mark) (point)))
                     (executable-find "clang-format"))))
+
 (emr-declare-command 'emr-cc-format-buffer
   :title "format buffer"
   :description "with clang"
@@ -96,6 +97,31 @@ detailed descriptions."
                (and (not mark-active)
                     (executable-find "clang-format"))))
 
+
+(defvar emr-cc-surround-var nil "Nil.")
+
+(defun emr-cc-surround-if-end (start end)
+  "Format region (START/END) using clang."
+  (interactive "rp")
+  (let ((var (completing-read "Variable Name: " emr-cc-surround-var
+                              nil nil nil 'emr-cc-surround-var)))
+    (kill-region start end)
+    (let ((s (point))
+          pos e)
+      (insert (format "#ifdef %s\n" var))
+      (yank)
+      (insert (format "\n#endif /*%s*/" var))
+      (setq pos (point))
+      (setq e (point))
+      (goto-char pos)
+      (emr-cc-format-region s e))))
+
+(emr-declare-command 'emr-cc-surround-if-end
+  :title "surround"
+  :description "with if-endif"
+  :modes '(c++-mode)
+  :predicate (lambda ()
+               (and mark-active (not (equal (mark) (point))))))
 (provide 'emr-cc)
 
 ;;; emr-cc.el ends here

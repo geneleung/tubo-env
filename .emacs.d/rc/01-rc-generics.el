@@ -103,7 +103,7 @@
 (setq-default show-trailing-whitespace t)
 (setq-default max-specpdl-size 8192)
 (setq-default max-lisp-eval-depth 8192)
-(setq-default large-file-warning-threshold 20000000)
+(setq-default large-file-warning-threshold 104857600)
 
 ;;;; Garbage Collection
 (setq-default garbage-collection-messages nil)
@@ -189,7 +189,7 @@
 
 ;; Remove vc-hooks, I don't use it.
 (setq vc-handled-backends nil)
-(eval-after-load "vc" '(remove-hook 'find-file-hooks 'vc-find-file-hook))
+;; (eval-after-load "vc" '(remove-hook 'find-file-hooks 'vc-find-file-hook))
 
 (eval-after-load
  "custom"

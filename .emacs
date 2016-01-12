@@ -52,7 +52,7 @@ If CLICK is t, calculate time cost."
 (package-initialize)
 
 (defvar yc/packages
-  (list 'helm 'auto-complete 'flycheck 'yasnippet 'session 'undo-tree 'autopair)
+  (list 'helm 'flycheck 'yasnippet 'session 'undo-tree 'autopair)
   "List of needed packages.")
 
 (defun yc/install-missing-packages ()

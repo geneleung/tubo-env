@@ -1,5 +1,5 @@
 # -*- mode: snippet -*-
 # name: add-hook
-# key: add
+# key: ah
 # --
 (add-hook '${HOOK-NAME} '${FUNC})
