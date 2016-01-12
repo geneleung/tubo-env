@@ -64,12 +64,12 @@ run as a subprocess."
   :group 'magit-arc
   :type '(repeat string))
 
-(defcustom magit-arc-test-plan-regexp   "^Test Plan:\\(.*\\)Reviewers:"
+(defcustom magit-arc-test-plan-regexp   "^Test Plan:\\([[:ascii:]]*\\)Reviewers:"
   "Regexp to match Test Plan field."
   :type 'string
   :group 'magit-arc)
 
-(defcustom magit-arc-reviewers-regexp   "^Reviewers:\\(.*\\)\nSubscribers:"
+(defcustom magit-arc-reviewers-regexp   "^Reviewers:\\([[:ascii:]]*\\)\nSubscribers:"
   "Regexp to match Reviewers field."
   :type 'string
   :group 'magit-arc)
@@ -169,6 +169,8 @@ Summary:"))
 
 (defun magit-arc--string-empty-p (str)
   "Check if STR is empty-line."
+  (print str)
+  (backtrace)
   (string-match "[^\n 	]" str))
 
 (defun magit-arc--check-test-plan ()
@@ -180,7 +182,8 @@ If it is not allowed, it will return nil so user can continue input correct test
       (goto-char (point-min))
       (when (re-search-forward magit-arc-test-plan-regexp nil t)
         (setq plan (match-string 1)
-              pos (1+ (match-beginning 1)))))
+              pos (1+ (match-beginning 1)))
+        (print plan)))
     (if (magit-arc--string-empty-p plan)
         (setq valid t))
     (unless valid
