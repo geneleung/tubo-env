@@ -64,6 +64,47 @@ run as a subprocess."
   :group 'magit-arc
   :type '(repeat string))
 
+(defcustom magit-arc-test-plan-regexp   "^Test Plan:\\(.*\\)Reviewers:"
+  "Regexp to match Test Plan field."
+  :type 'string
+  :group 'magit-arc)
+
+(defcustom magit-arc-reviewers-regexp   "^Reviewers:\\(.*\\)\nSubscribers:"
+  "Regexp to match Reviewers field."
+  :type 'string
+  :group 'magit-arc)
+
+(defcustom magit-arc-desc-keywords nil
+  "Keywords to check for descriptions."
+  :type '(repeat :tag "Keywords to check"
+                 (string :tag "Keyword"))
+  :group 'magit-arc)
+
+(defcustom magit-arc-finish-query-functions
+  '(magit-arc--check-keywords
+    magit-arc--check-test-plan
+    magit-arc--check-reviewers)
+  "List of functions called to query before performing commit.
+
+The commit message buffer is current while the functions are
+called.  If any of them returns nil, then the commit is not
+performed and the buffer is not killed.  The user should then
+fix the issue and try again.
+
+The functions are called with one argument.  If it is non-nil
+then that indicates that the user used a prefix argument to
+force finishing the session despite issues.  Functions should
+usually honor this wish and return non-nil."
+  :options '(magit-arc--check-test-plan)
+  :type 'hook
+  :group 'magit-arc)
+
+(defcustom magit-arc-send-arguments nil
+  "Default arguments used when sending review (arc diff)."
+  :group 'magit-arc
+  :type '(repeat (string :tag "Argument")))
+
+
 (defvar magit-arc-rev-alist nil
   "AList of commit-rev mapping.
 It will be loaded from and store into `magit-arc-db'.")
@@ -99,63 +140,77 @@ variable `magit-process-buffer-name-format'."
        (string-match-p arc-commit-filename-regexp buffer-file-name)
        (arc-commit-setup)))
 
-(defcustom magit-arc-desc-keywords nil
-  "Keywords to check for descriptions."
-  :type '(repeat :tag "Keywords to check"
-                 (regexp :tag "Keyword"))
-  :group 'magit-arc)
-
 (defun magit-arc--check-keywords ()
-  "Check if user specified keywords are included in descritpion."
-  (message "enter")
-  (let ((r-match-brief (rx (group (+ anything)) "
+  "Check if user specified keywords are included in description."
+  (if (not magit-arc-desc-keywords)
+      t
+    (let ((r-match-brief (rx (group (+ anything)) "
 Summary:"))
-        (valid t)
-        brief missing)
-    (save-excursion
-      (goto-char (point-min))
-      (when (search-forward-regexp r-match-brief)
-        (setq brief (match-string 1))
-        (dolist (item magit-arc-desc-keywords)
-          (unless (string-match (regexp-opt (list item)) brief)
-            (setq valid nil
-                  missing (cons item missing))))))
-    (unless valid
-      (message "Some fields are missing: %s, please fix them." (concat missing)))
-    valid))
+          (valid t)
+          brief missing pos)
+      (save-excursion
+        (goto-char (point-min))
+        (when (re-search-forward r-match-brief)
+          (setq brief (match-string 1))
+          (dolist (item magit-arc-desc-keywords)
+            (unless (string-match (regexp-opt (list item)) brief)
+              (setq valid nil
+                    missing (cons item missing))))))
+      (unless valid
+        (message "Some fields are missing, please fix them: %s"
+                 (mapconcat 'identity missing ","))
+        (goto-char (point-min))
+        (while missing
+          (insert (format "%s " (pop missing)))
+          (unless pos
+            (setq pos (1- (point)))))
+        (if pos (goto-char pos)))
+      valid)))
+
+(defun magit-arc--string-empty-p (str)
+  "Check if STR is empty-line."
+  (string-match "[^\n 	]" str))
 
 (defun magit-arc--check-test-plan ()
   "Check if test plan is set or not.
 If it is not set, it will ask whether it is allowed to set plan to `None'.
-If it is not allowed, it will return nil so user can continue input correct test plan."
-  (save-excursion
-    (goto-char (point-min))
-    ;; (re-search-forward (git-commit-summary-regexp) nil t)
-    ;; (if (equal (match-string 1) "")
-    ;;     t ; Just try; we don't know whether --allow-empty-message was used.
-    ;;   (and (or (equal (match-string 2) "")
-    ;;            (y-or-n-p "Summary line is too long.  Commit anyway? "))
-    ;;        (or (equal (match-string 3) "")
-    ;;            (y-or-n-p "Second line is not empty.  Commit anyway? "))))
-    ))
+If it is not allowed, it will return nil so user can continue input correct test  plan."
+  (let (valid plan pos)
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward magit-arc-test-plan-regexp nil t)
+        (setq plan (match-string 1)
+              pos (1+ (match-beginning 1)))))
+    (if (magit-arc--string-empty-p plan)
+        (setq valid t))
+    (unless valid
+      (goto-char pos) ;; pos should never be nil, it is added by arc..
+      (when (y-or-n-p "Test Plan is empty, set it to None? ")
+        (insert "None")
+        (setq valid t)))
+    valid))
 
-(defcustom magit-arc-finish-query-functions
-  '(magit-arc--check-test-plan
-    magit-arc--check-keywords)
-  "List of functions called to query before performing commit.
+(defun magit-arc--check-reviewers ()
+  "Check if reviewers is set or not."
+  (let (valid reviewers)
+    (save-excursion
+      (goto-char (point-min))
+      (when (re-search-forward magit-arc-reviewers-regexp nil t)
+        (setq reviewers (match-string 1)
+              pos (1+ (match-beginning 1)))))
+    (if (magit-arc--string-empty-p reviewers)
+        (setq valid t))
+    (unless valid
+      (goto-char pos) ;; pos should never be nil, it is added by arc..
+      (message "Reviewers are not set, sorry I can't do this for you.."))
+    valid))
 
-The commit message buffer is current while the functions are
-called.  If any of them returns nil, then the commit is not
-performed and the buffer is not killed.  The user should then
-fix the issue and try again.
 
-The functions are called with one argument.  If it is non-nil
-then that indicates that the user used a prefix argument to
-force finishing the session despite issues.  Functions should
-usually honor this wish and return non-nil."
-  :options '(magit-arc--check-test-plan)
-  :type 'hook
-  :group 'magit-arc)
+
+(defun magit-arc-finish-query-functions (force)
+  "Run all hooks."
+  (run-hook-with-args-until-failure
+   'magit-arc-finish-query-functions))
 
 (defun arc-commit-setup ()
   (setq with-editor-show-usage nil)
@@ -192,30 +247,20 @@ usually honor this wish and return non-nil."
               (?s "Send Review"     magit-arc-send-review)))
 
 ;;TODO: update popup based on arguments.
-(defcustom magit-arc-send-arguments nil
-  "Default arguments used when sending review (arc diff)."
-  :group 'magit-arc
-  :type '(repeat (string :tag "Argument")))
 
 (defvar magit-arc--current-commit nil "Nil.")
 
-(cdsq magit-arc-send-popup
+(defvar magit-arc-send-popup
   '(:variable magit-arc-send-arguments
-    ;; :switches ((?g "Show graph"              "--graph")
-    ;;            (?c "Show graph in color"     "--color")
-    ;;            (?d "Show refnames"           "--decorate")
-    ;;            (?S "Show signatures"         "--show-signature")
-    ;;            (?u "Show diffs"              "--patch")
-    ;;            (?s "Show diffstats"          "--stat")
-    ;;            (?D "Simplify by decoration"  "--simplify-by-decoration")
-    ;;            (?f "Follow renames when showing single-file log" "--follow"))
     :options  ((?e "Set Encoding"          "--encoding=" read-from-minibuffer)
                (?r "Set Reviewers"         "--reviewers="  read-from-minibuffer)
                (?f "Force Update"          "--update="    read-from-minibuffer)
                )
     :actions  ((?s "Send review"             magit-arc-do-send-review))
     :default-action magit-arc-do-send-review
-    :max-action-columns 3))
+    :max-action-columns 3)
+  "Parameters for send-poup.")
+
 
 (defun magit-arc-commit-to-revision (commit)
   "Find proper revision based on COMMIT."
@@ -255,7 +300,19 @@ Dump this mapping into database If WITHOUT-IO is not specified."
 (defun magit-arc-send-arguments (&optional refresh)
   (cond ((memq magit-current-popup
                '(magit-arc-send-popup))
-         (magit-popup-export-file-args magit-current-popup-args))
+         (let* ((args (magit-popup-export-file-args magit-current-popup-args))
+                (arg-1 (car args)) is-update)
+           (dolist (arg arg-1)
+             (if (string-match "--update=.+" arg)
+                 (setq is-update t)))
+           ;; remove reviewer if it is an UPDATE, since it is not allowed to change
+           ;; reviewers for this operation.
+           (when is-update
+             (setf (car args)
+                   (remove-if
+                    (lambda (x)
+                      (string-match "--reviewers=" x)) arg-1)))
+           args))
         ((derived-mode-p 'magit-log-mode)
          (list (nth 1 magit-refresh-args)
                (nth 2 magit-refresh-args)))
@@ -286,7 +343,7 @@ Dump this mapping into database If WITHOUT-IO is not specified."
 
 ;;;###autoload
 (defun magit-arc-send-review (&optional args)
-  "Send a commit to review.."
+  "Send a commit to review with ARGS."
   (interactive "P")
   (let* ((commit (magit-arc-get-commit))
          (revision (magit-arc-commit-to-revision commit)))
