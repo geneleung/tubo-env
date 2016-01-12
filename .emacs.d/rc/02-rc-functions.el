@@ -1234,6 +1234,24 @@ args should be a list, but to make caller's life easier, it can accept one atom 
       (goto-char (point-min))
       (display-buffer (current-buffer)))))
 
+(defun int-to-binary-string (i)
+  "Convert an integer (I) into it's binary representation in string format."
+  (let ((res ""))
+    (while (not (= i 0))
+      (setq res (concat (if (= 1 (logand i 1)) "1" "0") res)
+            i (lsh i -1)))
+    (if (string= res "")
+        "0" res)))
+
+(defun binary-form ()
+  "Show binary format of current symbol."
+  (interactive)
+  (let ((number (number-at-point)))
+    (if number
+        (message "Binary format of %d is: %s"
+                 number (int-to-binary-string number))
+      (error "Is cursor on a number??"))))
+
  ;; Advice
 
 ;; Auto indent regions for prog/sgml based modes.
