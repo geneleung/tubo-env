@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # --
-${2:fe}${2:$(cond
+${2:fi}${2:$(cond
              ((string-match "^fe" yas-text) "at")
              ((string-match "^fi"  yas-text) "x")
              ((string-match "^d$"  yas-text) "oc")
