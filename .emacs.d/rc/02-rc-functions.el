@@ -1170,66 +1170,118 @@ args should be a list, but to make caller's life easier, it can accept one atom 
 (defun uniq-stack ()
   "Make stacks unique."
   (interactive)
-  (let ((r-match-thread (rx bol "Thread" (* space) (group (+ digit)) (* space)
-                            "(Thread" (+? ascii) ":" eol))
-        (r-match-suspicious (rx (+? ascii)
-                                (or "segfault" "segment fault" "signal handler called"
-                                    "abort" "raise" "__assert_fail")
-                                (? space) (? "()")
-                                (+? ascii)))
-        (htable-stack (make-hash-table :test 'equal :size 2048))
-        (htable-threads (make-hash-table :test 'equal :size 2048))
-        ordered-numbers suspects)
+  (let ((r-match-host (rx bol (+ "-") (* space)
+                          (group  (+? (or alnum "." "-" "_")) )
+                          (* space) (+ "-") eol))
+        (obuf (get-buffer-create (format "Uniq-Stack of: %s" (buffer-name))))
+        (nr-hosts 0) suspect-hosts)
+
+    ;; prepare obuf
+    (with-current-buffer obuf
+      (read-only-mode -1)
+      (erase-buffer))
+
+    (defun uniq-single-host (start end &optional host)
+      "Parse and make stack unique for single host. Return t if stack of this host is suspicious."
+      (print (cons start end))
+      (let ((r-match-thread (rx bol "Thread" (* space) (group (+ digit)) (* space)
+                                "(Thread" (+? ascii) ":" eol))
+            (r-match-suspicious (rx (+? ascii)
+                                    (or "segfault" "segment fault" "signal handler called"
+                                        "abort" "raise" "__assert_fail")
+                                    (? space) (? "()")
+                                    (+? ascii)))
+            (htable-stack (make-hash-table :test 'equal :size 2048))
+            (htable-threads (make-hash-table :test 'equal :size 2048))
+            (nr-uniq 0)
+            ordered-numbers suspects summary-pos)
+        (save-excursion
+          (goto-char start)
+          (while (and (< (point) end)
+                      (search-forward-regexp r-match-thread end t))
+            (forward-char)
+            (let* ((pos (point))
+                   (endp (cond
+                          ((search-forward-regexp r-match-thread end t) (point-at-bol))
+                          (t end)))
+                   (stack (buffer-substring-no-properties pos endp))
+                   (num (gethash stack htable-stack 0)))
+              (puthash stack (1+ num) htable-stack)
+              (goto-char endp))))
+
+        ;; Sort tacks based on number of threads.
+        (maphash (lambda (stack repeated)
+                   (let ((lst (gethash repeated htable-threads nil)))
+                     (puthash repeated (cons stack lst) htable-threads))
+                   (add-to-list 'ordered-numbers repeated)
+                   ) htable-stack)
+        (sort ordered-numbers '>)
+
+        ;; Now insert stacks and highlight suspicious ones.
+        (with-current-buffer obuf
+          (read-only-mode -1)
+          (goto-char (point-max))
+          (message "Parsing stack of host: %s" host)
+          (insert "\n\n========= Host " (or host "Unknown Host") ", ")
+          (setq summary-pos (point))
+
+          (dolist (number ordered-numbers)
+            (let ((stack-list (gethash number htable-threads)))
+              (dolist (stack stack-list)
+                (setq nr-uniq (1+ nr-uniq))
+                (insert (format "\nNumber of Threads: %d" number))
+                (let (added-to-list)
+                  (dolist (str (string-split stack "\n"))
+                    (insert (format "\n%s" str))
+                    (when (string-match r-match-suspicious str)
+                      (unless added-to-list
+                        (setq added-to-list t
+                              suspects (cons (1+ (line-number-at-pos)) suspects)))
+                      (overlay-put (make-overlay (point-at-bol) (point-at-eol))
+                                   'face `(:underline (:style wave :color "Red1")))))))))
+          (goto-char summary-pos)
+          (insert (format "Unique Stacks: %d, suspicious lines: " nr-uniq))
+          (if suspects
+              (progn
+                (setq suspects (nreverse suspects))
+                (insert (format "%d" (pop suspects)))
+                (while suspects
+                  (insert (format ", %d" (pop suspects)))))
+            (insert "none"))
+          (insert ".=========\n"))
+        suspects))
+
     (save-excursion
       (goto-char (point-min))
-      (while (search-forward-regexp r-match-thread nil t)
-        (forward-char)
-        (let* ((pos (point))
-               (end (cond
-                     ((search-forward-regexp r-match-thread nil t) (point-at-bol))
-                     (t (point-max))))
-               (stack (buffer-substring-no-properties pos end))
-               (num (gethash stack htable-stack 0)))
-          (puthash stack (1+ num) htable-stack)
-          (goto-char end))))
+      (if (search-forward-regexp r-match-host nil t)
+          (let ((host (match-string 1))
+                (pos (match-end 0))
+                host-next pos-end pos-next)
+            (while (< pos (point-max))
+              (if (search-forward-regexp r-match-host nil t) ;; ok, find next one
+                  (setq host-next (match-string 1)
+                        pos-next (point)
+                        pos-end (1- (point-at-bol)))
+                (setq host-next nil
+                      pos-end (point-max)
+                      pos-next (point-max)))
+              (setq nr-hosts (1+ nr-hosts))
+              (if (uniq-single-host pos pos-end host)
+                  (setq suspect-hosts (cons host suspect-hosts)))
+              (setq host host-next
+                    pos pos-next)))
+        (uniq-single-host (point-min) (point-max))))
 
-    ;; Sort tacks based on number of threads.
-    (maphash (lambda (stack repeated)
-               (let ((lst (gethash repeated htable-threads nil)))
-                 (puthash repeated (cons stack lst) htable-threads))
-               (add-to-list 'ordered-numbers repeated)
-               ) htable-stack)
-    (sort ordered-numbers '>)
+    ;; show this buffer.
+    (with-current-buffer obuf
+      (when (> nr-hosts 0)
+        (goto-char (point-min))
+        (insert (format "Total hosts: %d" nr-hosts))
+        (insert (if suspect-hosts
+                    (format ", %d suspicious hosts: %s" (length suspect-hosts)
+                            (mapconcat 'identity suspect-hosts ","))
+                  ".")))
 
-    ;; Now insert stacks and highlight suspicious ones.
-    (with-current-buffer (get-buffer-create (format "Uniq-Stack of: %s" (buffer-name)))
-      (read-only-mode -1)
-      (erase-buffer)
-      (dolist (number ordered-numbers)
-        (let ((stack-list (gethash number htable-threads)))
-          (dolist (stack stack-list)
-            (insert (format "\nNumber of Threads: %d" number))
-            (let (added-to-list)
-              (dolist (str (string-split stack "\n"))
-                (insert (format "\n%s" str))
-                (when (string-match r-match-suspicious str)
-                  (unless added-to-list
-                    (setq added-to-list t
-                          suspects (cons (1+ (line-number-at-pos)) suspects)))
-                  (overlay-put (make-overlay (point-at-bol) (point-at-eol))
-                               'face `(:underline (:style wave :color "Red1")))))))))
-      (goto-char (point-min))
-      (insert (format "Unique Stacks: %d, suspicious lines: " (length ordered-numbers)))
-      (if suspects
-          (progn
-            (setq suspects (nreverse suspects))
-            (insert (format "%d" (pop suspects)))
-            (while suspects
-              (insert (format ", %d" (pop suspects)))))
-        (insert "none"))
-      (insert ".\n")
-
-      ;; show this buffer.
       (read-only-mode 1)
       (goto-char (point-min))
       (display-buffer (current-buffer)))))
