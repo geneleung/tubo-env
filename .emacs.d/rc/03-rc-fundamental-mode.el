@@ -154,8 +154,8 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
  '(recentf-max-saved-items 200)
  '(recentf-save-file (yc/make-cache-path "recentf")))
 
-(autoload 'recentf-mode "recentf")
-(define-key ctl-x-map "\C-r" 'recentf-open-files)
+(yc/autoload 'helm-recentf "helm-files")
+(define-key ctl-x-map "\C-r" 'helm-recentf)
 
  ;; session
 (autoload 'session-initialize "session")
