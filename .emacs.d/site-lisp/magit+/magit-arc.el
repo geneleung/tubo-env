@@ -252,7 +252,6 @@ If it is not allowed, it will return nil so user can continue input correct test
 ;;TODO: update popup based on arguments.
 
 (defvar magit-arc--current-commit nil "Nil.")
-
 (defvar magit-arc-send-popup
   '(:variable magit-arc-send-arguments
     :options  ((?e "Set Encoding"          "--encoding=" read-from-minibuffer)
@@ -270,27 +269,27 @@ If it is not allowed, it will return nil so user can continue input correct test
   (unless magit-arc-rev-alist
     (condition-case error
         (with-temp-buffer
-          (insert-file-contents magit-arc-db)
+          (insert-file-contents magit-arc--db)
           (goto-char (point-min))
           (setq magit-arc-rev-alist (read (current-buffer))))
-      (error (message "Failed to load database from: %s" magit-arc-db))))
+      (error (message "Failed to load database from: %s" magit-arc--db))))
   (cdr (assoc commit magit-arc-rev-alist)))
 
-(defun magit-arc-db-remove-commit (commit &optional without-io)
+(defun magit-arc--db-remove-commit (commit &optional without-io)
   "Remove COMMIT from db.
 If WITHOUT-IO is specified, database will not be written back to disk."
   (setq magit-arc-rev-alist (assq-delete-all commit magit-arc-rev-alist))
-  (unless without-io (magit-arc-db-write)))
+  (unless without-io (magit-arc--db-write)))
 
-(defun magit-arc-db-add-commit (commit revision &optional without-io)
+(defun magit-arc--db-add-commit (commit revision &optional without-io)
   "Add mapping of COMMIT & REVISION.
 Dump this mapping into database If WITHOUT-IO is not specified."
   (push (cons commit revision) magit-arc-rev-alist)
-  (unless without-io (magit-arc-db-write)))
+  (unless without-io (magit-arc--db-write)))
 
-(defun magit-arc-db-write ()
+(defun magit-arc--db-write ()
   "Write `magit-arc-rev-alist' into database."
-    (with-temp-file magit-arc-db
+    (with-temp-file magit-arc--db
       (insert "(")
       (dolist (i magit-arc-rev-alist) (pp i (current-buffer)))
       (insert ")")))
@@ -328,6 +327,23 @@ Dump this mapping into database If WITHOUT-IO is not specified."
                      (nth 2 magit-refresh-args)))
            (list (default-value 'magit-arc-send-arguments) nil)))))
 
+(defun magit-arc--dir (&optional path)
+  "Return absolute PATH to the control directory."
+  (magit-git-dir (concat "arc/" path)))
+
+(defun magit-arc--delete (file &rest files)
+  "Delete FILE and FILES, if exists."
+  (let ((f-list (cons file files)))
+    (dolist (f f-list)
+      (if (and (stringp f)
+               (file-exists-p f))
+          (delete-file f)))))
+
+(defun magit-arc--amend-internal (revision)
+  "Amend this REVISION."
+  (magit-arc-run "amend" "--revision" revision)
+  (magit-process-wait))
+
 ;;;###autoload
 (defun magit-arc-amend-close (&optional args)
   "Amend and close commit message."
@@ -338,10 +354,12 @@ Dump this mapping into database If WITHOUT-IO is not specified."
       (setq revision (completing-read "Input revision number: " nil)))
 
     (if (not revision)
-      (error "Can't find revision for commit: %s" commit))
-    (magit-arc-run "amend" "--revision" revision)
+        (error "Can't find revision for commit: %s" commit))
+    (unless (string-match "^D[[:digit:]]+" revision)
+      (setq commit (concat "D" revision)))
+    (magit-arc--amend-internal revision)
     (magit-arc-run "close-revision" revision)
-    (magit-arc-db-remove-commit commit)
+    (magit-arc--db-remove-commit commit)
     (message "Amend finished.")))
 
 ;;;###autoload
@@ -353,8 +371,6 @@ Dump this mapping into database If WITHOUT-IO is not specified."
     (setq magit-arc--current-commit commit)
     ;; Show popup and send review, then return a revision id.
     (magit-invoke-popup 'magit-arc-send-popup nil args)
-
-    ;; TODO: (magit-arc-db-add-commit)
     (message "Send finished.")))
 
 ;;;###autoload
@@ -365,7 +381,9 @@ one or more revs read from the minibuffer."
   (interactive)
   (let* ((send-args (magit-arc-send-arguments))
          (cl (symbol-name magit-arc--current-commit))
-         (arc-args (list "--head" cl (concat cl "~"))))
+         (arc-args (list "--head" cl (concat cl "~")))
+         (logfile (magit-arc--dir "ARC_CMD_OUTPUT"))
+         (msgfile (magit-arc--dir "create-message")))
 
     (mapc (lambda (x)
             (when x
@@ -378,12 +396,43 @@ one or more revs read from the minibuffer."
           (cdr send-args))
 
     (push "diff" arc-args)
-    ;; TODO: get process buffer, save point-max, then process arc commands, and parse
-    ;;       result between previous (point-max) and current point-max, find URL and
-    ;;       save it into db.
+
+    ;; ignore last message.
+    (magit-arc--delete msgfile logfile)
+
     (let ((find-file-hook (append find-file-hook '('with-editor-mode))))
       (with-editor
-        (apply 'magit-start-process "arc" nil arc-args)))))
+        (apply 'magit-start-process "arc" nil arc-args)))
+    (process-put magit-this-process 'logfile logfile)
+    (set-process-filter magit-this-process 'magit-arc--process-logfile-filter)
+    (set-process-sentinel magit-this-process 'magit-arc--process-sentinel)))
+
+(defun magit-arc--process-logfile-filter (process string)
+  "Special filter used by `magit-run-git-with-logfile'."
+  (magit-process-filter process string)
+  (let ((file (process-get process 'logfile)))
+    (with-temp-file file
+      (when (file-exists-p file)
+        (insert-file-contents file)
+        (goto-char (point-max)))
+      (insert string)
+      (write-region (point-min) (point-max) file))))
+
+(defun magit-arc--process-sentinel (process event)
+  "Sentinel of PROCESS with EVENT to describe change."
+  (when (memq (process-status process) '(exit signal))
+    (magit-process-sentinel process event)
+    (let ((r-match-url (rx (group "http://" (+ nonl) "/" (group (: "D" (+ digit))))))
+          url revision)
+      (with-temp-buffer
+        (insert-file-contents-literally (magit-arc--dir "ARC_CMD_OUTPUT"))
+        (goto-char (point-min))
+        (when (search-forward-regexp r-match-url)
+          (setq url (match-string 1)
+                revision (match-string 2))
+          (magit-arc--amend-internal revision)
+          (magit-arc--db-add-commit magit-arc--current-commit revision)
+          (message "Code review sent: %s" url))))))
 
 (defvar magit-arc-mode-map
   (let ((map (make-sparse-keymap)))
