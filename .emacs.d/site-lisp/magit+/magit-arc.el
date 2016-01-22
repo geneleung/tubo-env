@@ -269,10 +269,10 @@ If it is not allowed, it will return nil so user can continue input correct test
   (unless magit-arc-rev-alist
     (condition-case error
         (with-temp-buffer
-          (insert-file-contents magit-arc--db)
+          (insert-file-contents magit-arc-db)
           (goto-char (point-min))
           (setq magit-arc-rev-alist (read (current-buffer))))
-      (error (message "Failed to load database from: %s" magit-arc--db))))
+      (error (message "Failed to load database from: %s" magit-arc-db))))
   (cdr (assoc commit magit-arc-rev-alist)))
 
 (defun magit-arc--db-remove-commit (commit &optional without-io)
@@ -289,7 +289,7 @@ Dump this mapping into database If WITHOUT-IO is not specified."
 
 (defun magit-arc--db-write ()
   "Write `magit-arc-rev-alist' into database."
-    (with-temp-file magit-arc--db
+    (with-temp-file magit-arc-db
       (insert "(")
       (dolist (i magit-arc-rev-alist) (pp i (current-buffer)))
       (insert ")")))
