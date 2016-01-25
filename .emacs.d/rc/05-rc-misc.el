@@ -195,6 +195,7 @@
 
 (add-hook 'git-commit-mode-hook
           (lambda ()
+            (goto-char (point-min))
             (turn-on-flyspell)))
 
 ;; Guess proper encoding for files.

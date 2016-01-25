@@ -93,12 +93,6 @@ If CLICK is t, calculate time cost."
   (try-require '10-priv)
   (require '99-proj)
 
-
-  ;; Finally, setup display. configurations (color theme, font size ...) can
-  ;; be tweaked in 100-private.
-
-  (yc/setup-display)
-
   ;; Report package statistics.
   (message "\n\nShowing package initialization statistics:\n%s"
            (mapconcat (lambda (x)

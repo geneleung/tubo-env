@@ -6,9 +6,9 @@
 
 ;;; Code:
 
-(defvar YC-DEBUG nil "flag to debug or not")
+(defvar YC-DEBUG nil "Set this flag to t to enable debug mode.")
 (defconst YC-DEBUG-BUF "*YC-DEBUG*" "Debug buffer of my own.")
-(defvar yc/debug-msg nil "A variable to be used for debuging in *scratch*")
+(defvar yc/debug-msg nil "A variable to be used for debuging in *scratch*.")
 
  ;; Macros
 
@@ -145,7 +145,8 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
   (setq YC-DEBUG (not YC-DEBUG))
   (setq debug-on-error YC-DEBUG
         helm-debug YC-DEBUG
-        debug-on-quit YC-DEBUG))
+        debug-on-quit YC-DEBUG)
+  (message "Debug turned %s" (if YC-DEBUG "ON" "OFF")))
 
 (defun yc/debug-log (msg)
   "Out put debug message based on YC-DEBUG"
