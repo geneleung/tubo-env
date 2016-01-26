@@ -1380,7 +1380,8 @@ and is reversed for better performence.")
                          "yc/eval-after-load" "try-require-autoloads"
                          "fboundp" "boundp" "featurep" "cdsq"
                          "cds" "dsq" "sif" "aif"
-                         "csq" "cdsq" "yc/autoload" "yc/set-auto-mode" "defun*" "defmacro*")) eow)
+                         (: "yc/" (+ (or alnum "-" "_")))
+                         "csq" "cdsq"  "defun*" "defmacro*")) eow)
       "My Lisp keywords")
 
 (define-skeleton skeleton-require

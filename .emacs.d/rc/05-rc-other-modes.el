@@ -433,17 +433,15 @@ li {font-size: 15px}
 
  ;; ***************************** Mode Alias **************************
 
-(add-to-list 'auto-mode-alist
-             (cons
-              (rx (or "Doxyfile"
-                      (: (+? ascii) "." (or "doxy" "doxygen" "service"  "conf" "config" "rc"
-                                            "cnf"))
-                      (: "fvwm/" (+? ascii))
-                      ".globalrc"
-                      ".gitmodules"
-                      "conf\.d/")
-                  eol)
-              'conf-mode))
+(yc/set-mode 'conf-mode
+             (rx (or "Doxyfile"
+                     (: (+? ascii) "." (or "doxy" "doxygen" "service"  "conf" "config" "rc"
+                                           "cnf" "options"))
+                     (: "fvwm/" (+? ascii))
+                     ".globalrc"
+                     ".gitmodules"
+                     "conf\.d/")
+                 eol))
 
 
 (autoload 'logviewer-mode "logviewer"   "Major mode for editing Logviewer files"  t)
