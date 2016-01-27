@@ -91,6 +91,7 @@ If CLICK is t, calculate time cost."
   (require '06-rc-complete)
   (require '09-rc-keybindings)
   (try-require '10-priv)
+  (try-require '10-emacs-custome)
   (require '99-proj)
 
   ;; Report package statistics.

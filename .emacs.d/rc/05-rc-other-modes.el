@@ -448,6 +448,12 @@ li {font-size: 15px}
 (yc/set-mode 'logviewer-mode (rx (or (: bow "messages" eow)
                                      (: "." (or "log" "LOG" "Log"))
                                      (: (or "log" "LOG" "Log") ".txt"))))
+(defun yc/mw-open ()
+  "Load function mediawiki-site, and call it."
+  (interactive)
+  (load-library "mediawiki")
+  (mediawiki-site)
+  )
 
 
 (autoload 'qml-mode "qml-mode")
