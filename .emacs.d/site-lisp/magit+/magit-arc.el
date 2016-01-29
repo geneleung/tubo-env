@@ -105,14 +105,9 @@ usually honor this wish and return non-nil."
   :type '(repeat (string :tag "Argument")))
 
 
-(defvar magit-arc-rev-alist nil
+(defvar magit-arc--rev-alist nil
   "AList of commit-rev mapping.
 It will be loaded from and store into `magit-arc-db'.")
-
-;;XXX: test only
-(setq magit-arc-rev-alist nil)
-(setq-default magit-arc-db "/tmp/test-arc.db")
-(setq-default magit-arc-executable (or (executable-find "arc") (executable-find "echo")))
 
 ;;; Utilities
 (defun magit-arc-run (&rest args)
@@ -266,32 +261,32 @@ If it is not allowed, it will return nil so user can continue input correct test
 
 (defun magit-arc-commit-to-revision (commit)
   "Find proper revision based on COMMIT."
-  (unless magit-arc-rev-alist
+  (unless magit-arc--rev-alist
     (condition-case error
         (with-temp-buffer
           (insert-file-contents magit-arc-db)
           (goto-char (point-min))
-          (setq magit-arc-rev-alist (read (current-buffer))))
+          (setq magit-arc--rev-alist (read (current-buffer))))
       (error (message "Failed to load database from: %s" magit-arc-db))))
-  (cdr (assoc commit magit-arc-rev-alist)))
+  (cdr (assoc commit magit-arc--rev-alist)))
 
 (defun magit-arc--db-remove-commit (commit &optional without-io)
   "Remove COMMIT from db.
 If WITHOUT-IO is specified, database will not be written back to disk."
-  (setq magit-arc-rev-alist (assq-delete-all commit magit-arc-rev-alist))
+  (setq magit-arc--rev-alist (assq-delete-all commit magit-arc--rev-alist))
   (unless without-io (magit-arc--db-write)))
 
 (defun magit-arc--db-add-commit (commit revision &optional without-io)
   "Add mapping of COMMIT & REVISION.
 Dump this mapping into database If WITHOUT-IO is not specified."
-  (push (cons commit revision) magit-arc-rev-alist)
+  (push (cons commit revision) magit-arc--rev-alist)
   (unless without-io (magit-arc--db-write)))
 
 (defun magit-arc--db-write ()
-  "Write `magit-arc-rev-alist' into database."
+  "Write `magit-arc--rev-alist' into database."
     (with-temp-file magit-arc-db
       (insert "(")
-      (dolist (i magit-arc-rev-alist) (pp i (current-buffer)))
+      (dolist (i magit-arc--rev-alist) (pp i (current-buffer)))
       (insert ")")))
 
 (defun magit-arc-get-commit ()
