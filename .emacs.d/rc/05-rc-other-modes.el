@@ -123,9 +123,8 @@
           (b64_cmd (format "base64 %s | tr -d '\n'" fn))
           (b64_content (shell-command-to-string b64_cmd)))
      (insert (format
-              "<img title=%s src=\"data:image/%s;base64, %s\" alt=\"%s\"/>"
-              fn_base_name fn_ext_name b64_content fn))
-     ))
+              "<p><img src=\"data:image/%s;base64, %s\" alt=\"%s\"/><p>"
+              fn_ext_name b64_content fn_base_name))))
 
  (add-hook 'html-mode-hook (lambda ()
                              (local-set-key (kbd "<C-return>") 'yc/html-newline)
@@ -156,124 +155,63 @@
 
 (yc/autoload 'org-version "org")
 
-(yc/eval-after-load "org"
-                    (push (purecopy (append '(org) (version-to-list (org-version))))
-                          package--builtin-versions)
-                    (custom-set-variables
-                     '(org-ditaa-jar-path "~/.emacs.d/site-lisp/org_contrib/ditaa.jar")
-                     '(org-blank-before-new-entry (quote ((heading . auto) (plain-list-item))))
-                     '(org-enforce-todo-checkbox-dependencies t)
-                     '(org-hide-leading-stars t)
-                     '(org-log-done (quote time))
-                     '(org-special-ctrl-a/e t)
-                     '(org-special-ctrl-k t)
-                     '(org-startup-folded nil)
-                     '(org-export-time-stamp-file nil)
-                     '(org-confirm-babel-evaluate nil)
-                     '(org-startup-indented t)
-                     '(org-directory (convert-standard-filename "~/Work/Orgs"))
-                     '(org-default-notes-file (expand-file-name
-                                               "~/Work/Orgs/notes.org"))
-                     '(org-html-postamble nil)
-                     '(org-src-lang-modes '(("ocaml" . tuareg)
-                                            ("elisp" . emacs-lisp)
-                                            ("ditaa" . artist)
-                                            ("asymptote" . asy)
-                                            ("dot" . graphviz-dot)
-                                            ("sqlite" . sql)
-                                            ("calc" . fundamental)
-                                            ("C" . c)
-                                            ("cpp" . c++)
-                                            ("C++" . c++)
-                                            ("screen" . shell-script)))
-                     ;; WAITING: Assigned to others, and waiting for their report.
-                     ;; PENDING: Pending for some reason, maybe scheduled but not started because task dependency.
-                     '(org-todo-keywords (quote ((sequence "TODO(t)" "WAITING(w)" "DOING(g)"
-                                                           "DONE(d)" "CANCELED(c)" "PENDING(p)" ))))
-                     '(org-use-property-inheritance t))
-                    (org-indent-mode 1)
-
-;;; Key bingdings
-                    (defun yc/show-pomodoro-keywords ()
-                      "Pomodoro Keywords, used by pomodoro technique "
-                      (interactive)
-                      ;; highlight additional keywords
-                      (font-lock-add-keywords nil '(("\\<\\(TODO \\)"
-                                                     1 font-lock-comment-face t)))
-                      (font-lock-add-keywords nil '(("\\<\\(DONE \\):"
-                                                     1 font-lock-builtin-face t)))
-                      (font-lock-add-keywords nil '(("\\<\\(DOING \\):"
-                                                     1 font-lock-function-name-face t)))
-                      )
-
-                    (defun yc/org-mode-hooks ()
-                      "Functions will run when entering org-mode"
-                      (interactive)
-                      (org-defkey org-mode-map "\C-cl" 'org-store-link)
-                      (org-defkey org-mode-map "\C-ca" 'org-agenda)
-                      (org-defkey org-mode-map "\C-cb" 'org-iswitchb)
-                      (org-defkey org-mode-map (kbd "<C-tab>") 'indent-or-complete)
-                      (org-defkey org-mode-map [(control ?,)]     'backward-page)
-                      (yc/show-pomodoro-keywords)
-                      (flyspell-mode)
-                      )
-
-                    (defun org-summary-todo (n-done n-not-done)
-                      "Switch entry to DONE when all subentries are done, to TODO otherwise."
-                      (let (org-log-done org-log-states)   ; turn off logging
-                        (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
-
-                    (advice-add
-                     'org-html-paragraph :around
-                     (lambda (func &rest args)
-                       "Join consecutive Chinese lines into a single long line without
-unwanted space when exporting org-mode to html."
-                       (let ((orig-contents (cadr args))
-                             (reg-han "[[:multibyte:]]"))
-                         (setf (cadr args) (replace-regexp-in-string
-                                             (concat "\\(" reg-han "\\) *\n *\\(" reg-han "\\)")
-                                             "\\1\\2" orig-contents))
-                         (apply func args))))
-                    (substitute-key-definition
-                     'org-cycle-agenda-files  'backward-page org-mode-map)
-
-                    (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
-                    (add-hook 'org-mode-hook 'yc/org-mode-hooks)
-                    (org-babel-do-load-languages
-                     'org-babel-load-languages
-                     '((ditaa . t)
-                       (dot . t)))
-                    )
-
-(yc/eval-after-load "org-agenda"
-                    (custom-set-variables
-                     '(org-agenda-files (quote ("~/Work/Orgs/")))
-                     '(org-agenda-include-all-todo t)
-                     '(org-agenda-include-diary nil)
-                     '(org-agenda-skip-deadline-if-done t)
-                     '(org-agenda-skip-scheduled-if-done t)
-                     '(org-agenda-dim-blocked-tasks (quote invisible))
-                     ))
-
-(yc/eval-after-load "org-capture"
-                    (custom-set-variables
-                     '(org-capture-templates
-                       '(("t" "Todo" entry (file+headline "~/Work/Orgs/gtd.org" "Tasks")
-                          "\n* TODO %?\n  %i\n  %a")
-                         ("p" "Project" entry (file+headline "~/Work/Orgs/gtd.org" "Project")
-                          "
+(yc/eval-after-load
+ "org"
+ (push (purecopy (append '(org) (version-to-list (org-version))))
+       package--builtin-versions)
+ (custom-set-variables
+  '(org-ditaa-jar-path "~/.emacs.d/site-lisp/org_contrib/ditaa.jar")
+  '(org-blank-before-new-entry (quote ((heading . auto) (plain-list-item))))
+  '(org-enforce-todo-checkbox-dependencies t)
+  '(org-hide-leading-stars t)
+  '(org-log-done (quote time))
+  '(org-special-ctrl-a/e t)
+  '(org-special-ctrl-k t)
+  '(org-startup-folded nil)
+  '(org-export-time-stamp-file nil)
+  '(org-confirm-babel-evaluate nil)
+  '(org-startup-indented t)
+  '(org-directory (convert-standard-filename "~/Work/Orgs"))
+  '(org-default-notes-file (expand-file-name
+                            "~/Work/Orgs/notes.org"))
+  '(org-html-postamble nil)
+  '(org-src-lang-modes '(("ocaml" . tuareg)
+                         ("elisp" . emacs-lisp)
+                         ("ditaa" . artist)
+                         ("asymptote" . asy)
+                         ("dot" . graphviz-dot)
+                         ("sqlite" . sql)
+                         ("calc" . fundamental)
+                         ("C" . c)
+                         ("cpp" . c++)
+                         ("C++" . c++)
+                         ("screen" . shell-script)))
+  ;; WAITING: Assigned to others, and waiting for their report.
+  ;; PENDING: Pending for some reason, maybe scheduled but not started because task dependency.
+  '(org-todo-keywords (quote ((sequence "TODO(t)" "WAITING(w)" "DOING(g)"
+                                        "DONE(d)" "CANCELED(c)" "PENDING(p)" ))))
+  '(org-use-property-inheritance t)
+  '(org-agenda-files (quote ("~/Work/Orgs/")))
+  '(org-agenda-include-all-todo t)
+  '(org-agenda-include-diary nil)
+  '(org-agenda-skip-deadline-if-done t)
+  '(org-agenda-skip-scheduled-if-done t)
+  '(org-agenda-dim-blocked-tasks (quote invisible))
+  '(org-capture-templates
+    '(("t" "Todo" entry (file+headline "~/Work/Orgs/gtd.org" "Tasks")
+       "\n* TODO %?\n  %i\n  %a")
+      ("p" "Project" entry (file+headline "~/Work/Orgs/gtd.org" "Project")
+       "
 ** NOTE %?\n %i\n %a" )
-                         ("n" "New" entry (file+datetree "~/Work/Orgs/Inbox.org" "Inbox")
-                          "* %?\nEntered on %U\n  %i\n  %a")
-                         ("i" "Idea" entry (file+headline "~/Work/Orgs/task.org" "Idea")
-                          "* %?\nEntered on %U\n  %i\n  %a")
-                         ("j" "Journal" entry (file+datetree "~/Work/Orgs/journal.org")
-                          "* %?\nEntered on %U\n  %i\n  %a")
-                         ))))
-
-(yc/eval-after-load "ox-html"
-                    (setq org-html-head-extra
-                          "
+      ("n" "New" entry (file+datetree "~/Work/Orgs/Inbox.org" "Inbox")
+       "* %?\nEntered on %U\n  %i\n  %a")
+      ("i" "Idea" entry (file+headline "~/Work/Orgs/task.org" "Idea")
+       "* %?\nEntered on %U\n  %i\n  %a")
+      ("j" "Journal" entry (file+datetree "~/Work/Orgs/journal.org")
+       "* %?\nEntered on %U\n  %i\n  %a")
+      ))
+  '(org-html-head-extra
+    "
 <style type=\"text/css\">
 div.org-src-container {
     font-size: 85%;
@@ -288,7 +226,7 @@ body {
 }
 code, pre {
     border-radius: 5px;
-	border: 1px solid #e5e5e5;
+    border: 1px solid #e5e5e5;
 }
 *:not(pre)>code{
     color: #c03;
@@ -300,6 +238,85 @@ code, pre {
 p {font-size: 15px}
 li {font-size: 15px}
 </style>"))
+ (org-indent-mode 1)
+
+;;; Key bingdings
+ (defun yc/show-pomodoro-keywords ()
+   "Pomodoro Keywords, used by pomodoro technique "
+   (interactive)
+   ;; highlight additional keywords
+   (font-lock-add-keywords nil '(("\\<\\(TODO \\)"
+                                  1 font-lock-comment-face t)))
+   (font-lock-add-keywords nil '(("\\<\\(DONE \\):"
+                                  1 font-lock-builtin-face t)))
+   (font-lock-add-keywords nil '(("\\<\\(DOING \\):"
+                                  1 font-lock-function-name-face t)))
+   )
+
+ (defun yc/org-mode-hooks ()
+   "Functions will run when entering org-mode"
+   (interactive)
+   (org-defkey org-mode-map "\C-cl" 'org-store-link)
+   (org-defkey org-mode-map "\C-ca" 'org-agenda)
+   (org-defkey org-mode-map "\C-cb" 'org-iswitchb)
+   (org-defkey org-mode-map (kbd "<C-tab>") 'indent-or-complete)
+   (org-defkey org-mode-map [(control ?,)]     'backward-page)
+   (yc/show-pomodoro-keywords)
+   (flyspell-mode)
+   )
+
+ (defun org-summary-todo (n-done n-not-done)
+   "Switch entry to DONE when all subentries are done, to TODO otherwise."
+   (let (org-log-done org-log-states)   ; turn off logging
+     (org-todo (if (= n-not-done 0) "DONE" "TODO"))))
+
+ (advice-add
+  'org-html-paragraph :around
+  (lambda (func &rest args)
+    "Join consecutive Chinese lines into a single long line without
+unwanted space when exporting org-mode to html."
+    (let ((orig-contents (cadr args))
+          (reg-han "[[:multibyte:]]"))
+      (setf (cadr args) (replace-regexp-in-string
+                         (concat "\\(" reg-han "\\) *\n *\\(" reg-han "\\)")
+                         "\\1\\2" orig-contents))
+      (apply func args))))
+ (substitute-key-definition
+  'org-cycle-agenda-files  'backward-page org-mode-map)
+
+ (add-hook 'org-after-todo-statistics-hook 'org-summary-todo)
+ (add-hook 'org-mode-hook 'yc/org-mode-hooks)
+ (org-babel-do-load-languages
+  'org-babel-load-languages
+  '((ditaa . t)
+    (dot . t))))
+
+
+(yc/eval-after-load
+ "ox-html"
+
+ (defun yc/org-html--format-image (func source attributes info)
+   ""
+   (let* ((fn_ext_name (file-name-extension source))
+          (fn_base_name (file-name-sans-extension (file-name-nondirectory source)))
+          (b64_cmd (format "base64 %s | tr -d '\n'" source))
+          (b64_content (shell-command-to-string b64_cmd)))
+
+     (unless (file-exists-p source) (error "File %s does not exist!" source))
+     (org-html-close-tag
+      "img"
+      (org-html--make-attribute-string
+       (org-combine-plists
+        (list :src (format "data:image/%s;base64, %s"fn_ext_name b64_content)
+              :alt (if (string-match-p "^ltxpng/" source)
+                       (org-html-encode-plain-text
+                        (org-find-text-property-in-string 'org-latex-src source))
+                     (file-name-nondirectory source)))
+        attributes))
+      info)))
+
+ (advice-add 'org-html--format-image :around #'yc/org-html--format-image)
+ )
 
 
 (defun open-mylist ()

@@ -872,11 +872,24 @@ and is reversed for better performence.")
                             (awk-mode . autodoc)
                             (other . tbdoc)))))
 
+ (defun c-lineup-arglist-tabs-only (ignored)
+   "Line up argument lists by tabs, not spaces"
+   (let* ((anchor (c-langelem-pos c-syntactic-element))
+          (column (c-langelem-2nd-pos c-syntactic-element))
+          (offset (- (1+ column) anchor))
+          (steps (floor offset c-basic-offset)))
+     (* (max steps 1)
+        c-basic-offset)))
+
  (c-add-style
   "kernel"
   `("linux"
     (tab-width . 8)
-    (indent-tabs-mode . t)))
+    (indent-tabs-mode . t)
+    (c-offsets-alist
+     (arglist-cont-nonempty
+      c-lineup-gcc-asm-reg
+      c-lineup-arglist-tabs-only))))
 
  ;; "Based on Google C/C++ Programming Style"
  "Based on Google C/C++ Programming Style"
@@ -938,7 +951,10 @@ and is reversed for better performence.")
  (c-add-style
   "express-engine"
   `("tubo"
-    (indent-tabs-mode . t)))
+    (indent-tabs-mode . t)
+    (arglist-cont-nonempty
+     c-lineup-gcc-asm-reg
+     c-lineup-arglist-tabs-only)))
 
 ;; Coding style for MySql
  (c-add-style
