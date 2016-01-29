@@ -1,3 +1,0 @@
-# -*- mode: snippet -*-
-# --
-(setq compile-command "cd <elisp "(insert default-directory)"> && <cursor>")
