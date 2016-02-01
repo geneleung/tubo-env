@@ -73,7 +73,7 @@
                        (completing-read "Name: " '("Unmaed"))))))
     (find-file name)))
 
-(define-or-set blog-escape-alist
+(defvar blog-escape-alist
   '(
     (?: . "&#58;")
     (?< . "&#60;")

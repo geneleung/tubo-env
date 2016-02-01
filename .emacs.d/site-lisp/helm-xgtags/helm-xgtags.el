@@ -51,7 +51,13 @@
 ;; GLOBAL database. Call 'describe-function RE'S helm-xgtags-mode' to get an
 ;; overview of those bindings.
 ;;
-;; TODO: Hide similar parts of file path...
+;; TODO: Display function name in helm-xgtags-buffer, something like:
+;; /Users/yyc/Work/mysql-server/sql/rpl_handler.cc
+;;     [-] int register_trans_observer (class Trans_observer observer,void p)
+;;          return transaction_delegate->add_observer(observer, (st_plugin_int *)p);
+;;     [-] int register_binlog_storage_observer (class Binlog_storage_observer observer,void p)
+;; int result= binlog_storage_delegate->add_observer(observer, (st_plugin_int *)p);
+
 ;;
 ;;; Code:
 
