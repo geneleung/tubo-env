@@ -6,33 +6,41 @@
 
 ;;; Code:
 
+(defgroup tblog nil
+  "Helper tool to create/commit posts to github.io.")
 
-(defconst github-io
-  (expand-file-name "~/Work/yangyingchao.github.io"))
+(defcustom tblog-repository (expand-file-name "~/Work/yangyingchao.github.io")
+  "Path of blog repository."
+  :type 'string
+  :group 'tblog)
 
-(defcustom yc/media-object-suffix-list
+(defcustom tblog-media-object-suffix-list
   '("jpg" "jpeg" "png" "gif" "mp4" "zip" "gz" "bz2")
   "希望处理的媒体文件类型"
-  :group 'mwb
+  :group 'tblog
   :type 'list)
 
-(defvar yc/b2p-method-alist
-  '((org-mode yc/b2p-org)
-    (nxml-mode yc/b2p-html)
-    (html-mode yc/b2p-html))
-  "Buffer to Post method alist")
+(defcustom tblog-categories nil
+  "Categories of posts."
+  :type 'list
+  :group 'tblog)
 
-(defvar yc/buffer-content nil "Content of buffer.")
+(defvar tblog--b2p-method-alist
+  '((org-mode tblog-b2p-org)
+    (nxml-mode tblog-b2p-html)
+    (html-mode tblog-b2p-html))
+  "Buffer to Post method alist.")
 
+(defvar tblog--buffer-content nil "Content of buffer.")
 
-(defun yc/make-media-object-file-data (media-path)
+(defun tblog-make-media-object-file-data (media-path)
   "根据给出的文件路径返回相应的FileData，文件不存在返回nil"
   (if (file-exists-p media-path)
       (format "../../../assets/img/%s"
               (file-name-nondirectory media-path))
     nil))
 
-(defun yc/replace-media-object-location (buf-str)
+(defun tblog-replace-media-object-location (buf-str)
   "处理BUF-STR中的媒体文件，返回处理后的字符串"
   (mapc (lambda (suffix)
           (let ((regexp
@@ -44,7 +52,7 @@
                      (media-url
                       (save-match-data
                         (and (file-exists-p media-path)
-                             (yc/make-media-object-file-data
+                             (tblog-make-media-object-file-data
                               media-path)))))
 
                 (if media-url
@@ -59,16 +67,16 @@
                                            buf-str)))
                   (setq current
                         (match-end 0)))))))
-        yc/media-object-suffix-list)
+        tblog-media-object-suffix-list)
   buf-str)
 
 ;;;###autoload
-(defun yc/new-post ()
+(defun tblog-new-post ()
   "Start a new post."
   (interactive)
   (let ((name (expand-file-name
                (format "%s/org/%s-%s.org"
-                       github-io
+                       tblog-repository
                        (format-time-string  "%Y-%m-%d" (current-time))
                        (completing-read "Name: " '("Unmaed"))))))
     (find-file name)))
@@ -83,7 +91,7 @@
     )
   "escape table")
 
-(defun yc/escape-html-characters (input)
+(defun tblog-escape-html-characters (input)
   "Escape special characters in INPUT."
   (when (stringp input)
     (apply 'concat (mapcar (lambda (x)
@@ -91,22 +99,22 @@
                                (if kv (cdr kv) (string x))))
                            input))))
 
-(defun yc/fetch-field (fmt &optional default &optional escape)
-  (if (string-match fmt yc/buffer-content)
-      (let ((result (match-string 1 yc/buffer-content)))
+(defun tblog--fetch-field (fmt &optional default &optional escape)
+  (if (string-match fmt tblog--buffer-content)
+      (let ((result (match-string 1 tblog--buffer-content)))
         (when (string-match "(nil)" result)
           (setq result default))
         (if escape
-            (yc/escape-html-characters result)
+            (tblog-escape-html-characters result)
           result))))
 
-(defun yc/fetch-fields (fmt &optional default tolower)
+(defun tblog--fetch-fields (fmt &optional default tolower)
   "Fetch all fields, and return a concatenated string.
 FMT: format used by regex.
 DEFAULT: default value to return if no match found.
 TOLOWER: if specified, turn fields into lower case."
-  (if (string-match fmt yc/buffer-content)
-      (let ((result (match-string 1 yc/buffer-content)))
+  (if (string-match fmt tblog--buffer-content)
+      (let ((result (match-string 1 tblog--buffer-content)))
         (if (string-match "(nil)" result)
             default
           (concat (mapcar (lambda (x)
@@ -114,19 +122,19 @@ TOLOWER: if specified, turn fields into lower case."
                           result))))
     default))
 
-(defun yc/b2p-html ()
+(defun tblog-b2p-html ()
   (cons (list
          ;; title
          (cons "title"
-               (or (car (yc/fetch-fields (rx (or "<title>" "<TITLE>") (group (+? anything))
+               (or (car (tblog--fetch-fields (rx (or "<title>" "<TITLE>") (group (+? anything))
                                              (or "</title>" "</TITLE>"))))
                    "Unamed"))
 
          ;; categories
          (cons "categories"
                (let ((categories-list
-                      (yc/categories-string-to-list
-                       (car (yc/fetch-fields "CATEGORIES")))))
+                      (tblog-categories-string-to-list
+                       (car (tblog--fetch-fields "CATEGORIES")))))
                  (or
                   categories-list
                   '("Copies"))))
@@ -134,7 +142,7 @@ TOLOWER: if specified, turn fields into lower case."
          ;; tags
          (cons "mt_keywords"
                (or
-                (yc/fetch-fields "KEYWORDS")
+                (tblog--fetch-fields "KEYWORDS")
                 ""))
 
          ;; dateCreated
@@ -145,13 +153,13 @@ TOLOWER: if specified, turn fields into lower case."
                   (cons (car ctime) (cadr ctime)))))
          ;; description
          (cons "description"
-               (yc/replace-media-object-location
+               (tblog-replace-media-object-location
                 (buffer-substring-no-properties
-                 (yc/point-template-head-end)
+                 (tblog-point-template-head-end)
                  (point-max))))))
   )
 
-(defun yc/b2p-other ()
+(defun tblog-b2p-other ()
   (delq nil
         (list
          ;; title
@@ -177,43 +185,44 @@ TOLOWER: if specified, turn fields into lower case."
                  (kill-buffer bf)
                  content)))))
 
-(defun yc/current-buffer-to-post ()
-  (setq yc/buffer-content (buffer-substring-no-properties (point-min) (point-max)))
-  (let ((func (cadr (assoc major-mode yc/b2p-method-alist))))
+(defun tblog--current-buffer-to-post ()
+  (set (make-variable-buffer-local 'tblog--buffer-content)
+        (buffer-substring-no-properties (point-min) (point-max)))
+  (let ((func (cadr (assoc major-mode tblog--b2p-method-alist))))
     (if func
         (funcall func)
-      (yc/b2p-other))))
+      (tblog-b2p-other))))
 
-(defmacro yc/mkfield (x)
+(defmacro tblog-mkfield (x)
   `(rx bol ,x (* space) (group (+? nonl) eol)))
 
-(defun yc/b2p-org ()
+(defun tblog-b2p-org ()
   (cons (list
          ;; title
-         (cons "title"  (yc/fetch-field (yc/mkfield  "#+TITLE:") "Unamed" t))
+         (cons "title"  (tblog--fetch-field (tblog-mkfield  "#+TITLE:") "Unamed" t))
 
          ;; "description"
-         (cons "description" (yc/fetch-field (yc/mkfield "#+DESCRIPTION:")))
+         (cons "description" (tblog--fetch-field (tblog-mkfield "#+DESCRIPTION:")))
 
          ;; categories
-         (cons "categories" (yc/fetch-field (yc/mkfield "#+CATEGORY:")  "未分类"))
+         (cons "categories" (tblog--fetch-field (tblog-mkfield "#+CATEGORY:")  "未分类"))
 
          ;; tags
-         (cons "tags" (yc/fetch-fields (yc/mkfield "#+KEYWORDS:") nil t)))
+         (cons "tags" (tblog--fetch-fields (tblog-mkfield "#+KEYWORDS:") nil t)))
 
         ;; Contents.
         (with-current-buffer (let ((org-html-head-extra nil))
                                (org-export-to-buffer 'html "*Org HTML Export*"
                                  nil nil t t))
           (let ((buf-str
-                 (yc/replace-media-object-location
+                 (tblog-replace-media-object-location
                   (buffer-substring-no-properties
                    (point-min)
                    (point-max)))))
             (kill-buffer)
             buf-str))))
 
-(defun yc/get-post-name (bfn)
+(defun tblog-get-post-name (bfn)
   "BFN: base file name."
   (concat (if (string-match
                (rx bol
@@ -227,19 +236,19 @@ TOLOWER: if specified, turn fields into lower case."
           ".html"))
 
 ;;;###autoload
-(defun yc/prepare-post (&optional skip)
+(defun tblog-prepare-post (&optional skip)
   "Convert current buffer into html file and prepare send to github.
 SKIP: skip running magit."
   (interactive)
   (let* ((fn (buffer-file-name))
          (ofn (file-name-nondirectory fn))
          (bfn (file-name-sans-extension ofn))
-         (hfn (yc/get-post-name bfn))
+         (hfn (tblog-get-post-name bfn))
          (dir (file-name-directory fn))
          (git (executable-find "git"))
-         (content (yc/current-buffer-to-post))
+         (content (tblog--current-buffer-to-post))
          (final-content ))
-    (with-temp-file (format "%s/_posts/%s" github-io hfn)
+    (with-temp-file (format "%s/_posts/%s" tblog-repository hfn)
       (goto-char (point-min))
       (insert "---
 layout : post
@@ -254,6 +263,48 @@ layout : post
     (if (and (fboundp 'magit-status)
              (not skip))
         (magit-status-internal dir))))
+
+
+;; Operations related to categories and tags
+
+(defvar tblog--categories nil "Categories.")
+(defvar tblog--tags nil "Tags.")
+
+(defun tblog--get-category-db-path ()
+  "Return path of category database."
+  (concat tblog-repository "/category.db"))
+
+(defun tblog--get-tag-db-path ()
+  "Return path of tag database."
+  (concat tblog-repository "/tags.db"))
+
+(defun tblog--get-category-list (&optional force)
+  "Get a list of categories.
+It only read files from database when FORCE is t or tblog--categories is nil."
+  (when (or force (not tblog--categories))
+    (setq tblog--categories (tblog--read-db-as-list (tblog--get-category-db-path))))
+  tblog--categories)
+
+(defun tblog--get-tag-list (&optional force)
+  "Get a list of tags.
+It only read files from database when FORCE is t or tblog--tags is nil."
+  (when (or force (not tblog--tags))
+    (setq tblog--tags (tblog--read-db-as-list (tblog--get-tag-db-path))))
+  tblog--tags)
+
+(defun tblog--read-db-as-list (path)
+  "Read and return content of file (specified as PATH), and return as list."
+  (with-temp-buffer
+    (insert-file-contents path)
+    (goto-char (point-min))
+    (read (current-buffer))))
+
+(defun tblog--db-write (path content)
+  "Write CONTENT into file specified as PATH."
+  (with-temp-file path
+    (insert "(")
+    (dolist (i content) (pp i (current-buffer)))
+    (insert ")")))
 
 (provide 'tblog)
 

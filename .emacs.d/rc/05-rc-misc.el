@@ -707,8 +707,8 @@ which is options for `diff'."
                    'vimrc-mode))
 
 
-(yc/autoload 'yc/new-post t "tblog")
-(yc/autoload 'yc/prepare-post t "tblog")
+(yc/autoload 'tblog-new-post t "tblog")
+(yc/autoload 'tblog-prepare-post t "tblog")
 
 
 
