@@ -25,6 +25,11 @@
   :type 'list
   :group 'tblog)
 
+(defcustom tblog-tags nil
+  "tags of posts."
+  :type 'list
+  :group 'tblog)
+
 (defvar tblog--b2p-method-alist
   '((org-mode tblog-b2p-org)
     (nxml-mode tblog-b2p-html)
@@ -99,34 +104,23 @@
                                (if kv (cdr kv) (string x))))
                            input))))
 
-(defun tblog--fetch-field (fmt &optional default &optional escape)
-  (if (string-match fmt tblog--buffer-content)
-      (let ((result (match-string 1 tblog--buffer-content)))
-        (when (string-match "(nil)" result)
-          (setq result default))
-        (if escape
-            (tblog-escape-html-characters result)
-          result))))
-
-(defun tblog--fetch-fields (fmt &optional default tolower)
+(defun tblog--fetch-field (fmt &optional func)
   "Fetch all fields, and return a concatenated string.
 FMT: format used by regex.
-DEFAULT: default value to return if no match found.
-TOLOWER: if specified, turn fields into lower case."
-  (if (string-match fmt tblog--buffer-content)
-      (let ((result (match-string 1 tblog--buffer-content)))
-        (if (string-match "(nil)" result)
-            default
-          (concat (mapcar (lambda (x)
-                            (if (= ?, x) ? (if (and (<= x ?Z) (>= x ?A) t) (+ x 32) x)))
-                          result))))
-    default))
+FUNC: function to be called."
+  (let ((result (if (string-match fmt tblog--buffer-content)
+                    (match-string 1 tblog--buffer-content))))
+    (if (string-match "(nil)" result)
+        (setq result nil))
+    (if func
+        (setq result (funcall func result)))
+    result))
 
 (defun tblog-b2p-html ()
   (cons (list
          ;; title
          (cons "title"
-               (or (car (tblog--fetch-fields (rx (or "<title>" "<TITLE>") (group (+? anything))
+               (or (car (tblog--fetch-field (rx (or "<title>" "<TITLE>") (group (+? anything))
                                              (or "</title>" "</TITLE>"))))
                    "Unamed"))
 
@@ -134,7 +128,7 @@ TOLOWER: if specified, turn fields into lower case."
          (cons "categories"
                (let ((categories-list
                       (tblog-categories-string-to-list
-                       (car (tblog--fetch-fields "CATEGORIES")))))
+                       (car (tblog--fetch-field "CATEGORIES")))))
                  (or
                   categories-list
                   '("Copies"))))
@@ -142,7 +136,7 @@ TOLOWER: if specified, turn fields into lower case."
          ;; tags
          (cons "mt_keywords"
                (or
-                (tblog--fetch-fields "KEYWORDS")
+                (tblog--fetch-field "KEYWORDS")
                 ""))
 
          ;; dateCreated
@@ -156,8 +150,7 @@ TOLOWER: if specified, turn fields into lower case."
                (tblog-replace-media-object-location
                 (buffer-substring-no-properties
                  (tblog-point-template-head-end)
-                 (point-max))))))
-  )
+                 (point-max)))))))
 
 (defun tblog-b2p-other ()
   (delq nil
@@ -196,19 +189,74 @@ TOLOWER: if specified, turn fields into lower case."
 (defmacro tblog-mkfield (x)
   `(rx bol ,x (* space) (group (+? nonl) eol)))
 
+(defun tblog--update-category (&optional cat)
+  "Update category.
+If CAT is specified, add it to database and return it unchanged.
+Or, select/create one from DB and return a new one."
+  (tblog--get-category-list)
+  (unless cat
+    (setq cat (tblog--choose-or-create "Category" tblog-categories)))
+  (add-to-list 'tblog-categories cat)
+  (tblog--db-write (tblog--get-category-db-path) tblog-categories)
+  cat)
+
+(defun tblog--update-tag (&optional tag)
+  "Update tags.
+If TAG is specified, add it to database and return it unchanged.
+Or, select/create one from DB and return a new one."
+  (tblog--get-tag-list)
+  (unless tag
+    (setq tag (tblog--choose-or-create "Tag" tblog-tags)))
+  (setq tag (concat (mapcar (lambda (x)
+                              (if (= ?, x) ? (if (and (<= x ?Z) (>= x ?A) t) (+ x 32) x)))
+                            tag)))
+  (add-to-list 'tblog-tags tag)
+  (tblog--db-write (tblog--get-tag-db-path) tblog-tags)
+  tag)
+
+(defun tblog--choose-or-create (name candidates)
+  "Choose one candidate for NAMAE from CANDIDATES for create a new one, with HELM."
+  (interactive)
+  (let ((h-source
+         (helm-build-sync-source (format "Choose One %s" name)
+           :init nil
+           :candidates candidates
+           :action (lambda (cand)
+                      cand)))
+        (fallback-source
+         `((name . ,(format "Create New %s" name))
+           (dummy)
+           (action . (("Default" . (lambda (candidate)
+                                     (message "%s" helm-pattern))))))))
+    (helm :sources '(h-source fallback-source)
+          :buffer "*helm*"
+          :preselect nil)))
+
 (defun tblog-b2p-org ()
+  (save-excursion
+    (goto-char (point-min))
+    (when (search-forward-regexp (tblog-mkfield "#+CATEGORY:") nil t)
+      (let ((cat (match-string-no-properties 1)))
+        (when (and (string-match "(nil)" cat)
+                   (yes-or-no-p "Category is not specified, add one?"))
+          (setq cat (tblog--update-category))
+          (goto-char (point-at-bol))
+          (search-forward-regexp (tblog-mkfield "#+CATEGORY:") nil t)
+          (replace-match (format "#+CATEGORY: %s" cat))
+          (setq tblog--buffer-content
+               (buffer-substring-no-properties (point-min) (point-max)))))))
   (cons (list
          ;; title
-         (cons "title"  (tblog--fetch-field (tblog-mkfield  "#+TITLE:") "Unamed" t))
+         (cons "title"  (tblog--fetch-field (tblog-mkfield  "#+TITLE:")))
 
          ;; "description"
          (cons "description" (tblog--fetch-field (tblog-mkfield "#+DESCRIPTION:")))
 
          ;; categories
-         (cons "categories" (tblog--fetch-field (tblog-mkfield "#+CATEGORY:")  "未分类"))
+         (cons "categories" (tblog--fetch-field (tblog-mkfield "#+CATEGORY:") 'tblog--update-category))
 
          ;; tags
-         (cons "tags" (tblog--fetch-fields (tblog-mkfield "#+KEYWORDS:") nil t)))
+         (cons "tags" (tblog--fetch-field (tblog-mkfield "#+KEYWORDS:") 'tblog--update-tag)))
 
         ;; Contents.
         (with-current-buffer (let ((org-html-head-extra nil))
@@ -267,7 +315,7 @@ layout : post
 
 ;; Operations related to categories and tags
 
-(defvar tblog--categories nil "Categories.")
+(defvar tblog-categories nil "Categories.")
 (defvar tblog--tags nil "Tags.")
 
 (defun tblog--get-category-db-path ()
@@ -280,10 +328,10 @@ layout : post
 
 (defun tblog--get-category-list (&optional force)
   "Get a list of categories.
-It only read files from database when FORCE is t or tblog--categories is nil."
-  (when (or force (not tblog--categories))
-    (setq tblog--categories (tblog--read-db-as-list (tblog--get-category-db-path))))
-  tblog--categories)
+It only read files from database when FORCE is t or tblog-categories is nil."
+  (when (or force (not tblog-categories))
+    (setq tblog-categories (tblog--read-db-as-list (tblog--get-category-db-path))))
+  tblog-categories)
 
 (defun tblog--get-tag-list (&optional force)
   "Get a list of tags.
@@ -294,10 +342,11 @@ It only read files from database when FORCE is t or tblog--tags is nil."
 
 (defun tblog--read-db-as-list (path)
   "Read and return content of file (specified as PATH), and return as list."
-  (with-temp-buffer
-    (insert-file-contents path)
-    (goto-char (point-min))
-    (read (current-buffer))))
+  (when (file-exists-p path)
+    (with-temp-buffer
+      (insert-file-contents path)
+      (goto-char (point-min))
+      (read (current-buffer)))))
 
 (defun tblog--db-write (path content)
   "Write CONTENT into file specified as PATH."
