@@ -86,11 +86,13 @@
    # : protected
    - : private")
 
-(defun uml/stringify-args (pl)
+(defvar uml/show-func-args nil "Nil.")
+
+(defun uml/stringify-func-args (pl)
   (let (res)
     (dolist (item pl)
       (push (uml/stringify-semantic-ele item t) res))
-    (concat "(" (mapconcat 'identity res ", " )")")))
+    (concat "(" (if uml/show-func-args (mapconcat 'identity res ", " ))")")))
 
 (defun uml/parse-tag-element (ele &optional type-only)
   "Parse an element and return a list of string that can be concat into a string."
@@ -101,7 +103,7 @@
       (push (semantic-tag-name ele) result))
     (case (semantic-tag-class ele)
       ('function ;; member functions
-       (push (uml/stringify-args (semantic-tag-get-attribute ele
+       (push (uml/stringify-func-args (semantic-tag-get-attribute ele
                                                              :arguments)
                                  ) result))
       ('variable
