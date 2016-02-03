@@ -52,9 +52,6 @@
 
 (defconst uml/dot-attr "\n%s\\l\\" "Foramt of attr")
 
-(defvar uml/dots-directory nil "Place to hold all original ObjNodes")
-(defvar uml/jnode-directory nil "Place to hold all original ObjNodes")
-
 
 ;;;;; Regular expressions to match a field of a struct.
 
@@ -262,25 +259,6 @@
             str-list)
 
         (when name
-
-          ;; save node if necessary.
-          (when (and uml/jnode-directory
-                     (stringp uml/jnode-directory))
-            (if (and (file-exists-p uml/jnode-directory)
-                     (not (file-directory-p uml/jnode-directory)))
-                (let ((bk (format "%s_%s.bak" uml/jnode-directory
-                                  (format-time-string "%s" (current-time)))))
-                  (message "%s is not directory, renamed to %s_bak"
-                           uml/jnode-directory  bk)
-                  (rename-file uml/jnode-directory bk)))
-
-            (when (not (file-exists-p uml/jnode-directory))
-              (make-directory uml/jnode-directory t))
-
-            (with-temp-file (concat uml/jnode-directory "/" name)
-              (erase-buffer)
-              (print node (current-buffer))))
-
           ;; start of single node
           (setq node-str (format uml/dot-node-head
                                  (uml/strip-ws-in-string name) name))
@@ -326,8 +304,7 @@
 
 ;;;###autoload
 (defun uml/struct-to-UML-full (start end)
-  "Generated a UML-like dot graph, with all variables in one line, and all
-  functions in one line."
+  "Generated a UML-like dot graph, , from region START to END."
   (interactive "rp")
   (save-excursion
     (let ((tags (semantic-find-tag-by-overlay start))
