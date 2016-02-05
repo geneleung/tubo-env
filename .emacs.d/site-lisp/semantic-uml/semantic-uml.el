@@ -127,10 +127,12 @@
             (modifier "")
             node params)
 
-        (yc/debug "ELE:" ele "Type" type)
+        (yc/debug "ELE:" ele "Type" type "is eieio-object" (semantic-tag-p type))
         (unless (or (semantic-tag-get-attribute ele :constructor-flag)
                     (semantic-tag-get-attribute ele :destructor-flag))
           (setq node (make-instance 'uml/object-attr))
+          (if (semantic-tag-p type)
+              (setq type (semantic-tag-name type)))
           (case (semantic-tag-class ele)
             ('function ;; member functions
              (setq params (semantic-tag-get-attribute ele :arguments)))
