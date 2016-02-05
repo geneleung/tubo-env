@@ -8,7 +8,6 @@
 
 (defvar YC-DEBUG nil "Set this flag to t to enable debug mode.")
 (defconst YC-DEBUG-BUF "*YC-DEBUG*" "Debug buffer of my own.")
-(defvar yc/debug-msg nil "A variable to be used for debuging in *scratch*.")
 
  ;; Macros
 
@@ -133,6 +132,19 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
      (unless (fboundp ,func)
        (load ,file))
      (funcall ,func)))
+
+(defmacro yc/concat (src &rest sequences)
+  "Concatenate SRC with all SEQUENCES, and set result to SRC."
+  `(setq ,src (funcall 'concat ,src ,@sequences)))
+
+(defmacro yc/append (src &rest sequences)
+  "Append SRC with all SEQUENCES, and set result to SRC."
+  `(setq ,src (funcall 'append ,src ,@sequences)))
+
+(defmacro yc/append-item (list item)
+  "Append LIST with ITEM, and set result to LIST."
+  `(setq ,list (nreverse (cons ,item (nreverse ,list)))))
+
  ;; Functions
 
 ;;; Start debug on error.
@@ -148,17 +160,19 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
         debug-on-quit YC-DEBUG)
   (message "Debug turned %s" (if YC-DEBUG "ON" "OFF")))
 
-(defun yc/debug-log (msg)
+(defun yc/debug-log (&rest msgs)
   "Out put debug message based on YC-DEBUG"
   (when YC-DEBUG
-    (let ((buf (get-buffer-create YC-DEBUG-BUF)))
-      (setq yc/debug-msg msg)
+    (let ((buf (get-buffer-create YC-DEBUG-BUF)) msg)
       (switch-to-buffer-other-window buf)
       (goto-char (point-max))
-      (princ "\n\n" buf)
+      (princ "\n" buf)
       (princ (format-time-string current-date-time-format (current-time)) buf)
       (princ " ======>\n" buf)
-      (princ msg buf)
+      (princ (pop msgs) buf)
+      (while msgs
+        (princ " " buf)
+        (princ (pop msgs) buf))
       (princ "\n" buf)
       (goto-char (point-max)))))
 

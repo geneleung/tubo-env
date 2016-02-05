@@ -58,236 +58,239 @@
 (defclass uml/object-node ()
   ((name :initarg :name
          :initform nil
-         :type (or null string)
-         )
+         :type (or null string))
    (funcs :initarg :funcs
           :type (or null list)
-          :initform nil
-          )
+          :initform nil)
    (attrs :initarg :attrs
           :type (or null list)
-          :initform nil
-          )
+          :initform nil)
    (subnodes :initarg :subnodes
              :initform nil
-             :type (or null list)
-             )
+             :type (or null list))
    (parents :initarg :parents
             :initform nil
-            :type (or null list))
-   (mx :initarg :mx
-       :type (or null number)
-       :initform 0))
+            :type (or null list)))
   :document "A Semantic object which can be stringified."
   )
 
-(defvar uml/cur-prefix "+"
-  "+ : public
-   # : protected
-   - : private")
+(defclass uml/object-attr ()
+  ((name :initarg :name
+         :initform nil
+         :type (or null string)
+         )
+   (type :initarg :type
+         :type string
+         :initform "")
 
-(defvar uml/show-func-args nil "Nil.")
+   (visibility :initarg :visibility
+               :initform 1 ;;visibility: 0 -- public, 1 -- private, 2 -- protected
+               :type number
+               )
+   (params :initarg :params ;; For functions only...
+           :initform nil
+           :type (or null list))
+   )
+  :document "A Semantic object for member fields and member functions."
+  )
 
-(defun uml/stringify-func-args (pl)
-  (let (res)
-    (dolist (item pl)
-      (push (uml/stringify-semantic-ele item t) res))
-    (concat "(" (if uml/show-func-args (mapconcat 'identity res ", " ))")")))
-
-(defun uml/parse-tag-element (ele &optional type-only)
-  "Parse an element and return a list of string that can be concat into a string."
-  (let ((result nil) ;; name added
-        (type (semantic-tag-type ele))
-        (modifier ""))
-    (unless type-only
-      (push (semantic-tag-name ele) result))
-    (case (semantic-tag-class ele)
-      ('function ;; member functions
-       (push (uml/stringify-func-args (semantic-tag-get-attribute ele
-                                                             :arguments)
-                                 ) result))
-      ('variable
-       (push "" result)))
-
-    (cond
-     ((semantic-tag-get-attribute ele :template-specifier)
-      (push (format " %s\\<%s\\> " result
-                    (uml/stringify-semantic-ele
-                     (car (semantic-tag-get-attribute ele
-                                                      :template-specifier)))) result))
-     ((semantic-tag-get-attribute ele :functionpointer-flag)
-      (let ((tmp (car (last result))))
-        (setf (car (last result)) (format "(*%s)()" tmp))))
-     ((semantic-tag-get-attribute ele :pointer)
-      (setq modifier "*"))
-     ((semantic-tag-get-attribute ele :dereference)
-      (setq modifier "[]")))
-
-    (when type
-      (if (semantic-tag-p type)
-          (let ((nd (uml/parse-tag-element type)))
-            (if (listp nd)
-                (setq result (append nd  result) )
-              (setq result (push nd  result))))
-        (when (stringp type)
-          (cond
-           ((string= type "class") nil)
-           (t (push (concat type modifier) result))))))
-    result))
+;;visibility: 0 -- public, 1 -- private, 2 -- protected
 
 (defun uml/stringify-semantic-ele (ele  &optional type-only)
   "Stringify semantic type"
-  (let* ((result (nreverse (uml/parse-tag-element ele type-only)))
+  (let* ((result (nreverse (uml/ele-to-obj-attr ele type-only)))
          (varname (subseq result 0 2))
          (vartype (subseq result 2))
          (result  (append varname (nreverse vartype))))
     (mapconcat 'identity  result " ")))
 
 
-(defun uml/stringify-semantic-ele2 (ele)
-  "Stringify semantic type"
-  (let* ((result (nreverse (uml/parse-tag-element ele)))
-         (varname (concat-string-array (subseq result 0 2) " "))
-         (vartype (concat-string-array (nreverse (subseq result 2)) " ")))
-    (cons (length varname) (cons vartype varname))))
-
-(defun Tag-To-ObjNode (tag &optional fonly)
-  "Parse semantic tag and convert it into a uml/object-node which can be stringified later."
+(defun Tag-To-ObjNode (tag)
+  "Parse semantic TAG and convert it into a uml/object-node which can be stringified later."
   (let* ((type (semantic-tag-get-attribute tag :type))
          (attrs (semantic-tag-get-attribute tag :members))
          (node (make-instance 'uml/object-node))
-         (mx 0)
-         name func-list attr-list subnodes
-         e ele)
+         (visibility 1) ;;visibility: 0 -- public, 1 -- private, 2 -- protected
+         func-list attr-list subnodes
+         ele)
 
-    (when (string= type "typedef")
-      (let ((tmp-tag (semantic-tag-get-attribute tag :typedef)))
-        (setq type (semantic-tag-get-attribute tmp-tag :type)
-              attrs (semantic-tag-get-attribute tmp-tag :members))))
-    ;;todo: Add more case handling if necessary.
+    (defun uml/parse-func-args (pl)
+      (let (res)
+        (dolist (item pl)
+          (add-to-list 'res (semantic-tag-get-attribute tag :type) t )
+          res)))
 
-    (setq name (or (semantic-tag-name tag) " "))
-    (setq uml/cur-prefix "+")
+    (defun uml/ele-to-obj-attr (ele)
+      "Parse an element and and generate a object-attr."
+      (let ((name (semantic-tag-name ele))
+            (type (semantic-tag-type ele))
+            (modifier "")
+            node params)
 
-    (while (setq ele (pop attrs)) ;; Walk through all attributes of this Tag.
-      (let ((modifiers (semantic-tag-get-attribute ele :typemodifiers)))
-        (when modifiers
+        (yc/debug "ELE:" ele "Type" type)
+        (unless (or (semantic-tag-get-attribute ele :constructor-flag)
+                    (semantic-tag-get-attribute ele :destructor-flag))
+          (setq node (make-instance 'uml/object-attr))
+          (case (semantic-tag-class ele)
+            ('function ;; member functions
+             (setq params (semantic-tag-get-attribute ele :arguments)))
+            ('variable
+             t
+             ;; (print "variable")
+             ))
+
           (cond
-           ((member "public" modifiers) (setq uml/cur-prefix "+"))
-           ((member "protected" modifiers) (setq uml/cur-prefix "#"))
-           ((member "private"  modifiers) (setq uml/cur-prefix "-"))))
-        (case  (semantic-tag-class ele)
-          ('function ;; member functions
-           (unless fonly
-             (setq e (uml/stringify-semantic-ele2 ele))
-             (when e
-               (if (> (car e) mx)
-                   (setq mx (car e)))
-               (add-to-list 'func-list (cons (concat uml/cur-prefix (cddr e)) (cadr e)) t))))
-          ('variable ;; memer fields
-           (setq e (uml/stringify-semantic-ele2 ele))
-           (when e
-             (if (> (car e) mx)
-                 (setq mx (car e)))
-             (add-to-list 'attr-list (cons (concat uml/cur-prefix (cddr e)) (cadr e)) t)))
-          ('label    ;; Lables (public/protected/private)
-           (setq e (semantic-tag-name ele))
+           ((semantic-tag-get-attribute ele :template-specifier)
+            t
+            ;; (print (uml/stringify-semantic-ele
+            ;;         (car (semantic-tag-get-attribute ele
+            ;;                                          :template-specifier))))
+            )
+           ((semantic-tag-get-attribute ele :functionpointer-flag)
+            t
+            ;; (print (cons ele "function pointer...."))
+            )
+           ((semantic-tag-get-attribute ele :pointer)
+            (setq modifier "*"))
+           ((semantic-tag-get-attribute ele :dereference)
+            (setq modifier "[]")))
+
+          (when (stringp type)
+            (setq type (concat type modifier)))
+
+          (oset node :name name)
+          (oset node :type type)
+          (oset node :visibility visibility)
+          (oset node :params params))
+        node))
+
+  ;; start of real parsing...
+  (when (string= type "typedef")
+    (let ((tmp-tag (semantic-tag-get-attribute tag :typedef)))
+      (setq type (semantic-tag-get-attribute tmp-tag :type)
+            attrs (semantic-tag-get-attribute tmp-tag :members))))
+  ;;todo: Add more case handling if necessary.
+
+  (oset node :name (semantic-tag-name tag))
+
+  (while (setq ele (pop attrs)) ;; Walk through all attributes of this Tag.
+    (case (semantic-tag-class ele)
+      ('function ;; member functions
+       (aif (uml/ele-to-obj-attr ele)
+           (add-to-list 'func-list it t)))
+      ('variable ;; memer fields
+       (aif (uml/ele-to-obj-attr ele)
+           (add-to-list 'attr-list it t)))
+      ('label    ;; Lables (public/protected/private)
+       (aif (semantic-tag-name ele)
            (cond
-            ((string= e "public")
-             (setq uml/cur-prefix "+"))
-            ((string= e "protected")
-             (setq uml/cur-prefix "#"))
-            ((string= e "private")
-             (setq uml/cur-prefix "-"))
+            ((string= it "public")
+             (setq visibility 0))
+            ((string= it "protected")
+             (setq visibility 2))
+            ((string= it "private")
+             (setq visibility 1))
             (t
-             (message (format "Skip lable (%s), should be added later."
-                              (semantic-tag-name ele))))))
-          ('type  ;; Other embedded types, will be processed later.
-           (add-to-list 'subnodes (Tag-To-ObjNode (semantic-tag-copy ele) fonly)))
-          (t (message (format "Skip type (%s), should be added later."
-                              (semantic-tag-class ele)))))))
+             (message (format "Skip lable (%s), should be added later." it))))))
+      ('type  ;; Other embedded types, will be processed later.
+       (add-to-list 'subnodes (Tag-To-ObjNode (semantic-tag-copy ele))))
+      (t (message (format "Skip type (%s), should be added later."
+                          (semantic-tag-class ele))))))
 
-    (if (not (and  name (or func-list attr-list subnodes)))
-        (setq node nil)
-      (oset node :name name)
-      (oset node :funcs func-list)
-      (oset node :attrs attr-list)
-      (oset node :subnodes subnodes)
-      (oset node :mx mx)
-      (oset node :parents (cons (semantic-tag-type-superclasses tag)
-                                (semantic-tag-type-interfaces tag)))
-      ;; Now process embedded objects.
-      )
-    node))
+  (oset node :funcs func-list)
+  (oset node :attrs attr-list)
+  (oset node :subnodes subnodes)
+  (oset node :parents (cons (semantic-tag-type-superclasses tag)
+                            (semantic-tag-type-interfaces tag)))
+  node))
 
-(defun uml/allign-concat (e l)
-  "Align and concat strings"
+(defun uml/dot-allign-concat (e &optional l)
+  "Align and concat strings."
   (let* ((result (car e);; (uml/strip-ws-in-string (car e))
                  )
          (cl (length result))
          (padding ""))
-    (when (> l cl)
+    (when (and l (> l cl))
       (dotimes (k (- l cl))
         (setq padding (concat padding "&#32;"))))
     (concat result padding " : " (cdr e))))
 
 (defun uml/connect-parent-node (parents child)
   "Connect this node with its parents"
-  (let ((result "")
-        (fmt "node_%s -> node_%s [%s];\n")
+  (let ((fmt "node_%s -> node_%s [%s];\n")
         (inh "arrowtail=empty style=solid dir=back")
-        (imp "arrowtail=empty style=dashed dir=back"))
+        (imp "arrowtail=empty style=dashed dir=back")
+        result)
     (dolist (parent (car parents))
       (setq result (concat result (format fmt parent child inh))))
     (dolist (parent (cdr parents))
       (setq result (concat result (format fmt parent child imp))))
     result))
 
-(defun uml/strip-ws-in-string (src)
-  "description"
+(defun uml/replace-ws-in-string (src dst)
+  "Replace whitespaces in SRC into DST."
   (let ((str-array (split-string src split-string-default-separators)))
-    (mapconcat 'identity str-array "_")))
+    (mapconcat 'identity str-array dst)))
 
-(defun uml/stringnify-obj-node (node)
-  "description"
-  (if (eieio-object-p node)
-      (let ((name  (or (oref node :name) "Unamed Object"))
-            (funcs (oref node :funcs))
-            (attrs (oref node :attrs))
-            (subnodes (oref node :subnodes))
-            (mx (1+ (oref node :mx)))
-            (parents (oref node :parents))
-            (node-str "")
-            str-list)
+(defun uml/dot-fmt-attr (attr &optional is-func &optional align)
+  "Format an `ATTR' into dot language.
+If `IS-FUNC' is nil, it is treated as a function, parameters will be formatted.
+If `ALIGN' is specified, make sure `:' is aligned."
+  (yc/debug-log "attr" attr)
+  (yc/debug-log "attr: " attr ", name: " (oref attr :name)
+                "Visibility" (oref attr :visibility))
+  (let* ((name (oref attr :name))
+         (type (oref attr :type))
+         (params (oref attr :params))
+         (visibility (oref attr :visibility))
+         (prefix (case visibility
+                   (0 "+")
+                   (1 "-")
+                   (2 "#"))))
+    (uml/dot-allign-concat (cons (concat prefix name
+                                         (if is-func
+                                             (concat "(" ")")) ;; TODO: Parameter type and names
+                                         ) type) align)))
 
-        (when name
-          ;; start of single node
-          (setq node-str (format uml/dot-node-head
-                                 (uml/strip-ws-in-string name) name))
-          (dolist (attr attrs)
-            (setq node-str (concat node-str
-                                   (format uml/dot-attr (uml/allign-concat attr mx)))))
-          ;; (setq node-str (concat node-str "\n|\\"))
-          (dolist (func funcs)
-            (setq node-str (concat node-str
-                                   (format uml/dot-attr (uml/allign-concat func mx)))))
-          (setq node-str (concat node-str uml/dot-node-tail))
-          (setq str-list (cons node-str str-list))
+(defun uml/node-to-dot (node)
+  "Convert NODE into dot file."
+  (yc/debug-log "Node:" node)
+  (when (eieio-object-p node)
+    (let* ((name  (or (oref node :name) "Unamed Object"))
+           (funcs (oref node :funcs))
+           (attrs (oref node :attrs))
+           (subnodes (oref node :subnodes))
+           (parents (oref node :parents))
+           (node-str (format uml/dot-node-head
+                             (uml/replace-ws-in-string name "_") name))
+           mx
+           str-list)
 
-          ;; start of subnodes.
+      (yc/debug "Starting formatting member functions.")
+      ;; start of single node
+      (dolist (func funcs)
+        (yc/concat node-str
+                   (format uml/dot-attr (uml/dot-fmt-attr func t mx))))
 
-          (dolist (subnode subnodes)
-            (if subnode
-                (setq str-list (append (uml/stringnify-obj-node subnode) str-list))))
+      (dolist (attr attrs)
+        (yc/concat node-str
+                   (format uml/dot-attr (uml/dot-fmt-attr attr nil mx))))
+      (yc/concat node-str uml/dot-node-tail)
+      (setq str-list (cons node-str str-list))
 
-          ;; start of node-links..
-          (setq str-list (cons (uml/connect-parent-node parents name) str-list)))
-        str-list)))
+      ;; start of subnodes.
+
+      (dolist (subnode subnodes)
+        (if subnode
+            (yc/append str-list (uml/node-to-dot subnode))))
+
+      ;; start of node-links..
+      (setq str-list (cons (uml/connect-parent-node parents name) str-list))
+      (mapconcat 'identity str-list "\n"))))
 
 ;;;###autoload
 (defun uml/struct-to-UML (start end)
-  "Generated a UML-like dot graph, with all variables in one line, and all
-  functions in one line."
+  "Generated a UML-like dot graph for tags between START and END."
   (interactive "rp")
   (save-excursion
     (let ((tags (semantic-find-tag-by-overlay start))
@@ -295,9 +298,7 @@
       (if (not tags)
           (error "No tags found!")
         (dolist (tag tags)
-          (let ((lst (uml/stringnify-obj-node (Tag-To-ObjNode tag t))))
-            (dolist (item lst)
-              (add-to-list 'strs item))))
+          (add-to-list 'strs (uml/node-to-dot (Tag-To-ObjNode tag))))
         (if strs
             (kill-new (mapconcat 'identity strs "\n"))
           (error "Failed to format tags!")))))
@@ -306,7 +307,7 @@
 
 ;;;###autoload
 (defun uml/struct-to-UML-full (start end)
-  "Generated a UML-like dot graph, , from region START to END."
+  "Generated a UML-like dot graph for tags between START and END."
   (interactive "rp")
   (save-excursion
     (let ((tags (semantic-find-tag-by-overlay start))
@@ -314,15 +315,121 @@
       (if (not tags)
           (error "No tags found!")
         (dolist (tag tags)
-          (let ((lst (uml/stringnify-obj-node (Tag-To-ObjNode tag))))
-            (dolist (item lst)
-              (add-to-list 'strs item))))
+          (add-to-list 'strs (uml/node-to-dot (Tag-To-ObjNode tag))))
         (if strs
             (kill-new (mapconcat 'identity strs "\n"))
           (error "Failed to format tags!")))))
   (deactivate-mark)
   (message "Finished, node copied to killing-ring."))
 
+ ;; DIA support
+
+(defvar uml/dia-id nil "Last ID")
+
+(defun uml/dia-fmt-attr (name  &optional type &optional val)
+  "Format an attribute of TYPE, with NAME & VAL."
+  (if val
+      (let ((res))
+        (add-to-list 'res (format "<dia:attribute name=\"%s\">" name) t)
+        (add-to-list 'res (case type
+                            (string (format "<dia:%s>#%s#</dia:%s>"
+                                            (symbol-name type) val (symbol-name type)))
+                            (t (format "<dia:%s val=\"%s\" />" (symbol-name type) val))) t)
+        (add-to-list 'res  "</dia:attribute>" t)
+        (mapconcat 'identity res "\n"))
+    (format "<dia:attribute name=\"%s\"/>" name)))
+
+(defun uml/dia-fmt-funcs (funcs)
+  "Format functions (FUNCS)."
+  (let (result )
+    (yc/append-item result "<dia:attribute name=\"operations\">") ;; head
+
+    (dolist (func funcs)
+      (yc/append-item result "<dia:composite type=\"umloperation\">")
+
+      (yc/append-item result (uml/dia-fmt-attr "name" 'string (oref func :name)))
+      (yc/append-item result (uml/dia-fmt-attr "type" 'string (oref func :type)))
+      (yc/append-item result (uml/dia-fmt-attr "visibility" 'enum (oref func :visibility)))
+      (yc/append-item result (uml/dia-fmt-attr "value" 'string ""))
+      (yc/append-item result (uml/dia-fmt-attr "comment" 'string ""))
+      (yc/append-item result (uml/dia-fmt-attr "abstract" 'boolean "false"))
+      (yc/append-item result (uml/dia-fmt-attr "class_scope" 'boolean "false"))
+      ;; (yc/append-item result (uml/dia-fmt-attr "parameters" 'boolean (oref func :params)))
+      (yc/append-item result "</dia:composite>"))
+
+    (yc/append-item result "</dia:attribute>\n") ;; tail
+
+    (mapconcat 'identity result "\n")))
+
+(defun uml/dia-fmt-attrs (attrs)
+  "Format member fields (ATTRS)."
+  (let (result)
+    (yc/append-item result "<dia:attribute name=\"attributes\">");; head
+
+    (dolist (attr attrs)
+      (yc/append-item result "<dia:composite type=\"umlattribute\">")
+      (yc/append-item result (uml/dia-fmt-attr "name" 'string (oref attr :name)))
+      (yc/append-item result (uml/dia-fmt-attr "type" 'string (oref attr :type)))
+      (yc/append-item result (uml/dia-fmt-attr "visibility" 'enum (oref attr :visibility)))
+      (yc/append-item result (uml/dia-fmt-attr "value" 'string ""))
+      (yc/append-item result (uml/dia-fmt-attr "comment" 'string ""))
+      (yc/append-item result (uml/dia-fmt-attr "abstract" 'boolean "false"))
+      (yc/append-item result (uml/dia-fmt-attr "class_scope" 'boolean "false"))
+      (yc/append-item result "</dia:composite>"))
+
+    (yc/append-item result "</dia:attribute>\n") ;; tail
+
+    (yc/debug-log result)
+    (mapconcat 'identity result "\n")))
+
+(defun uml/node-to-dia (node)
+  "Convert NODE to xml string which can be displayed with DIA."
+  (setq uml/dia-id (if uml/dia-id (1+ uml/dia-id)
+                     (+ 1000 (% (random 1000000) 111111))))
+  (let ((class-head "<dia:object type=\"UML - Class\" version=\"0\" id=\"%d\">")
+        (name  (or (oref node :name) "Unamed Object"))
+        (funcs (oref node :funcs))
+        (attrs (oref node :attrs))
+        (subnodes (oref node :subnodes))
+        result)
+    (yc/append-item result (format class-head uml/dia-id)) ;; head
+
+    (yc/append-item result (uml/dia-fmt-attr "name" 'string name))
+    (yc/append-item result (uml/dia-fmt-attr "visible_operations" 'boolean "true"))
+    (yc/append-item result (uml/dia-fmt-attr "visible_attributes" 'boolean "true"))
+    (yc/append-item result (uml/dia-fmt-attr "template" 'boolean "false"))
+    (yc/append-item result (uml/dia-fmt-attr "templates"))
+
+    (when funcs
+      (yc/append-item result (uml/dia-fmt-funcs funcs))
+      )
+
+    (when attrs
+      (yc/append-item result (uml/dia-fmt-attrs attrs))
+      )
+
+    ;; TODO: subnodes...
+
+    ;; tail
+    (yc/append-item result "</dia:object>")
+    (mapconcat 'identity result "\n")))
+
+;;;###autoload
+(defun uml/struct-to-dia (start end)
+  "Generated a UML-like dot graph for tags between START and END."
+  (interactive "rp")
+  (save-excursion
+    (let ((tags (semantic-find-tag-by-overlay start))
+          (strs nil))
+      (if (not tags)
+          (error "No tags found!")
+        (dolist (tag tags)
+          (add-to-list 'strs (uml/node-to-dia (Tag-To-ObjNode tag))))
+        (if strs
+            (kill-new (mapconcat 'identity strs "\n"))
+          (error "Failed to format tags!")))))
+  (deactivate-mark)
+  (message "Finished, node copied to killing-ring."))
 
 (provide 'semantic-uml)
 
