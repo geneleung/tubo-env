@@ -265,15 +265,24 @@ If `ALIGN' is specified, make sure `:' is aligned."
            (parents (oref node :parents))
            (node-str (format uml/dot-node-head
                              (uml/replace-ws-in-string name "_") name))
-           mx
+           (mx 0)
            str-list)
 
       (yc/debug "Starting formatting member functions.")
       ;; start of single node
+      (mapc
+       (lambda (x)
+         (setq mx (max mx (length (oref x :name))))) ;; name length.
+       funcs)
       (dolist (func funcs)
         (yc/concat node-str
                    (format uml/dot-attr (uml/dot-fmt-attr func t mx))))
 
+      (setq mx 0)
+      (mapc
+       (lambda (x)
+         (setq mx (max mx (1+ (length (oref x :name)))))) ;; name length.
+       attrs)
       (dolist (attr attrs)
         (yc/concat node-str
                    (format uml/dot-attr (uml/dot-fmt-attr attr nil mx))))
