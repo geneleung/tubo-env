@@ -109,10 +109,12 @@
   "Parse semantic TAG and convert it into a uml/object-node which can be stringified later."
   (let* ((type (semantic-tag-get-attribute tag :type))
          (attrs (semantic-tag-get-attribute tag :members))
-         (node (make-instance 'uml/object-node))
-         (visibility 1) ;;visibility: 0 -- public, 1 -- private, 2 -- protected
+         (visibility 0) ;;visibility: 0 -- public, 1 -- private, 2 -- protected
+         node
          func-list attr-list subnodes
          ele)
+
+    (yc/debug-log  "Tag: " tag)
 
     (defun uml/parse-func-args (pl)
       (let (res)
@@ -167,43 +169,47 @@
         node))
 
   ;; start of real parsing...
-  (when (string= type "typedef")
-    (let ((tmp-tag (semantic-tag-get-attribute tag :typedef)))
+    (when (string= type "typedef")
+      (yc/debug-log "typedef tag: " tag )
+      (let ((tmp-tag (semantic-tag-get-attribute tag :typedef)))
       (setq type (semantic-tag-get-attribute tmp-tag :type)
             attrs (semantic-tag-get-attribute tmp-tag :members))))
   ;;todo: Add more case handling if necessary.
 
-  (oset node :name (semantic-tag-name tag))
+    (when attrs
+      (setq node (make-instance 'uml/object-node))
+      (oset node :name (semantic-tag-name tag))
+      (while (setq ele (pop attrs)) ;; Walk through all attributes of this Tag.
+        (case (semantic-tag-class ele)
+          ('function ;; member functions
+           (aif (uml/ele-to-obj-attr ele)
+               (add-to-list 'func-list it t)))
+          ('variable ;; memer fields
+           (aif (uml/ele-to-obj-attr ele)
+               (add-to-list 'attr-list it t)))
+          ('label    ;; Lables (public/protected/private)
+           (aif (semantic-tag-name ele)
+               (cond
+                ((string= it "public")
+                 (setq visibility 0))
+                ((string= it "protected")
+                 (setq visibility 2))
+                ((string= it "private")
+                 (setq visibility 1))
+                (t
+                 (message (format "Skip lable (%s), should be added later." it))))))
+          ('type  ;; Other embedded types, will be processed later.
+           (add-to-list 'subnodes (Tag-To-ObjNode (semantic-tag-copy ele))))
+          (t (message (format "Skip type (%s), should be added later."
+                              (semantic-tag-class ele))))))
 
-  (while (setq ele (pop attrs)) ;; Walk through all attributes of this Tag.
-    (case (semantic-tag-class ele)
-      ('function ;; member functions
-       (aif (uml/ele-to-obj-attr ele)
-           (add-to-list 'func-list it t)))
-      ('variable ;; memer fields
-       (aif (uml/ele-to-obj-attr ele)
-           (add-to-list 'attr-list it t)))
-      ('label    ;; Lables (public/protected/private)
-       (aif (semantic-tag-name ele)
-           (cond
-            ((string= it "public")
-             (setq visibility 0))
-            ((string= it "protected")
-             (setq visibility 2))
-            ((string= it "private")
-             (setq visibility 1))
-            (t
-             (message (format "Skip lable (%s), should be added later." it))))))
-      ('type  ;; Other embedded types, will be processed later.
-       (add-to-list 'subnodes (Tag-To-ObjNode (semantic-tag-copy ele))))
-      (t (message (format "Skip type (%s), should be added later."
-                          (semantic-tag-class ele))))))
+      (oset node :funcs func-list)
+      (oset node :attrs attr-list)
+      (oset node :subnodes subnodes)
+      (oset node :parents (cons (semantic-tag-type-superclasses tag)
+                                (semantic-tag-type-interfaces tag)))
+      )
 
-  (oset node :funcs func-list)
-  (oset node :attrs attr-list)
-  (oset node :subnodes subnodes)
-  (oset node :parents (cons (semantic-tag-type-superclasses tag)
-                            (semantic-tag-type-interfaces tag)))
   node))
 
 (defun uml/dot-allign-concat (e &optional l)
@@ -272,7 +278,7 @@ If `ALIGN' is specified, make sure `:' is aligned."
       ;; start of single node
       (mapc
        (lambda (x)
-         (setq mx (max mx (length (oref x :name))))) ;; name length.
+         (setq mx (max mx (1+ (length (oref x :name)))))) ;; name length.
        funcs)
       (dolist (func funcs)
         (yc/concat node-str

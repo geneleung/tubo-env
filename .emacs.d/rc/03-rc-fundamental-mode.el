@@ -137,6 +137,11 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
   (interactive "FSudoedit: ")
   (helm-find-file-as-root file))
 
+(custom-set-variables
+ '(helm-man-or-woman-function 'woman)
+ )
+
+
 ;(helm-mode)
 
 (yc/autoload 'helm-projectile-find-file "helm-projectile")

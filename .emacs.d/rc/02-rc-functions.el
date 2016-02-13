@@ -45,26 +45,27 @@ THEN-FORM and ELSE-FORMS are then excuted just like in `if'."
   `(let ((it ,test-form))
      (if it ,then-form ,@else-forms)))
 
-(defmacro PDEBUG (&rest msgs)
-  "Output msgs with file and line..."
-  `(let ((ots debug-ts)
-         (cts (current-time)))
-     (setq debug-ts cts) ;; update timestamp.
-     (message "%s(%d) - (%.02f): %s"
-              ,(if (buffer-file-name)
-                   (file-name-nondirectory (buffer-file-name)) "Unknown")
-              (line-number-at-pos)
-              (if ots  (float-time (time-since ots)) 0)
-              (condition-case ()
-                  (apply 'format (list ,@msgs))
-                (error
-                 (concat "Failed to format message:"
-                         (with-temp-buffer
-                           (print (list ,@msgs) (current-buffer))
-                           (replace-regexp-in-string
-                            "^\n" ""
-                            (buffer-substring-no-properties (point-min) (point-max))
-                            ))))))))
+(defmacro PDEBUG (&rest mgs)
+  "Output MSGS with file and line..."
+  `(when YC-DEBUG
+     (let ((buf (get-buffer-create YC-DEBUG-BUF))
+           (msgs '(,@mgs)) msg)
+       (switch-to-buffer-other-window buf)
+       (goto-char (point-max))
+       (princ "\n" buf)
+       (princ (format-time-string current-date-time-format (current-time)) buf)
+       (princ " ======>" buf)
+       (princ (format "%s(%d)  ======>\n"
+                      ,(if (buffer-file-name)
+                           (file-name-nondirectory (buffer-file-name)) "Unknown")
+                      (line-number-at-pos)) buf)
+
+       (princ (pop msgs) buf)
+       (while msgs
+         (princ " " buf)
+         (princ (pop msgs) buf))
+       (princ "\n" buf)
+       (goto-char (point-max)))))
 
 (defmacro yc/eval-cost (tip &rest args)
   `(let ((ts (current-time))
@@ -176,6 +177,7 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
       (princ "\n" buf)
       (goto-char (point-max)))))
 
+(defalias 'yc/debug-log 'PDEBUG)
 (defalias 'yc/debug 'yc/debug-log)
 
 (defvar debug-ts nil "Timestamp used by PDEBUG.")
