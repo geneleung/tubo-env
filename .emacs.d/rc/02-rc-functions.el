@@ -138,10 +138,6 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
   "Concatenate SRC with all SEQUENCES, and set result to SRC."
   `(setq ,src (funcall 'concat ,src ,@sequences)))
 
-(defmacro yc/append (src &rest sequences)
-  "Append SRC with all SEQUENCES, and set result to SRC."
-  `(setq ,src (funcall 'append ,src ,@sequences)))
-
 (defmacro yc/append-item (list item)
   "Append LIST with ITEM, and set result to LIST."
   `(setq ,list (nreverse (cons ,item (nreverse ,list)))))
@@ -177,7 +173,6 @@ ARGS provide extra information: first element in ARGS specifies whether this is 
       (princ "\n" buf)
       (goto-char (point-max)))))
 
-(defalias 'yc/debug-log 'PDEBUG)
 (defalias 'yc/debug 'yc/debug-log)
 
 (defvar debug-ts nil "Timestamp used by PDEBUG.")

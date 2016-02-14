@@ -275,34 +275,44 @@ If `ALIGN' is specified, make sure `:' is aligned."
            str-list)
 
       (yc/debug "Starting formatting member functions.")
-      ;; start of single node
+      ;; calculating max length of func & attrs
       (mapc
        (lambda (x)
          (setq mx (max mx (1+ (length (oref x :name)))))) ;; name length.
-       funcs)
+       (append funcs attrs))
+
+
+      ;;;; start of single node
+
+      ;; member functions.
       (dolist (func funcs)
         (yc/concat node-str
                    (format uml/dot-attr (uml/dot-fmt-attr func t mx))))
 
-      (setq mx 0)
-      (mapc
-       (lambda (x)
-         (setq mx (max mx (1+ (length (oref x :name)))))) ;; name length.
-       attrs)
-      (dolist (attr attrs)
-        (yc/concat node-str
-                   (format uml/dot-attr (uml/dot-fmt-attr attr nil mx))))
+      ;; member fields
+      (when attrs
+        ;; add a "|" into string if this class contains both member functions and
+        ;; member fields
+        (if funcs
+            (yc/concat node-str "\n|\\"))
+        (dolist (attr attrs)
+          (yc/concat node-str
+                     (format uml/dot-attr (uml/dot-fmt-attr attr nil mx)))))
+
+      ;; tail.
       (yc/concat node-str uml/dot-node-tail)
-      (setq str-list (cons node-str str-list))
+
+      (yc/append-item str-list node-str)
 
       ;; start of subnodes.
-
       (dolist (subnode subnodes)
         (if subnode
-            (yc/append str-list (uml/node-to-dot subnode))))
+            (yc/append-item str-list (uml/node-to-dot subnode))))
 
       ;; start of node-links..
-      (setq str-list (cons (uml/connect-parent-node parents name) str-list))
+      (aif (uml/connect-parent-node parents name)
+          (yc/append-item str-list it))
+      (yc/debug-log "AA: str-list" str-list)
       (mapconcat 'identity str-list "\n"))))
 
 ;;;###autoload
@@ -396,7 +406,7 @@ If `ALIGN' is specified, make sure `:' is aligned."
 
     (yc/append-item result "</dia:attribute>\n") ;; tail
 
-    (yc/debug-log result)
+    (yc/debug-log "Result:" result)
     (mapconcat 'identity result "\n")))
 
 (defun uml/node-to-dia (node)

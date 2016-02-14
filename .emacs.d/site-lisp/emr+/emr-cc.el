@@ -29,7 +29,6 @@
 (require 's)
 (require 'dash)
 (require 'thingatpt)
-(autoload 'ido-completing-read "ido")
 (autoload 'c-mode-map "cc-mode")
 
 (defcustom emr-clang-format-style 'Google
