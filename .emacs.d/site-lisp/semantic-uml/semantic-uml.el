@@ -37,6 +37,10 @@
 
 (autoload 'semantic-find-tag-by-overlay "semantic-find")
 
+(defgroup uml nil
+  "group name."
+  )
+
 (require 'cl)
 (require 'eieio)
 
@@ -51,6 +55,17 @@
   "Format of node tail.")
 
 (defconst uml/dot-attr "\n%s\\l\\" "Foramt of attr")
+
+(defcustom uml/extract-type 'all
+  "Type of members to be extracted.
+Possible choices:
+`functions' -- extract member functions only.
+`attributes' -- extract member fields only.
+`all' -- extract everything."
+  :type '(radio (const :tag "Extract member methods only." methods)
+                (const :tag "Extract member fields only." fields)
+                (const :tag "Extract everything.." all))
+  :group 'uml)
 
 
 ;;;;; Regular expressions to match a field of a struct.
@@ -272,28 +287,41 @@ If `ALIGN' is specified, make sure `:' is aligned."
            (node-str (format uml/dot-node-head
                              (uml/replace-ws-in-string name "_") name))
            (mx 0)
+           extract-fields extract-methods
            str-list)
 
       (yc/debug "Starting formatting member functions.")
-      ;; calculating max length of func & attrs
-      (mapc
-       (lambda (x)
-         (setq mx (max mx (1+ (length (oref x :name)))))) ;; name length.
-       (append funcs attrs))
 
+      ;; calculating max length of func & attrs
+      (let (tmp-array)
+        (case uml/extract-type
+          ('all (setq tmp-array (append funcs attrs)
+                      extract-fields t
+                      extract-methods t))
+          ('methods (setq tmp-array funcs
+                          extract-methods t))
+          ('fields (setq tmp-array attrs
+                         extract-fields t))
+          (t (message "oops")))
+
+        (mapc
+         (lambda (x)
+           (setq mx (max mx (1+ (length (oref x :name)))))) ;; name length.
+         tmp-array))
 
       ;;;; start of single node
 
       ;; member functions.
-      (dolist (func funcs)
-        (yc/concat node-str
-                   (format uml/dot-attr (uml/dot-fmt-attr func t mx))))
+      (if extract-methods
+          (dolist (func funcs)
+            (yc/concat node-str
+                       (format uml/dot-attr (uml/dot-fmt-attr func t mx)))))
 
       ;; member fields
-      (when attrs
+      (when (and extract-fields attrs)
         ;; add a "|" into string if this class contains both member functions and
         ;; member fields
-        (if funcs
+        (if (and extract-methods funcs)
             (yc/concat node-str "\n|\\"))
         (dolist (attr attrs)
           (yc/concat node-str
@@ -316,7 +344,7 @@ If `ALIGN' is specified, make sure `:' is aligned."
       (mapconcat 'identity str-list "\n"))))
 
 ;;;###autoload
-(defun uml/struct-to-UML (start end)
+(defun uml/member-fields-to-UML (start end)
   "Generated a UML-like dot graph for tags between START and END."
   (interactive "rp")
   (save-excursion
@@ -333,7 +361,24 @@ If `ALIGN' is specified, make sure `:' is aligned."
   (message "Finished, node copied to killing-ring."))
 
 ;;;###autoload
-(defun uml/struct-to-UML-full (start end)
+(defun uml/member-functions-to-UML (start end)
+  "Generated a UML-like dot graph for tags between START and END."
+  (interactive "rp")
+  (save-excursion
+    (let ((tags (semantic-find-tag-by-overlay start))
+          (strs nil))
+      (if (not tags)
+          (error "No tags found!")
+        (dolist (tag tags)
+          (add-to-list 'strs (uml/node-to-dot (Tag-To-ObjNode tag))))
+        (if strs
+            (kill-new (mapconcat 'identity strs "\n"))
+          (error "Failed to format tags!")))))
+  (deactivate-mark)
+  (message "Finished, node copied to killing-ring."))
+
+;;;###autoload
+(defun uml/struct-to-UML (start end)
   "Generated a UML-like dot graph for tags between START and END."
   (interactive "rp")
   (save-excursion
