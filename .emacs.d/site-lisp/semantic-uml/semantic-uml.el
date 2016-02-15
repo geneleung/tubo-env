@@ -46,7 +46,7 @@
 
 ;;;;; Dot templates
 (defconst uml/dot-node-head
-  "node_%s[shape=record
+  "%s[shape=record
             label=\"{<f0> %s |\\"
   "Format of node head.")
 (defconst uml/dot-node-tail "
@@ -148,8 +148,11 @@ Possible choices:
         (unless (or (semantic-tag-get-attribute ele :constructor-flag)
                     (semantic-tag-get-attribute ele :destructor-flag))
           (setq node (make-instance 'uml/object-attr))
-          (if (semantic-tag-p type)
-              (setq type (semantic-tag-name type)))
+          (when (semantic-tag-p type)
+            (aif (semantic-tag-get-attribute type :template-specifier)
+                (setq type (format "%s\\<%s\\>" (semantic-tag-name type)
+                                   (car (car it))))
+              (setq type (semantic-tag-name type))))
           (case (semantic-tag-class ele)
             ('function ;; member functions
              (setq params (semantic-tag-get-attribute ele :arguments)))
@@ -160,14 +163,10 @@ Possible choices:
 
           (cond
            ((semantic-tag-get-attribute ele :template-specifier)
-            t
-            ;; (print (uml/stringify-semantic-ele
-            ;;         (car (semantic-tag-get-attribute ele
-            ;;                                          :template-specifier))))
+            (yc/debug-log "template" ele)
             )
            ((semantic-tag-get-attribute ele :functionpointer-flag)
-            t
-            ;; (print (cons ele "function pointer...."))
+            (yc/debug-log "function pointer" ele)
             )
            ((semantic-tag-get-attribute ele :pointer)
             (setq modifier "*"))
@@ -240,7 +239,7 @@ Possible choices:
 
 (defun uml/connect-parent-node (parents child)
   "Connect this node with its parents"
-  (let ((fmt "node_%s -> node_%s [%s];\n")
+  (let ((fmt "%s -> %s [%s];\n")
         (inh "arrowtail=empty style=solid dir=back")
         (imp "arrowtail=empty style=dashed dir=back")
         result)

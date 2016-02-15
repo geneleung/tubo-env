@@ -1512,7 +1512,7 @@ and is reversed for better performence.")
    (define-key gud-minor-mode-map "\C-c\C-z" 'gdb-io-stop)
    (define-key gud-minor-mode-map "\C-c\C-\\" 'gdb-io-quit)
    (define-key gud-minor-mode-map "\C-c\C-p" 'gud-print)
-
+   (define-key gud-minor-mode-map (kbd "<S-f1>") 'gud-print)
    (define-key gud-minor-mode-map (kbd "C-M-S-n") 'gud-down)
    (define-key gud-minor-mode-map (kbd "C-M-S-p") 'gud-up)
    )
