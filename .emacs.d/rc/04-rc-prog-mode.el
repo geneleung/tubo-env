@@ -1447,10 +1447,12 @@ and is reversed for better performence.")
  "sh-script"
  (add-hook 'sh-mode-hook
            (lambda ()
-             (let ((zsh-file (executable-find "zsh")))
-               (when (and (string-match (rx (*? ascii) (| "zsh" "zsh")) (buffer-file-name))
+             (let ((zsh-file (executable-find "zsh"))
+                   (fname (buffer-file-name)))
+               (when (and fname
+                          (string-match (rx (*? ascii) (| "zsh" "zsh")) fname)
                           zsh-file)
-                 (setq sh-shell-file zsh-file)
+                 (setq-default sh-shell-file zsh-file)
                  (sh-set-shell (file-name-nondirectory zsh-file))))
              ;; remap some keybinding to nil. those keys are handled by autopair!
              (define-key sh-mode-map "<" nil)
