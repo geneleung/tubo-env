@@ -1833,9 +1833,6 @@ and is reversed for better performence.")
 (advice-add
  'emr-initialize :before
  (lambda (&rest args)
-   (load-library "emr-iedit")
-   (load-library "emr-cc")
-   (load-library "emr-c++")
    (load-library "emr-prog2")))
 
 (yc/eval-after-load
