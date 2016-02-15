@@ -1,7 +1,7 @@
 # -*- mode: conf-unix -*-
 [user]
-  name = yangyingchao
-  email = yangyingchao@gmail.com
+	name = yangyingchao
+	email = yangyingchao@gmail.com
 [color]
   ui = auto
   ## If git is too slow, disable following colors.
@@ -88,3 +88,9 @@
 
 [svn]
 	rmdir = true
+[difftool "sourcetree"]
+	cmd = opendiff \"$LOCAL\" \"$REMOTE\"
+	path = 
+[mergetool "sourcetree"]
+	cmd = /Applications/SourceTree.app/Contents/Resources/opendiff-w.sh \"$LOCAL\" \"$REMOTE\" -ancestor \"$BASE\" -merge \"$MERGED\"
+	trustExitCode = true

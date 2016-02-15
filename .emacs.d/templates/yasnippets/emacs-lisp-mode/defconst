@@ -1,6 +1,6 @@
 # -*- mode: snippet -*-
 # name: defconst
-# key: dfcons
+# key: dfc
 # --
 (defconst ${1:name}
 $0$>

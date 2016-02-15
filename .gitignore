@@ -286,3 +286,5 @@ tmp/
 /.emacs.d/viper
 /PlayOnLinux's virtual drives
 /.gemrc
+/.gitignore_global
+/.hgignore_global
