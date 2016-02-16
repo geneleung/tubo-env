@@ -482,54 +482,6 @@ Uses `current-date-time-format' for the formatting the date/time."
       (goto-char after-point)
       (c-indent-line))))
 
-(defcustom yc/trailing-whitespace-modes
-  nil
-  "Modes when whitespaces need to removed automatically."
-  :group 'user)
-
-(setq yc/trailing-whitespace-modes
-      '(emacs-lisp-mode
-        latex-mode org-mode
-        lisp-mode python-mode
-        scheme-mode erlang-mode antlr-mode graphviz-dot-mode ruby-mode
-        js2-mode))
-
-(defun yc/trailing-whitespace-hook ()
-  (when (member major-mode yc/trailing-whitespace-modes)
-    (delete-trailing-whitespace)))
-
-;; clean trailing whitespaces automatically
-(add-hook 'before-save-hook 'yc/trailing-whitespace-hook)
-(add-hook 'after-save-hook
-          #'(lambda ()
-              (and (save-excursion
-                     (save-restriction
-                       (widen)
-                       (goto-char (point-min))
-                       (save-match-data
-                         (looking-at "^#!"))))
-                   (not (file-executable-p buffer-file-name))
-                   (shell-command (concat "chmod u+x " buffer-file-name))
-                   (message
-                    (concat "Saved as script: " buffer-file-name)))))
-
-;;;; Untabify
-(defvar yc/untabify-modes nil "Modes to run untabify.")
-
-;; (setq yc/untabify-modes '(haskell-mode
-;;                            scheme-mode
-;;                            erlang-mode
-;;                            python-mode
-;;                            clojure-mode
-;;                            text-mode))
-
-(defun yc/untabify-hook ()
-  (when (member major-mode yc/untabify-modes)
-    (untabify (point-min) (point-max))))
-
-;;;; untabify some modes
-(add-hook 'before-save-hook 'yc/untabify-hook)
-
 ;;;; Shift regiion to left or right quickly.
 
 (defvar shift-indent-offset 4)

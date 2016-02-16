@@ -98,7 +98,7 @@
                                         ; by 100-private.el
 (setq-default auto-fill-function 'do-auto-fill)
 (setq-default global-font-lock-mode t) ; 语法高亮
-(setq sentence-end-double-space nil)
+;; (setq sentence-end-double-space nil)
 (setq font-lock-maximum-decoration t)
 (setq-default show-trailing-whitespace t)
 (setq-default max-specpdl-size 8192)
