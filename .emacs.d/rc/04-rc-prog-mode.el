@@ -1852,41 +1852,6 @@ and is reversed for better performence.")
 ;;                             ("UseTab" . "Never")))
 ;;  )
 
-(defun yc/emr-cc-surround-if-end (func &rest args)
-  "Rewrite of emr-cc-surround-if-end.
-Should be removed once new emr-cc merged to upstream."
-  (let* ((start (car args))
-         (end (cadr args))
-         (content (buffer-substring-no-properties start end))
-         (var (completing-read "Variable Name: " emr-cc-surround-var-hist
-                               nil nil nil 'emr-cc-surround-var-hist)))
-    (save-excursion
-      (delete-region start end)
-      (insert (format "#ifdef %s\n" var))
-      (insert content)
-      (insert (format "\n#endif /*%s*/" var))
-      (emr-cc-format-region start (point)))))
-
-(advice-add 'emr-cc-surround-if-end :around #'yc/emr-cc-surround-if-end)
-
-
-(defun yc/emr-cpp-try-catch (func &rest args)
-  "Rewrite of emr-cc-surround-if-end.
-Should be removed once new emr-cc merged to upstream."
-  (let* ((start (car args))
-         (end (cadr args))
-         (content (buffer-substring-no-properties start end)))
-    (save-excursion
-      (delete-region start end)
-      (insert "try {\n")
-      (insert content)
-      (insert
-       "}\ncatch (exception& e) {\n")
-      (insert "throw ;\n}\n")
-      (emr-cc-format-region start (point)))))
-
-(advice-add 'emr-cpp-try-catch :around #'yc/emr-cpp-try-catch)
-
 
  ;; SQL Mode
 (yc/eval-after-load
