@@ -1015,9 +1015,9 @@ and is reversed for better performence.")
            (lambda ()
              (let ((style (yc/get-c-stype (buffer-file-name))) )
                (c-set-style style)
-               (unless (string= style "tubo")
-                 (setq flycheck-checker 'c/c++-gcc)
-                 )
+               ;; (unless (string= style "tubo")
+               ;;   (setq flycheck-checker 'c/c++-gcc)
+               ;;   )
                (when (string= style "kernel-coding")
                  (add-to-list
                   'hide-ifdef-define-alist

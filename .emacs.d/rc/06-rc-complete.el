@@ -316,6 +316,11 @@
 
 (add-hook 'c-mode-common-hook
           (lambda ()
+            (when ede-object
+              (aif (ede-system-include-path ede-object)
+                  (set (make-variable-buffer-local 'irony-additional-clang-options)
+                       (mapcar (lambda (dir)
+                                 (format "-I %s" dir)) it))))
             (irony-mode 1)
             (yc/add-company-backends-with-yasnippet company-irony :sorted company-gtags)))
 
