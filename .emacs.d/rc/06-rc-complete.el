@@ -235,17 +235,20 @@
                         'update-yasnippets-on-save)))
 
   (defun yc/yas-after-snippet ()
-    "description"
+    "Format inserted snippets, if possible."
     (cond
-     ((member 'c++-mode '(c-mode c++-mode objc-mode))
+     ((member major-mode '(c-mode c++-mode objc-mode))
       (unless (fboundp 'emr-cc-format-region)
         (load "emr-c.el"))
-      (save-excursion
-        (emr-cc-format-region yas-snippet-beg yas-snippet-end))
+      (message "fffffff")
+      ;; (save-excursion
+      ;;   (emr-cc-format-region yas-snippet-beg yas-snippet-end))
       (when (and (not (looking-back (rx bol (* space))))
                  (< (point) yas-snippet-end))
         (newline-and-indent))
-      (if (looking-at "\n\n") (kill-line)))))
+      (if (looking-at "\n\n") (kill-line)))
+     (t ""))
+    )
 
   (add-hook 'yas-after-exit-snippet-hook 'yc/yas-after-snippet))
 
