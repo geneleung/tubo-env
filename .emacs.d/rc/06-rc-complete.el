@@ -232,7 +232,19 @@
   (add-hook 'snippet-mode-hook
             (lambda ()
               (add-hook 'after-save-hook
-                        'update-yasnippets-on-save))))
+                        'update-yasnippets-on-save)))
+
+  (defun yc/yas-after-snippet ()
+    "description"
+    (cond
+     ((and (member 'c++-mode '(c-mode c++-mode objc-mode))
+           (fboundp 'emr-cc-format-region))
+      (save-excursion
+        (emr-cc-format-region yas-snippet-beg yas-snippet-end))
+      (newline-and-indent))))
+
+  (add-hook 'yas-after-exit-snippet-hook 'yc/yas-after-snippet))
+
 (yas-global-mode 1)
 (setq yc/yas-loaded t)
 
