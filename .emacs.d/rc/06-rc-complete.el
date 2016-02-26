@@ -240,9 +240,8 @@
      ((member major-mode '(c-mode c++-mode objc-mode))
       (unless (fboundp 'emr-cc-format-region)
         (load "emr-c.el"))
-      (message "fffffff")
-      ;; (save-excursion
-      ;;   (emr-cc-format-region yas-snippet-beg yas-snippet-end))
+      (save-excursion
+        (emr-cc-format-region yas-snippet-beg yas-snippet-end))
       (when (and (not (looking-back (rx bol (* space))))
                  (< (point) yas-snippet-end))
         (newline-and-indent))
