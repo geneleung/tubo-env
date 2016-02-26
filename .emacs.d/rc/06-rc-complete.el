@@ -237,11 +237,15 @@
   (defun yc/yas-after-snippet ()
     "description"
     (cond
-     ((and (member 'c++-mode '(c-mode c++-mode objc-mode))
-           (fboundp 'emr-cc-format-region))
+     ((member 'c++-mode '(c-mode c++-mode objc-mode))
+      (unless (fboundp 'emr-cc-format-region)
+        (load "emr-c.el"))
       (save-excursion
         (emr-cc-format-region yas-snippet-beg yas-snippet-end))
-      (newline-and-indent))))
+      (when (and (not (looking-back (rx bol (* space))))
+                 (< (point) yas-snippet-end))
+        (newline-and-indent))
+      (if (looking-at "\n\n") (kill-line)))))
 
   (add-hook 'yas-after-exit-snippet-hook 'yc/yas-after-snippet))
 

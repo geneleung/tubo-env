@@ -1843,16 +1843,15 @@ and is reversed for better performence.")
  "emr"
  (emr-initialize))
 
-;; (custom-set-variables
-;;  '(emr-clang-format-style '(("BasedOnStyle" . "LLVM")
-;;                             ("IndentWidth" . "4")
-;;                             ("BreakBeforeBraces" . "Stroustrup")
-;;                             ("AllowShortIfStatementsOnASingleLine" . "false")
-;;                             ("AlignConsecutiveAssignments". "true")
-;;                             ("IndentCaseLabels" . "false")
-;;                             ("PointerAlignment" . "Left")
-;;                             ("UseTab" . "Never")))
-;;  )
+(custom-set-variables
+ '(emr-clang-format-style '(("BasedOnStyle" . "LLVM")
+                            ("IndentWidth" . "4")
+                            ("BreakBeforeBraces" . "Stroustrup")
+                            ("AllowShortIfStatementsOnASingleLine" . "false")
+                            ("AlignConsecutiveAssignments". "true")
+                            ("IndentCaseLabels" . "false")
+                            ("PointerAlignment" . "Left")
+                            ("UseTab" . "Never"))))
 
 
 
