@@ -533,6 +533,12 @@ unwanted space when exporting org-mode to html."
 (yc/set-mode 'bison-mode
              (rx "." (or "yy" "y" "jison")))
 
+ ;; SQL Mode
+(yc/set-mode 'plsql-mode "\\.\\(p\\(?:k[bg]\\|ls\\)\\|sql\\)\\'")
+(yc/eval-after-load
+ "sql"
+ (sql-set-product 'mysql))
+
 
 
 (provide '05-rc-other-modes)

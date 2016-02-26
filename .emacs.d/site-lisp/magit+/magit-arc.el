@@ -336,8 +336,7 @@ Dump this mapping into database If WITHOUT-IO is not specified."
 
 (defun magit-arc--amend-internal (revision)
   "Amend this REVISION."
-  (magit-arc-run "amend" "--revision" revision)
-  (magit-process-wait))
+  (magit-arc-run "amend" "--revision" revision))
 
 ;;;###autoload
 (defun magit-arc-amend-close (&optional args)

@@ -1855,11 +1855,6 @@ and is reversed for better performence.")
 ;;  )
 
 
- ;; SQL Mode
-(yc/eval-after-load
- "sql"
- (sql-set-product 'mysql))
-
 
 
 (defun yc/get-compiling-threads ()
