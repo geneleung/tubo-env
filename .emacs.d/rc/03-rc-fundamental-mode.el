@@ -170,6 +170,51 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
  '(session-save-file (yc/make-cache-path "session"))
  )
 
+(require 'desktop)
+(let ((desktop-cache-folder (yc/make-cache-path "desktop" t)))
+  (custom-set-variables
+   `(desktop-buffers-not-to-save ,(concat "\\("
+                                          "^nn\\.a[0-9]+\\|\\.log\\|(ftp)\\|^tags\\|^TAGS"
+                                          "\\|\\.emacs.*\\|\\.diary\\|\\.newsrc-dribble\\|\\.bbdb"
+                                          "\\)$"))
+   '(desktop-modes-not-to-save '(Info-mode dired-mode tags-table-mode fundamental-mode
+                                           info-lookup-mode Custom-mode woman-mode))
+
+   `(desktop-path (list desktop-cache-folder))
+   `(desktop-dirname desktop-cache-folder)
+   '(desktop-restore-eager 10)
+   ))
+
+(defun saved-session ()
+  (file-exists-p (concat desktop-dirname "/" desktop-base-file-name)))
+
+;; use session-restore to restore the desktop manually
+(defun session-restore ()
+  "Restore a saved emacs session."
+  (interactive)
+  (if (saved-session)
+      (desktop-read)
+    (message "No desktop found.")))
+
+;; use session-save to save the desktop manually
+(defun session-save ()
+  "Save an emacs session."
+  (interactive)
+  (if (saved-session)
+      (if (y-or-n-p "Overwrite existing desktop? ")
+          (desktop-save-in-desktop-dir)
+        (message "Session not saved."))
+    (desktop-save-in-desktop-dir)))
+
+;; ask user whether to restore desktop at start-up
+(add-hook 'after-init-hook
+          '(lambda ()
+             (if (saved-session)
+                 (if (y-or-n-p "Restore desktop? ")
+                     (session-restore)))))
+
+(desktop-save-mode 1)
+
  ;;; ABBREV-MODE;;;
 
 (setq abbrev-file-name  "~/.emacs.d/abbrev_defs")

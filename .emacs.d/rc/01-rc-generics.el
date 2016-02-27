@@ -148,9 +148,12 @@
 (defvar yc/emacs-cache-dir (expand-file-name "~/.cache/emacs/")
   "Caching directory.")
 
-(defun yc/make-cache-path (path)
+(defun yc/make-cache-path (path &optional dir)
   "Compose cache directory for PATH."
-  (expand-file-name path yc/emacs-cache-dir ))
+  (let ((path   (expand-file-name path yc/emacs-cache-dir )))
+    (when (and dir (not (file-exists-p path)))
+      (make-directory path t))
+    path))
 
 ;;;; backup settings 备份设置
 (let ((emacs-backup-dir (yc/make-cache-path "backups")))
