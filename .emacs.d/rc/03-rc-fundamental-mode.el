@@ -183,35 +183,25 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
    `(desktop-path (list desktop-cache-folder))
    `(desktop-dirname desktop-cache-folder)
    '(desktop-restore-eager 10)
-   ))
+   '(desktop-load-locked-desktop t)))
 
-(defun saved-session ()
+(defun session-saved ()
+  "Check if a session was saved before."
   (file-exists-p (concat desktop-dirname "/" desktop-base-file-name)))
 
 ;; use session-restore to restore the desktop manually
 (defun session-restore ()
-  "Restore a saved emacs session."
+  "Restore a saved Emacs session."
   (interactive)
-  (if (saved-session)
+  (if (session-saved)
       (desktop-read)
     (message "No desktop found.")))
-
-;; use session-save to save the desktop manually
-(defun session-save ()
-  "Save an emacs session."
-  (interactive)
-  (if (saved-session)
-      (if (y-or-n-p "Overwrite existing desktop? ")
-          (desktop-save-in-desktop-dir)
-        (message "Session not saved."))
-    (desktop-save-in-desktop-dir)))
 
 ;; ask user whether to restore desktop at start-up
 (add-hook 'after-init-hook
           '(lambda ()
-             (if (saved-session)
-                 (if (y-or-n-p "Restore desktop? ")
-                     (session-restore)))))
+             (if (session-saved)
+                 (session-restore))))
 
 (desktop-save-mode 1)
 

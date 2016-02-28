@@ -668,45 +668,37 @@ inserts comment at the end of the line."
   (setq yc/color-them (if (eq yc/color-them 'dark) 'light 'dark))
   (yc/setup-color-theme))
 
-(defcustom available-width '(72 78 82 86 92)
+(defcustom available-width '(78 82 86 92)
   "Available column width for Emacs to choose.."
   :group 'user)
 
-(defun get-column-width (width)
-  (let ((target 78)
-        (final-value nil)
-        (tmp 0)
-        (tmp-next 0)
-        (pos 0)
-        (font-string (face-font 'default))
-        (font-width 12)
-        (available-width (sort available-width '<))
-        (r-match-font
-         (rx "-" (+? (or alpha "-")) "*-"
-             (group (+? digit)) "-*" (+ (or alpha "-" "*")))))
-
-    (if (string-match r-match-font font-string)
-        (setq font-width (string-to-number (match-string 1 font-string))))
-
-    (setq target (/ width (+ 3 font-width))) ;; Hardcoded value.
-
-    (while (and (< pos (length available-width))
-                (not final-value))
-      (setq tmp (nth pos available-width))
-      (setq pos (1+ pos))
-      (setq tmp-next (nth pos available-width))
-      (if (and (<= tmp target)
-               (or (not tmp-next)
-                   (>= tmp-next target)))
-          (setq final-value tmp)))
-    final-value))
+(defun calc-column-width (x-width)
+  "Calculate column based on X-WIDTH."
+  (let* ((r-match-font
+          (rx "-" (+? (or alpha "-")) "*-"
+              (group (+? digit)) "-*" (+ (or alpha "-" "*"))))
+         (font-string (face-font 'default))
+         (pos 0)
+         (font-width
+          (if (string-match r-match-font font-string)
+              (string-to-number (match-string 1 font-string))
+            12))
+         (width-list (sort available-width '>))
+         (target (/ x-width (+ 3 font-width)))
+         width)
+    (yc/debug-log "target" target)
+    (catch 'width
+      (while (setq width (pop width-list))
+        (when (<= width target)
+          (yc/debug "Got proper width" width)
+          (throw 'width width))))))
 
 
 (defun yc/setup-column()
-  "setup column width, fill-colum can be overwriten by 100-private.el"
+  "setup column width, fill-column can be overwriten by 100-private.el"
   (let ((x-width (x-display-pixel-width)))
     (when x-width
-      (setq-default fill-column (get-column-width x-width))
+      (setq-default fill-column (calc-column-width x-width))
       )))
 
 (defun increase-font-size ()
