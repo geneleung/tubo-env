@@ -173,17 +173,16 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
 (require 'desktop)
 (let ((desktop-cache-folder (yc/make-cache-path "desktop" t)))
   (custom-set-variables
-   `(desktop-buffers-not-to-save ,(concat "\\("
-                                          "^nn\\.a[0-9]+\\|\\.log\\|(ftp)\\|^tags\\|^TAGS"
-                                          "\\|\\.emacs.*\\|\\.diary\\|\\.newsrc-dribble\\|\\.bbdb"
-                                          "\\)$"))
+   `(desktop-buffers-not-to-save ,(rx (or (: "." (or "log" "cnf" "diary" "newsrc-dribble" "bbdb") eol)
+                                          (: "/.cache/"))))
    '(desktop-modes-not-to-save '(Info-mode dired-mode tags-table-mode fundamental-mode
                                            info-lookup-mode Custom-mode woman-mode))
 
    `(desktop-path (list desktop-cache-folder))
    `(desktop-dirname desktop-cache-folder)
    '(desktop-restore-eager 10)
-   '(desktop-load-locked-desktop t)))
+   '(desktop-load-locked-desktop t)
+   '(desktop-restore-frames nil)))
 
 (defun session-saved ()
   "Check if a session was saved before."

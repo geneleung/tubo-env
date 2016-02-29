@@ -238,16 +238,17 @@
     "Format inserted snippets, if possible."
     (cond
      ((member major-mode '(c-mode c++-mode objc-mode))
-      (unless (fboundp 'emr-cc-format-region)
-        (load "emr-c.el"))
-      (save-excursion
-        (emr-cc-format-region yas-snippet-beg yas-snippet-end))
-      (when (and (not (looking-back (rx bol (* space))))
-                 (< (point) yas-snippet-end))
-        (newline-and-indent))
-      (if (looking-at "\n\n") (kill-line)))
-     (t ""))
-    )
+      (let (new-line-added)
+        (unless (fboundp 'emr-cc-format-region)
+          (load "emr-c.el"))
+        (save-excursion
+          (emr-cc-format-region yas-snippet-beg yas-snippet-end))
+        (when (and (not (looking-back (rx (or (: bol (* space))
+                                              (: (or ")""}"))))))
+                   (< (point) yas-snippet-end))
+          (newline-and-indent)
+          (if (looking-at "\n\n") (kill-line)))))
+     (t "")))
 
   (add-hook 'yas-after-exit-snippet-hook 'yc/yas-after-snippet))
 
