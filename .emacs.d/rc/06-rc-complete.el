@@ -244,7 +244,7 @@
         (save-excursion
           (emr-cc-format-region yas-snippet-beg yas-snippet-end))
         (when (and (not (looking-back (rx (or (: bol (* space))
-                                              (: (or ")""}"))))))
+                                              (: (or ")""}"";"))))))
                    (< (point) yas-snippet-end))
           (newline-and-indent)
           (if (looking-at "\n\n") (kill-line)))))

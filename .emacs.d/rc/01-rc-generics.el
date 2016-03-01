@@ -156,10 +156,10 @@
     path))
 
 ;;;; backup settings 备份设置
-(let ((emacs-backup-dir (yc/make-cache-path "backups")))
+(let ((emacs-backup-dir (yc/make-cache-path "backups" t)))
   (setq backup-directory-alist   `((".*" . ,emacs-backup-dir))
         ;; auto-save-file-name-transforms `((".*" ,emacs-backup-dir t))
-        auto-save-list-file-prefix  emacs-backup-dir))
+        auto-save-list-file-prefix  nil))
 (setq delete-old-versions t) ; Delete Old verion of backup files.
 (setq kept-new-versions 2)
 (setq kept-old-versions 2)

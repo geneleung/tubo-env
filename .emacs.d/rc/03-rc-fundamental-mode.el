@@ -6,7 +6,30 @@
 ;;; Settings for all modes..
 
 ;;; Code:
+ ;; Packages
+(require 'package)
+(add-to-list 'package-archives
+             (cons "melpa" "http://melpa.org/packages/"))
 
+(defvar yc/packages
+  (list 'helm 'flycheck 'yasnippet 'session 'undo-tree 'autopair)
+  "List of needed packages.")
+
+(defun yc/install-missing-packages (pack-list)
+  "Install all packages listed in PACK-LIST."
+  (interactive)
+  (package-refresh-contents)
+  (dolist (package pack-list)
+    (package-install package))
+  (message "All packages installed..."))
+
+(defun yc/get-missing-packages ()
+  "Find packages that are installed from `yc/packages'."
+  (remove-if 'package-installed-p yc/packages))
+
+(package-initialize)
+(aif (yc/get-missing-packages)
+  (yc/install-missing-packages it))
 
  ;; Helm
 (autoload 'helm-mode "helm-mode" ""  t)
@@ -162,27 +185,31 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
 (yc/autoload 'helm-recentf "helm-files")
 (define-key ctl-x-map "\C-r" 'helm-recentf)
 
- ;; session
-(autoload 'session-initialize "session")
-(add-hook 'after-init-hook 'session-initialize)
-(custom-set-variables
- '(session-use-package t nil (session))
- '(session-save-file (yc/make-cache-path "session"))
- )
-
+ ;; session & desktop
 (require 'desktop)
+(autoload 'session-initialize "session")
+
 (let ((desktop-cache-folder (yc/make-cache-path "desktop" t)))
   (custom-set-variables
-   `(desktop-buffers-not-to-save ,(rx (or (: "." (or "log" "cnf" "diary" "newsrc-dribble" "bbdb") eol)
+   `(desktop-buffers-not-to-save ,(rx (or (: "." (or "log" "cnf" "diary"
+                                                     "newsrc-dribble" "bbdb") eol)
                                           (: "/.cache/"))))
-   '(desktop-modes-not-to-save '(Info-mode dired-mode tags-table-mode fundamental-mode
-                                           info-lookup-mode Custom-mode woman-mode))
+   `(desktop-files-not-to-save ,(rx (or (: "." (or "log" "cnf" "diary"
+                                                   "newsrc-dribble" "bbdb" "el") eol)
+                                        "/.cache/" ".emacs"
+                                        (: bol "/usr/src/")
+                                        )))
+   '(desktop-modes-not-to-save '(info-mode dired-mode tags-table-mode fundamental-mode
+                                           info-lookup-mode custom-mode woman-mode))
 
    `(desktop-path (list desktop-cache-folder))
    `(desktop-dirname desktop-cache-folder)
    '(desktop-restore-eager 10)
    '(desktop-load-locked-desktop t)
-   '(desktop-restore-frames nil)))
+   '(desktop-restore-frames nil)
+   '(session-use-package t nil (session))
+   '(session-save-file (concat desktop-cache-folder "/.emacs.session"))
+   ))
 
 (defun session-saved ()
   "Check if a session was saved before."
@@ -192,15 +219,13 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
 (defun session-restore ()
   "Restore a saved Emacs session."
   (interactive)
+  (session-initialize)
   (if (session-saved)
       (desktop-read)
     (message "No desktop found.")))
 
 ;; ask user whether to restore desktop at start-up
-(add-hook 'after-init-hook
-          '(lambda ()
-             (if (session-saved)
-                 (session-restore))))
+(add-hook 'after-init-hook 'session-restore)
 
 (desktop-save-mode 1)
 

@@ -16,7 +16,7 @@
                      (normal-top-level-add-subdirs-to-load-path)))
                   load-path)))))
    (list "~/.emacs.d/site-lisp/" "~/.emacs.d/rc" "~/.emacs.d/elpa")))
-
+
  ;;
 
 (defvar package-init-statistic nil "Package loading statistics.")
@@ -43,42 +43,6 @@ If CLICK is t, calculate time cost."
       (message "Checking for library `%s'... Found, cost %.2f seconds"
                feature (float-time (time-since timestamp)))
       (error "Failed to load %s" feature))))
-
-(require 'package)
-(add-to-list 'package-archives
-             ;; (cons "melpa-stable" "http://stable.melpa.org/packages/")
-             (cons "melpa" "http://melpa.org/packages/")
-             )
-(package-initialize)
-
-(defvar yc/packages
-  (list 'helm 'flycheck 'yasnippet 'session 'undo-tree 'autopair)
-  "List of needed packages.")
-
-(defun yc/install-missing-packages ()
-  "Install all packages."
-  (interactive)
-  (package-refresh-contents)
-  (mapc
-   (lambda (p)
-     (unless (package-installed-p p)
-       (message "Installing %s" (symbol-name p))
-       (package-install p)))
-   yc/packages)
-  (message "All packages installed..."))
-
-(defun yc/all-packages-available-p ()
-  "Check if all modules are available or not."
-  (interactive)
-  (let ((r t))
-    (dolist (p yc/packages)
-      (setq r (and r (package-installed-p p))))
-    r))
-
-(unless (yc/all-packages-available-p)
-  (message "Trying to install missing modules...")
-  (yc/install-missing-packages))
-
 
  ;; Load all configuration and packages.
 (let ((ts-init (current-time)))
