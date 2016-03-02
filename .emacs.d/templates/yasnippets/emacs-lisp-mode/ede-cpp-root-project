@@ -11,5 +11,5 @@
 '()$>
 :system-include-path$>
 '()$>
-:spp-files '(("__linux__" . ""))$>
+:spp-table '(("__linux__" . ""))$>
 )$>

@@ -7,6 +7,8 @@
 
 (define-abbrev-table 'Man-mode-abbrev-table '())
 
+(define-abbrev-table 'asm-mode-abbrev-table '())
+
 (define-abbrev-table 'autoconf-mode-abbrev-table '())
 
 (define-abbrev-table 'awk-mode-abbrev-table
@@ -87,6 +89,8 @@
     ("req" "" skeleton-require 1)
    ))
 
+(define-abbrev-table 'emr-buffer-report-mode-abbrev-table '())
+
 (define-abbrev-table 'epa-info-mode-abbrev-table '())
 
 (define-abbrev-table 'epa-key-list-mode-abbrev-table '())
@@ -98,6 +102,22 @@
 (define-abbrev-table 'flycheck-error-list-mode-abbrev-table '())
 
 (define-abbrev-table 'fundamental-mode-abbrev-table '())
+
+(define-abbrev-table 'gdb-breakpoints-mode-abbrev-table '())
+
+(define-abbrev-table 'gdb-disassembly-mode-abbrev-table '())
+
+(define-abbrev-table 'gdb-frames-mode-abbrev-table '())
+
+(define-abbrev-table 'gdb-locals-mode-abbrev-table '())
+
+(define-abbrev-table 'gdb-memory-mode-abbrev-table '())
+
+(define-abbrev-table 'gdb-registers-mode-abbrev-table '())
+
+(define-abbrev-table 'gdb-script-mode-abbrev-table '())
+
+(define-abbrev-table 'gdb-threads-mode-abbrev-table '())
 
 (define-abbrev-table 'git-commit-mode-abbrev-table '())
 
@@ -130,6 +150,7 @@
     ("nihgt" "night" nil 0)
     ("opitonal" "optional" nil 0)
     ("reqest" "request" nil 0)
+    ("retrun" "return" nil 9)
     ("retunr" "return" nil 9)
     ("seperate" "separate" nil 0)
     ("serveral" "several" nil 1)
@@ -153,7 +174,11 @@
 
 (define-abbrev-table 'grep-mode-abbrev-table '())
 
+(define-abbrev-table 'gud-mode-abbrev-table '())
+
 (define-abbrev-table 'helm-grep-mode-abbrev-table '())
+
+(define-abbrev-table 'helm-major-mode-abbrev-table '())
 
 (define-abbrev-table 'helm-moccur-mode-abbrev-table '())
 
@@ -172,6 +197,10 @@
 (define-abbrev-table 'image-dired-thumbnail-mode-abbrev-table '())
 
 (define-abbrev-table 'inferior-python-mode-abbrev-table '())
+
+(define-abbrev-table 'ivy-occur-grep-mode-abbrev-table '())
+
+(define-abbrev-table 'ivy-occur-mode-abbrev-table '())
 
 (define-abbrev-table 'java-mode-abbrev-table
   '(
@@ -206,6 +235,8 @@
 (define-abbrev-table 'magit-log-mode-abbrev-table '())
 
 (define-abbrev-table 'magit-log-select-mode-abbrev-table '())
+
+(define-abbrev-table 'magit-merge-preview-mode-abbrev-table '())
 
 (define-abbrev-table 'magit-mode-abbrev-table '())
 

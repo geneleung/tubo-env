@@ -277,8 +277,6 @@
 
  (define-key eww-mode-map "\C-co" 'eww-open-current-page-in-gui))
 
-
-
 (defun yc/eww-open-this-page ()
   "Call w3m to open this html file"
   (interactive)
@@ -668,7 +666,9 @@ which is options for `diff'."
 
  ;; swiper
 (load-and-bind 'swiper "swiper" (kbd "M-s O"))
+(load-and-bind 'swiper "swiper" (kbd "C-S-s"))
 (load-and-bind 'ivy-resume "ivy" (kbd "M-s r"))
+(load-and-bind 'ivy-resume "ivy" (kbd "C-S-r"))
 (define-key (current-global-map) (kbd "M-s M-o")
   (lambda ()
     (interactive)

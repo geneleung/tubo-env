@@ -191,13 +191,11 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
 
 (let ((desktop-cache-folder (yc/make-cache-path "desktop" t)))
   (custom-set-variables
-   `(desktop-buffers-not-to-save ,(rx (or (: "." (or "log" "cnf" "diary"
-                                                     "newsrc-dribble" "bbdb") eol)
-                                          (: "/.cache/"))))
    `(desktop-files-not-to-save ,(rx (or (: "." (or "log" "cnf" "diary"
                                                    "newsrc-dribble" "bbdb" "el") eol)
                                         "/.cache/" ".emacs"
                                         (: bol "/usr/src/")
+                                        (: bol "/" (or "scp""ftp") ":")
                                         )))
    '(desktop-modes-not-to-save '(info-mode dired-mode tags-table-mode fundamental-mode
                                            info-lookup-mode custom-mode woman-mode))
