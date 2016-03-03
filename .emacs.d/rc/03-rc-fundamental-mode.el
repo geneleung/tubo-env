@@ -164,6 +164,52 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
  '(helm-man-or-woman-function 'woman)
  )
 
+(defun helm-substring-by-width-keep-ext (str width &optional endstr)
+  "Truncate string STR to end at column WIDTH.
+Similar to `truncate-string-to-width'.
+Add ENDSTR at end of truncated STR.
+Add spaces at end if needed to reach WIDTH when STR is shorter than WIDTH."
+  (let* ((ext (file-name-extension str))
+         (width (- width (string-width (or ext "")))))
+    (cl-loop for ini-str = str
+             then (substring ini-str 0 (1- (length ini-str)))
+             for sw = (string-width ini-str)
+             when (<= sw width) return
+             (concat ini-str endstr (make-string (- width sw) ? ) ext))))
+
+
+(defun yc/helm-highlight-buffers (func buffers _source)
+  "Advice for FUNC, with BUFFERS and _SOURCE.
+Hope this could be enhanced by upstream."
+  (cl-loop for i in buffers
+           for (name size mode meta) = (if helm-buffer-details-flag
+                                           (helm-buffer--details i 'details)
+                                         (helm-buffer--details i))
+           for truncbuf = (if (> (string-width name) helm-buffer-max-length)
+                              (helm-substring-by-width-keep-ext
+                               name helm-buffer-max-length
+                               helm-buffers-end-truncated-string)
+                            (concat name
+                                    (make-string
+                                     (- (+ helm-buffer-max-length
+                                           (length helm-buffers-end-truncated-string))
+                                        (string-width name)) ? )))
+           for len = (length mode)
+           when (> len helm-buffer-max-len-mode)
+           do (setq helm-buffer-max-len-mode len)
+           for fmode = (concat (make-string
+                                (- (max helm-buffer-max-len-mode len) len) ? )
+                               mode)
+           ;; The max length of a number should be 1023.9X where X is the
+           ;; units, this is 7 characters.
+           for formatted-size = (and size (format "%7s" size))
+           collect (cons (if helm-buffer-details-flag
+                             (concat truncbuf "\t" formatted-size
+                                     "  " fmode "  " meta)
+                           name)
+                         (get-buffer i))))
+
+(advice-add 'helm-highlight-buffers :around #'yc/helm-highlight-buffers)
 
 ;(helm-mode)
 
@@ -194,11 +240,12 @@ It will load `helm-SYM` from helm-FILE, and bind KEY to loaded SYM."
    `(desktop-files-not-to-save ,(rx (or (: "." (or "log" "cnf" "diary"
                                                    "newsrc-dribble" "bbdb" "el") eol)
                                         "/.cache/" ".emacs"
-                                        (: bol "/usr/src/")
+                                        (: bol "/usr/")
                                         (: bol "/" (or "scp""ftp") ":")
                                         )))
-   '(desktop-modes-not-to-save '(info-mode dired-mode tags-table-mode fundamental-mode
-                                           info-lookup-mode custom-mode woman-mode))
+   '(desktop-modes-not-to-save '(info-mode
+                                 dired-mode tags-table-mode fundamental-mode
+                                 info-lookup-mode custom-mode woman-mode))
 
    `(desktop-path (list desktop-cache-folder))
    `(desktop-dirname desktop-cache-folder)

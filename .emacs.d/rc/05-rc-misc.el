@@ -665,15 +665,13 @@ which is options for `diff'."
       (other-window 2))))
 
  ;; swiper
-(load-and-bind 'swiper "swiper" (kbd "M-s O"))
 (load-and-bind 'swiper "swiper" (kbd "C-S-s"))
 (load-and-bind 'ivy-resume "ivy" (kbd "M-s r"))
 (load-and-bind 'ivy-resume "ivy" (kbd "C-S-r"))
-(define-key (current-global-map) (kbd "M-s M-o")
+(define-key (current-global-map) (kbd "M-s O")
   (lambda ()
     (interactive)
     (swiper (thing-at-point 'symbol))))
-
 
  ;; cflow
 (autoload 'cflow-mode "cflow-mode" "Major mode for viewing cflow output files"  t)

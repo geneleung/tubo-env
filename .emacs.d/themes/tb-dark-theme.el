@@ -227,7 +227,6 @@
    '(flyspell-duplicate-face ((t (:foreground "IndianRed" :bold t :underline t))))
    '(flyspell-incorrect-face ((t (:foreground "Pink" :bold t :underline t))))
    '(font-lock-builtin-face       ((t (:foreground "#32cd32"))))
-   '(font-lock-comment-delimiter-face ((t (:foreground "Salmon"))))
    '(font-lock-comment-face ((t (:italic t :slant oblique  :foreground "#cd5c5c"))))
    '(font-lock-constant-face      ((t (:foreground "#7fffd4" :bold t))))
    '(font-lock-doc-face ((t ( :foreground "#87ceeb"))))

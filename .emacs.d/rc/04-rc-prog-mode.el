@@ -1541,8 +1541,6 @@ and is reversed for better performence.")
      (delete-other-windows)
      (let* ((win-src (selected-window))
             (win-gud (split-window-right))
-            (win-stack (split-window win-src ( / ( * (window-height win-src) 3) 4)))
-
             )
 
        ;; (gdb-set-window-buffer (gdb-locals-buffer-name) nil win-local)
@@ -1557,7 +1555,6 @@ and is reversed for better performence.")
             (list-buffers-noselect))))
 
        (setq gdb-source-window win-src)
-       (gdb-set-window-buffer (gdb-stack-buffer-name) nil win-stack)
        (select-window win-gud)))))
 
 

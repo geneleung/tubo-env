@@ -72,6 +72,7 @@
         (logviewer-next-part nil (or arg 1))))
     (define-key keymap "R" 'logviewer-reload-file)
     (define-key keymap "F" 'logviewer-set-filter)
+    (define-key keymap "C" 'logviewer-calibrate)
     (define-key keymap "L" 'logviewer-toggle-long-lines)
     keymap)
   "Keymap for logviewer mode.")
@@ -181,6 +182,45 @@
   (if (string-match "log_cache" logviewer-current-file)
       t
     nil))
+
+(defun logviewer-calibrate ()
+  "Calibrate data-time of logs."
+  (interactive)
+  (let* ((fmt-tip "%s (format: h:m:s): ")
+         (src-time (completing-read (format fmt-tip "From") nil))
+         (dst-time (completing-read (format fmt-tip "To") nil))
+         (ts (float-time))
+         (r-match-date-time
+          (rx bol
+              (group (** 2 4 digit) "-" (** 1 2 digit) "-" (** 1 2 digit)
+                     (+ space)
+                     (** 1 2 digit) ":" (** 1 2 digit) ":" (** 1 2 digit))))
+         (r-match-time-only
+          (rx bol (* space)
+              (group (** 1 2 digit) ":" (** 1 2 digit) ":" (** 1 2 digit))))
+         (src (if (string-match r-match-time-only src-time)
+                  (float-time
+                   (date-to-time (concat "2001-01-01 " (match-string 1 src-time))))
+                ts))
+         (dst (if (string-match r-match-time-only dst-time)
+                  (float-time
+                   (date-to-time (concat "2001-01-01 " (match-string 1 dst-time))))
+
+                ts))
+         (diff (- dst src)))
+
+    ;; calculate diff.
+    (if (= 0 diff)
+        (error "Invalid time: %s -- %s" src-time dst-time))
+    (save-excursion
+      (read-only-mode -1)
+      (goto-char (point-min))
+      (while (re-search-forward r-match-date-time nil t)
+        (replace-match
+         (format-time-string "%Y-%m-%d %H:%M:%S"
+                             (seconds-to-time
+                              (+ diff (float-time (date-to-time (match-string 1))))))))
+      (read-only-mode 1))))
 
 (defun logviewer-reload-file ()
   "Reload current file."
