@@ -534,10 +534,16 @@ unwanted space when exporting org-mode to html."
              (rx "." (or "yy" "y" "jison")))
 
  ;; SQL Mode
-(yc/set-mode 'plsql-mode "\\.\\(p\\(?:k[bg]\\|ls\\)\\|sql\\)\\'")
+(yc/autoload 'sql-mode "sql")
+(yc/autoload 'sqlup-mode)
+
+(yc/set-mode 'sql-mode "\\.\\(p\\(?:k[bg]\\|ls\\)\\|sql\\)\\'")
 (yc/eval-after-load
  "sql"
- (sql-set-product 'mysql))
+ (sql-set-product 'mysql)
+ (load-library "sql-indent")
+ (add-hook 'sql-mode-hook 'sqlup-mode)
+ (add-hook 'sql-interactive-mode-hook 'sqlup-mode))
 
 
 
