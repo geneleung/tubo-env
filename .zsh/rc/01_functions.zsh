@@ -65,6 +65,10 @@ function emacs_edit ()
     fn=`expr "$1" : '\([^:]*\):.*' '|' $1`
     ln=`expr "$1" :  '[^:]*:\(.*\)'` # line_info
 
+    if [ -z $fn ]; then
+        fn="."
+    fi
+
     if [ -z $ln ]; then
         run-emacs $fn || emacsclient -n $fn
     else
@@ -74,11 +78,6 @@ function emacs_edit ()
 
 function emacs_edit_terminal ()
 {
-    if [ $# -eq 0 ]; then
-        print "Usage: emacs_edit_terminal files....\n"
-        return 1
-    fi
-
     _is_emacs_daemon_started terminal
     if [ $? -ne 0 ]; then
         emacs --daemon
@@ -87,6 +86,10 @@ function emacs_edit_terminal ()
     #Every FILE can be either just a FILENAME or [+LINE[:COLUMN]] FILENAME.
     fn=`expr "$1" : '\([^:]*\):.*' '|' $1`
     ln=`expr "$1" :  '[^:]*:\(.*\)'` # line_info
+
+    if [ -z $fn ]; then
+        fn="."
+    fi
 
     if [ -z $ln ]; then
         emacsclient -s terminal-server $fn
