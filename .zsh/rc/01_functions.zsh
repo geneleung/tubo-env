@@ -52,10 +52,14 @@ function arcd ()
 }
 
 _is_emacs_daemon_started () {
-    netstat -nl 2>/dev/null | awk '{print $NF}' | grep -q "emacs"
+    if [ $# -ne 0 ]; then
+        netstat -nl 2>/dev/null | awk '{print $NF}' | grep "emacs" | grep -q "$*"
+    else
+        netstat -nl 2>/dev/null | awk '{print $NF}' | grep -q "emacs"
+    fi
 }
 
-function emacs_eidt ()
+function emacs_edit ()
 {
     #Every FILE can be either just a FILENAME or [+LINE[:COLUMN]] FILENAME.
     fn=`expr "$1" : '\([^:]*\):.*' '|' $1`
@@ -65,6 +69,29 @@ function emacs_eidt ()
         run-emacs $fn || emacsclient -n $fn
     else
         run-emacs "+$ln" $fn || emacsclient -n "+$ln" $fn
+    fi
+}
+
+function emacs_edit_terminal ()
+{
+    if [ $# -eq 0 ]; then
+        print "Usage: emacs_edit_terminal files....\n"
+        return 1
+    fi
+
+    _is_emacs_daemon_started terminal
+    if [ $? -ne 0 ]; then
+        emacs --daemon
+    fi
+
+    #Every FILE can be either just a FILENAME or [+LINE[:COLUMN]] FILENAME.
+    fn=`expr "$1" : '\([^:]*\):.*' '|' $1`
+    ln=`expr "$1" :  '[^:]*:\(.*\)'` # line_info
+
+    if [ -z $ln ]; then
+        emacsclient -s terminal-server $fn
+    else
+        emacsclient -s terminal-server "+$ln" $fn
     fi
 }
 

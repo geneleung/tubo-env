@@ -199,7 +199,12 @@
  (setq custom-theme-directory "~/.emacs.d/themes"
        custom-safe-themes t))
 
-(server-start)
+(if window-system
+    (server-start)
+  (custom-set-variables
+   '(server-name "terminal-server")))
+
+
 (provide '01-rc-generics)
 
 ;; Local Variables:

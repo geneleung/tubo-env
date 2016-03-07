@@ -72,7 +72,8 @@ ulimit -c unlimited
 alias rcp="rsync -P "
 which dcfldd > /dev/null 2>&1 && alias dd="dcfldd"
 
-alias ee=emacs_eidt
+alias ee=emacs_edit
+alias eet=emacs_edit_terminal
 alias edit=emacs_eidt
 alias tmux="tmux attach || tmux"
 alias ttop="top -u $UID"

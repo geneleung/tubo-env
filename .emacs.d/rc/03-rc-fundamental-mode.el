@@ -232,47 +232,48 @@ Hope this could be enhanced by upstream."
 (define-key ctl-x-map "\C-r" 'helm-recentf)
 
  ;; session & desktop
-(require 'desktop)
-(autoload 'session-initialize "session")
+(when window-system
+  (require 'desktop)
+  (autoload 'session-initialize "session")
 
-(let ((desktop-cache-folder (yc/make-cache-path "desktop" t)))
-  (custom-set-variables
-   `(desktop-files-not-to-save ,(rx (or (: "." (or "log" "cnf" "diary"
-                                                   "newsrc-dribble" "bbdb" "el") eol)
-                                        "/.cache/" ".emacs"
-                                        (: bol "/usr/")
-                                        (: bol "/" (or "scp""ftp") ":")
-                                        )))
-   '(desktop-modes-not-to-save '(info-mode
-                                 dired-mode tags-table-mode fundamental-mode
-                                 info-lookup-mode custom-mode woman-mode))
+  (let ((desktop-cache-folder (yc/make-cache-path "desktop" t)))
+    (custom-set-variables
+     `(desktop-files-not-to-save ,(rx (or (: "." (or "log" "cnf" "diary"
+                                                     "newsrc-dribble" "bbdb" "el") eol)
+                                          "/.cache/" ".emacs"
+                                          (: bol "/usr/")
+                                          (: bol "/" (or "scp""ftp") ":")
+                                          )))
+     '(desktop-modes-not-to-save '(info-mode
+                                   dired-mode tags-table-mode fundamental-mode
+                                   info-lookup-mode custom-mode woman-mode))
 
-   `(desktop-path (list desktop-cache-folder))
-   `(desktop-dirname desktop-cache-folder)
-   '(desktop-restore-eager 10)
-   '(desktop-load-locked-desktop t)
-   '(desktop-restore-frames nil)
-   '(session-use-package t nil (session))
-   '(session-save-file (concat desktop-cache-folder "/.emacs.session"))
-   ))
+     `(desktop-path (list desktop-cache-folder))
+     `(desktop-dirname desktop-cache-folder)
+     '(desktop-restore-eager 10)
+     '(desktop-load-locked-desktop t)
+     '(desktop-restore-frames nil)
+     '(session-use-package t nil (session))
+     '(session-save-file (concat desktop-cache-folder "/.emacs.session"))
+     ))
 
-(defun session-saved ()
-  "Check if a session was saved before."
-  (file-exists-p (concat desktop-dirname "/" desktop-base-file-name)))
+  (defun session-saved ()
+    "Check if a session was saved before."
+    (file-exists-p (concat desktop-dirname "/" desktop-base-file-name)))
 
-;; use session-restore to restore the desktop manually
-(defun session-restore ()
-  "Restore a saved Emacs session."
-  (interactive)
-  (session-initialize)
-  (if (session-saved)
-      (desktop-read)
-    (message "No desktop found.")))
+  ;; use session-restore to restore the desktop manually
+  (defun session-restore ()
+    "Restore a saved Emacs session."
+    (interactive)
+    (session-initialize)
+    (if (session-saved)
+        (desktop-read)
+      (message "No desktop found.")))
 
-;; ask user whether to restore desktop at start-up
-(add-hook 'after-init-hook 'session-restore)
+  ;; ask user whether to restore desktop at start-up
+  (add-hook 'after-init-hook 'session-restore)
 
-(desktop-save-mode 1)
+  (desktop-save-mode 1))
 
  ;;; ABBREV-MODE;;;
 
