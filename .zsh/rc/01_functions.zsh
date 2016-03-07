@@ -78,11 +78,6 @@ function emacs_edit ()
 
 function emacs_edit_terminal ()
 {
-    _is_emacs_daemon_started terminal
-    if [ $? -ne 0 ]; then
-        emacs --daemon
-    fi
-
     #Every FILE can be either just a FILENAME or [+LINE[:COLUMN]] FILENAME.
     fn=`expr "$1" : '\([^:]*\):.*' '|' $1`
     ln=`expr "$1" :  '[^:]*:\(.*\)'` # line_info
@@ -92,9 +87,9 @@ function emacs_edit_terminal ()
     fi
 
     if [ -z $ln ]; then
-        emacsclient -s terminal-server $fn
+        emacsclient -nw $fn
     else
-        emacsclient -s terminal-server "+$ln" $fn
+        emacsclient -nw "+$ln" $fn
     fi
 }
 
