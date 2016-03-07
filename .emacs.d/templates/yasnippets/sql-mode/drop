@@ -1,0 +1,9 @@
+# -*- mode: snippet; require-final-newline: nil -*-
+# name: drop
+# key: drp
+# --
+DROP ${1:D}${1:$(cond
+((string-match "^D" yas-text) "ATABASE")
+((string-match "^T"  yas-text) "ABLE")
+(t ""))} ${2:name}$3${3:$(if (string-match " " yas-text)
+"IF EXISTS;" ";")}

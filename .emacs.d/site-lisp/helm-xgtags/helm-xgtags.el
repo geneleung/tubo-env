@@ -253,7 +253,8 @@ Always update if value of this variable is nil."
     (define-key sub-keymap "u" 'helm-xgtags-pop-stack)
     (define-key sub-keymap "f" 'helm-xgtags-find-file)
     (define-key sub-keymap "x" 'helm-xgtags-switch-to-buffer)
-    (define-key sub-keymap "r" 'helm-xgtags-query-replace-regexp)
+    (define-key sub-keymap "R" 'helm-xgtags-query-replace-regexp)
+    (define-key sub-keymap "R" 'helm-xgtags--activate)
     keymap)
   "Keymap used in helm-xgtags minor mode.")
 
