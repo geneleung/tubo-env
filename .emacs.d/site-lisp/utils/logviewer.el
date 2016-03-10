@@ -213,14 +213,12 @@
     (if (= 0 diff)
         (error "Invalid time: %s -- %s" src-time dst-time))
     (save-excursion
-      (read-only-mode -1)
       (goto-char (point-min))
       (while (re-search-forward r-match-date-time nil t)
         (replace-match
          (format-time-string "%Y-%m-%d %H:%M:%S"
                              (seconds-to-time
-                              (+ diff (float-time (date-to-time (match-string 1))))))))
-      (read-only-mode 1))))
+                              (+ diff (float-time (date-to-time (match-string 1)))))))))))
 
 (defun logviewer-reload-file ()
   "Reload current file."
@@ -402,7 +400,7 @@ Key definitions:
             (overlay-put (car logviewer--overlays) 'invisible 'invs))
           (setq pos (1+ epos))))))
 
-  (setq buffer-read-only t)
+  ;; (setq buffer-read-only t)
 
   (run-hooks 'logviewer-mode-hook))
 

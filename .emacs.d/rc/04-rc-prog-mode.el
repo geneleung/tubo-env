@@ -1533,15 +1533,11 @@ and is reversed for better performence.")
    'gdb-setup-windows :around
    (lambda (&rest args)
      (interactive)
-     (gdb-get-buffer-create 'gdb-locals-buffer)
-     (gdb-get-buffer-create 'gdb-stack-buffer)
-     (gdb-get-buffer-create 'gdb-breakpoints-buffer)
      (set-window-dedicated-p (selected-window) nil)
      (switch-to-buffer gud-comint-buffer) ;;0
      (delete-other-windows)
      (let* ((win-src (selected-window))
-            (win-gud (split-window-right))
-            )
+            (win-gud (split-window-right)))
 
        ;; (gdb-set-window-buffer (gdb-locals-buffer-name) nil win-local)
        (set-window-buffer
@@ -1555,6 +1551,7 @@ and is reversed for better performence.")
             (list-buffers-noselect))))
 
        (setq gdb-source-window win-src)
+
        (select-window win-gud)))))
 
 

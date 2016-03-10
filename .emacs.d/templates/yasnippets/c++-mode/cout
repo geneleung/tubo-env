@@ -1,3 +1,5 @@
 # -*- mode: snippet -*-
+# name: cout
+# key: cot
 # --
 cout << "${1:Variable} = " << ${2:val} << endl;
