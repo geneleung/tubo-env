@@ -42,15 +42,6 @@
   "arc support for Magit."
   :group 'magit-extensions)
 
-(defcustom magit-arc-db (expand-file-name "~/.emacs.d/magit-arc-db")
-  "Database of COMMIT-REVISION mapping.
-We need a mapping between git commits and arc so we can amend commit message
-or close revision.  For now, this mapping will be saved as alist.  There might
-be a better solution, for example, to retrieve it from server..."
-  :type 'string
-  :group 'magit-arc
-  )
-
 (defcustom magit-arc-executable  "arc"
   "The Git executable used by Magit."
   :group 'magit-arc
@@ -258,36 +249,16 @@ If it is not allowed, it will return nil so user can continue input correct test
     :max-action-columns 3)
   "Parameters for send-poup.")
 
-
 (defun magit-arc-commit-to-revision (commit)
   "Find proper revision based on COMMIT."
-  (unless magit-arc--rev-alist
-    (condition-case error
-        (with-temp-buffer
-          (insert-file-contents magit-arc-db)
-          (goto-char (point-min))
-          (setq magit-arc--rev-alist (read (current-buffer))))
-      (error (message "Failed to load database from: %s" magit-arc-db))))
-  (cdr (assoc commit magit-arc--rev-alist)))
-
-(defun magit-arc--db-remove-commit (commit &optional without-io)
-  "Remove COMMIT from db.
-If WITHOUT-IO is specified, database will not be written back to disk."
-  (setq magit-arc--rev-alist (assq-delete-all commit magit-arc--rev-alist))
-  (unless without-io (magit-arc--db-write)))
-
-(defun magit-arc--db-add-commit (commit revision &optional without-io)
-  "Add mapping of COMMIT & REVISION.
-Dump this mapping into database If WITHOUT-IO is not specified."
-  (push (cons commit revision) magit-arc--rev-alist)
-  (unless without-io (magit-arc--db-write)))
-
-(defun magit-arc--db-write ()
-  "Write `magit-arc--rev-alist' into database."
-    (with-temp-file magit-arc-db
-      (insert "(")
-      (dolist (i magit-arc--rev-alist) (pp i (current-buffer)))
-      (insert ")")))
+  (let ((r-match-url (rx  "http://" (+ nonl) "/" (group (: "D" (+ digit)))))
+        revision)
+    (with-temp-buffer
+      (magit-insert-revision-message (symbol-name commit))
+      (goto-char (point-min))
+      (when (search-forward-regexp r-match-url nil t)
+        (setq revision (match-string 1))))
+    revision))
 
 (defun magit-arc-get-commit ()
   "Find COMMIT at cursor as symbol."
@@ -336,7 +307,9 @@ Dump this mapping into database If WITHOUT-IO is not specified."
 
 (defun magit-arc--amend-internal (revision)
   "Amend this REVISION."
-  (magit-arc-run "amend" "--revision" revision))
+  (magit-arc-run "amend" "--revision" revision)
+  (when (derived-mode-p 'magit-mode)
+    (magit-refresh)))
 
 ;;;###autoload
 (defun magit-arc-amend-close (&optional args)
@@ -425,7 +398,6 @@ one or more revs read from the minibuffer."
           (setq url (match-string 1)
                 revision (match-string 2))
           (magit-arc--amend-internal revision)
-          (magit-arc--db-add-commit magit-arc--current-commit revision)
           (message "Code review sent: %s" url))))))
 
 (defvar magit-arc-mode-map

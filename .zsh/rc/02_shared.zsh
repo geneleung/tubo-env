@@ -78,6 +78,5 @@ alias edit=emacs_eidt
 alias tmux="tmux attach || tmux"
 alias ttop="top -u $UID"
 which xdg-open > /dev/null 2>&1 && alias open=xdg-open
-which htop > /dev/null 2>&1 && alias top=htop
 
 alias time="/usr/bin/time -p"
