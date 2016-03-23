@@ -318,7 +318,13 @@
 
 (add-hook 'cmake-mode-hook
             (lambda ()
-            (yc/add-company-backends-with-yasnippet company-cmake)))
+              (yc/add-company-backends-with-yasnippet company-cmake)))
+
+(yc/autoload 'company-jedi)
+
+(add-hook 'python-mode-hook
+          (lambda ()
+            (yc/add-company-backends-with-yasnippet company-jedi)))
 
 (advice-add
  'company--should-begin :around

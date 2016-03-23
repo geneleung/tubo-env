@@ -796,33 +796,6 @@ inserts comment at the end of the line."
   (set-frame-position (selected-frame) 0 0)
   (set-frame-size (selected-frame) 1000 1000))
 
-
-(defun change-file-permissions-to-writable ()
-  "to be run from find-file-hook, change write permissions"
-  (interactive)
-  (when (file-exists-p buffer-file-name)
-    (let ((attr (file-attributes buffer-file-name))
-          (msg (format "Make file: %s writable... " buffer-file-name)))
-      ;; Change file mode if this file belongs to me, and it is writeable.
-      (when (and (not (car attr))
-                 (= (user-uid) (caddr attr))
-                 (not (file-writable-p buffer-file-name)))
-        (cond
-         ((executable-find "chmod")
-          (progn
-            (call-process (executable-find "chmod") nil nil nil "+w"
-                          buffer-file-name)))
-         (t (chmod buffer-file-name
-                   (file-modes-symbolic-to-number
-                    "u+w" (file-modes buffer-file-name)))))
-        (setq msg (concat msg (if (file-writable-p buffer-file-name)
-                                  "Succeeded\n" "Failed\n" )))
-        (message msg)))
-    )
-  )
-
-(add-hook 'before-save-hook 'change-file-permissions-to-writable)
-
 (defun yc/compile-rc-files ()
   "Compile all init files."
   (interactive)
@@ -975,7 +948,7 @@ for FILE, but proper EOL-conversion and character interpretation is done!"
       (error "Can't find proper app to open file %s." fn))))
 
 (defun yc/command-output-to-string (&rest args)
-  "Execute a p4 command and return result as string.
+  "Execute a command and return result as string.
 args should be a list, but to make caller's life easier, it can accept one atom instead of a
   list."
   (let* ((cmd (car args))

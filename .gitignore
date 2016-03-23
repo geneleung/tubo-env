@@ -288,3 +288,4 @@ tmp/
 /.gemrc
 /.gitignore_global
 /.hgignore_global
+.emacs.d/.python-environments/
