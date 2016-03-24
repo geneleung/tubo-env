@@ -760,24 +760,33 @@ which is options for `diff'."
                     "u+w" (file-modes buffer-file-name)))))
         (setq msg (concat msg (if (file-writable-p buffer-file-name)
                                   "Succeeded\n" "Failed\n" )))
-        (message msg)))
-    )
-  )
+        (message msg)))))
 
 (add-hook 'before-save-hook 'change-file-permissions-to-writable)
 
+(add-hook 'after-save-hook 'make-script-executable)
+(defvar new-script-list nil "list of newly created scripts.")
+
+(defun check-script-status ()
+  "Check status of scripts."
+  (unless (file-exists-p buffer-file-name)
+    (save-excursion
+      (save-restriction
+        (widen)
+        (goto-char (point-min))
+        (when (and (looking-at "^#!")
+                   (not (member buffer-file-name new-script-list)))
+          (add-to-list 'new-script-list buffer-file-name))))))
+
 (defun make-script-executable ()
   "If file starts with a shebang, make `buffer-file-name' executable."
-  (save-excursion
-    (save-restriction
-      (widen)
-      (goto-char (point-min))
-      (when (and (looking-at "^#!")
-                 (not (file-executable-p buffer-file-name)))
-        (set-file-modes buffer-file-name
-                        (logior (file-modes buffer-file-name) #o100))
-        (message "Made %s executable" buffer-file-name)))))
-(add-hook 'after-save-hook 'make-script-executable)
+  (when (member buffer-file-name new-script-list)
+    (set-file-modes buffer-file-name
+                    (logior (file-modes buffer-file-name) #o100))
+    (setq new-script-list (delete buffer-file-name new-script-list))
+    (message "Made %s executable" buffer-file-name)))
+
+(add-hook 'before-save-hook 'check-script-status)
 
 
 (provide '05-rc-misc)
