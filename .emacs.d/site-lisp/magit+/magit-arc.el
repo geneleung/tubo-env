@@ -326,7 +326,6 @@ If it is not allowed, it will return nil so user can continue input correct test
       (setq commit (concat "D" revision)))
     (magit-arc--amend-internal revision)
     (magit-arc-run "close-revision" revision)
-    (magit-arc--db-remove-commit commit)
     (message "Amend finished.")))
 
 ;;;###autoload
