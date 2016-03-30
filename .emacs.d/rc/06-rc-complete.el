@@ -238,7 +238,8 @@
     "Format inserted snippets, if possible."
     (cond
      ((member major-mode '(c-mode c++-mode objc-mode))
-      (let (new-line-added)
+      (unless (string-match (rx "int" (+ space) "main(")
+                            (buffer-substring-no-properties yas-snippet-beg yas-snippet-end))
         (unless (fboundp 'emr-cc-format-region)
           (load "emr-c.el"))
         (save-excursion

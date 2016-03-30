@@ -1997,6 +1997,10 @@ Major mode for editing PHP code.
              (rx "." (or (: "php" (+ (or "s" "t" digit)))
                          "phtml" "Amkfile" "amk")))
 
+(autoload 'systemtap-mode "systemtap-mode.el")
+(add-to-list 'auto-mode-alist '("\\.stp\\'" . systemtap-mode))
+
+
 
 (provide '04-rc-prog-mode)
 
