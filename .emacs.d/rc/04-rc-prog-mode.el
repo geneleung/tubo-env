@@ -218,7 +218,20 @@ variable.")))))
 
 
 ;; Which function mode
-(yc/eval-after-load "which-func" (setq which-func-unknown "unknown"))
+(yc/eval-after-load
+ "which-func"
+ (setq which-func-unknown "unknown")
+ (defun semantic-fetch-function-name ()
+   "Fetch function name from semantic tag."
+   (let ((tag (semantic-stickyfunc-tag-to-stick))
+         func)
+     (when (and tag (equal (semantic-tag-class tag) 'function))
+       (setq func (aif (semantic-tag-get-attribute tag :parent)
+                      (format "%s::%s" it (semantic-tag-name tag))
+                    (semantic-tag-name tag))))
+     func))
+ (add-to-list 'which-func-functions 'semantic-fetch-function-name)
+)
 
 ;; ;;;; Speedbar-frame-mode
 (autoload 'speedbar-frame-mode "speedbar" "popup a speedbar frame" t)
