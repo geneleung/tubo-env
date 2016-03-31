@@ -142,3 +142,53 @@ function svnedit ()
 
     svn propedit -r $1 --revprop svn:log $2
 }
+
+function o_dump_addr ()
+{
+    if [ $# -lt 2 ]; then
+        printf "Usage: o_dump_addr addr[addr...] binary\n"
+        return
+    fi
+
+    exe="${@: -1}"
+    if [ ! -f $exe ]; then
+        printf "file $exe does not exist\n"
+        return
+    fi
+
+    for addr in ${@:1:$(($# - 1))}; do
+        if [ $(expr $addr : "0x[0-9a-fA-F]\+$") -eq 0 ]; then
+            printf "Warning: %s is not valid address, skipped...\n" $addr
+        else
+            new_addr=$(($addr - 100)) # show last 100 lines as context
+            if [ $new_addr -gt 0 ]; then
+                addr=$new_addr
+            fi
+            objdump -d -S --start-address=$addr $exe | awk '{print $0} $3~/retq?/{exit}'
+        fi
+    done
+}
+
+function g_dump_symbol ()
+{
+    if [ $# -lt 2 ]; then
+        printf "Usage: g_dump_symbol symbol[symbol...] binary\n"
+        return
+    fi
+
+    gdb --version > /dev/null 2>&1
+    if [ $? -ne 0 ]; then
+        printf "g_dump_symbol requires gdb which is not available...\n"
+        return
+    fi
+
+    exe="${@: -1}"
+    if [ ! -f $exe ]; then
+        printf "file $exe does not exist\n"
+        return
+    fi
+
+    for symbol in ${@:1:$(($# - 1))}; do
+        gdb -batch -ex "file $exe" -ex "disassemble $symbol"
+    done
+}

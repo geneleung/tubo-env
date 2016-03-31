@@ -1872,7 +1872,7 @@ and is reversed for better performence.")
            ;; C
            ((or (equal ext-name "cc")
                 (equal ext-name "cpp"))
-            (format "%s %s %s %s -std=c++11 -g -o %s"
+            (format "%s %s %s %s -std=gnu++11 -g -o %s"
                     (yc/get-env "CXX" 'executable-find
                                 "g++" "clang++"  "mingw-g++")
                     (or (getenv "CPPFLAGS")"-Wall  ")
@@ -1882,7 +1882,7 @@ and is reversed for better performence.")
            ;; C++
            ((or (equal ext-name "c")
                 (equal ext-name "C"))
-            (format "%s -o %s %s %s %s %s %s -g -std=c99"
+            (format "%s -o %s %s %s %s %s %s -g -std=gnu99"
                     (yc/get-env "CXX" 'executable-find
                                 "gcc" "clang"  "mingw-g++")
                     (file-name-sans-extension file)
